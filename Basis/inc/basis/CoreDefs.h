@@ -24,7 +24,20 @@ using namespace CCore;
 
 /* consts */
 
-// TODO
+enum Status
+ {
+  StatusDone = 0,  
+  StatusPending,
+  StatusError,
+
+  StatusErrorAlign,  
+  StatusErrorCmd,
+  StatusErrorNoCmd,
+  StatusErrorRO,
+
+  StatusErrorMap,
+  StatusErrorAbsent
+ };
 
 } // namespace Basis    
 

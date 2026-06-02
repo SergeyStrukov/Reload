@@ -1,4 +1,4 @@
-/* Core.h */
+/* CPUMem.cpp */
 //----------------------------------------------------------------------------------------
 //
 //  Target: Basis 1.00
@@ -11,22 +11,10 @@
 //
 //----------------------------------------------------------------------------------------
 
-#ifndef Basis_inc_Core_h
-#define Basis_inc_Core_h
-
-#include "basis/CoreDefs.h"
+#include "basis/CPUMem.h"
 
 namespace Basis {
 
-/* using */
-
-using namespace CCore;
-
-/* consts */
-
-// TODO
 
 } // namespace Basis    
-
-#endif
 
