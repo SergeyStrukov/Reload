@@ -82,6 +82,10 @@ class CPUCore : NoCopy
    CPUCore();
 
    ~CPUCore();
+
+   void init(uint32 number);
+
+   void step();
  };
 
 /* class CPUCoreBlock */ 

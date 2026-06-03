@@ -39,6 +39,12 @@ enum Status
   StatusErrorAbsent
  };
 
+/* unit functions */
+
+inline constexpr ulen operator "" _GByte (unsigned long long len) { return len*1024u*1024u*1024u; }
+
+inline constexpr ulen operator "" _TByte (unsigned long long len) { return len*1024u*1024u*1024u*1024u; }
+
 } // namespace Basis    
 
 #endif

@@ -20,7 +20,32 @@ namespace Basis {
 
 /* classes */
 
+class L1Mem;
+
+class AddressMap;
+
 class CPUMem;
+
+/* class L1Mem */
+
+class L1Mem : NoCopy
+ {
+ };
+
+/* class AddressMap */
+
+class AddressMap : NoCopy
+ {
+   uint64 vmt;
+
+  public:
+
+   AddressMap();
+
+   ~AddressMap();
+
+   Status map(uint64 va,uint64 &pa);
+ };
 
 /* class CPUMem */
 
