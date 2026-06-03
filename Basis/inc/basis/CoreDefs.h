@@ -36,7 +36,8 @@ enum Status
   StatusErrorRO,
 
   StatusErrorMap,
-  StatusErrorAbsent
+  StatusErrorAbsent,
+  StatusErrorVoid
  };
 
 /* unit functions */

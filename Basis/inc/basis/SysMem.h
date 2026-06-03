@@ -20,11 +20,25 @@ namespace Basis {
 
 /* consts */    
 
+inline constexpr uint64 BootROMAddress = 4_MByte ;
+
 inline constexpr uint64 BootROMSize = 4_MByte ;
 
 inline constexpr uint64 BootROMLen = BootROMSize/sizeof (uint64) ;
 
+inline constexpr uint64 RegSpaceAddress = 8_MByte ;
+
+inline constexpr uint64 RegSpaceSize = 4_MByte ;
+
+inline constexpr uint64 RAMAddress = 12_MByte ;
+
 inline constexpr uint64 MaxRAMSize = 4_TByte ;
+
+inline constexpr uint64 DevAddress = 12_MByte + 4_TByte ;
+
+inline constexpr uint64 MaxDevSize = 4_TByte ;
+
+inline constexpr uint64 MemBankSize = 4_MByte ;
 
 /* classes */
 
@@ -36,6 +50,9 @@ class SysMemPort;
 
 class SysMem : NoCopy
  {
+   SimpleArray<uint64> rom;
+   SimpleArray<uint64> ram;
+
   public:
 
    SysMem();
@@ -44,7 +61,7 @@ class SysMem : NoCopy
 
    void init(uint64 ramSize);
 
-   uint64 * bootROM();
+   uint64 * bootROM() { return rom.getPtr(); }
 
    Status readData(uint64 pa,uint64 &data);
 
@@ -55,7 +72,13 @@ class SysMem : NoCopy
 
 class SysMemPort : NoCopy
  {
-   SysMem *mem;
+   struct Port
+    {
+    };
+
+   SimpleArray<Port> ports;
+
+   SysMem *mem = 0 ;
 
   public:  
 
@@ -68,6 +91,10 @@ class SysMemPort : NoCopy
    Status readData(uint32 port,uint64 pa,uint64 &data);
 
    Status writeData(uint32 port,uint64 pa,uint64 data);
+
+   Status pending(uint32 port);
+
+   void step();
  };
 
 } // namespace Basis    
