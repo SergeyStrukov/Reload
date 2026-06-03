@@ -15,7 +15,48 @@
 
 namespace Basis {
 
+/* class CPUCore */
+
+CPUCore::CPUCore() noexcept
+ {
+ }
+
+CPUCore::~CPUCore()
+ {
+ }
+
+void CPUCore::init(uint32 index_,uint64 cmdCacheSize,uint64 dataCacheSize,CPUCoreBlock &block_)
+ {
+  Range(regs).set_null();
+
+  flags=0;
+
+  if( index_==0 ) regs[RegPC]=BootROMAddress;
+
+  index=index_;
+
+  modeS=false;
+  modeI=false;
+  modeL=false;
+
+  mem.init(index_,cmdCacheSize,dataCacheSize,block_.mpx,block_.sysmap);
+
+  block=&block_;
+ }
+
+void CPUCore::step()
+ {
+  // TODO
+ }
+
 /* class CPUCoreBlock */ 
+
+void CPUCoreBlock::extmem(bool enable)
+ {
+  cache.extmem(enable);
+
+  for(ulen i=0,len=cores.getLen(); i<len ;i++) cores[i].extmem(enable);
+ }
 
 CPUCoreBlock::CPUCoreBlock()
  {
@@ -25,15 +66,8 @@ CPUCoreBlock::~CPUCoreBlock()
  {
  }
 
-void CPUCoreBlock::init(uint32 count,SysMem &mem)
+void CPUCoreBlock::init(uint32 count,uint64 cmdCacheSize,uint64 dataCacheSize,SysMem &mem)
  {
-  cores=SimpleArray<CPUCore>(count);
-
-  for(ulen i=0; i<count ;i++)
-    {
-     cores[i].init(i,mpx);   
-    }
-
   sysPC=0;
   sysSP=0;
 
@@ -43,12 +77,44 @@ void CPUCoreBlock::init(uint32 count,SysMem &mem)
   modeCore=false;
   modeStop=false;
 
-  mpx.init(count,mem); 
+  shift=0;
+
+  mpx.init(count+1,mem); 
+  cache.init(count,cmdCacheSize,0,mpx);
+  sysmap.init(cache);
+
+  cores=SimpleArray<CPUCore>(count);
+
+  for(uint32 i=0; i<count ;i++)
+    {
+     cores[i].init(i,cmdCacheSize,dataCacheSize,*this);   
+    }
  }
 
 bool CPUCoreBlock::step()
  {
-  // TODO
+  if( modeStop ) return false;
+
+  mpx.stepBeg();
+
+  if( modeCore )
+    {
+     ulen i=shift,len=cores.getLen();
+
+     for(; i<len ;i++) cores[i].step();
+
+     for(i=0; i<shift ;i++) cores[i].step();
+
+     shift++;
+
+     if( shift==len ) shift=0;
+    }
+  else
+    {
+     cores[0].step(); 
+    }
+
+  mpx.stepEnd();
 
   return !modeStop;  
  }

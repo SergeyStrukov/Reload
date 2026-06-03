@@ -18,6 +18,13 @@
 
 namespace Basis {
 
+/* consts */    
+
+inline constexpr uint32 MaxCores = 64 ;
+
+inline constexpr uint32 MinCacheSize = 64_KByte ;
+inline constexpr uint32 MaxCacheSize = 64_MByte ;
+
 /* classes */
 
 struct ComputerCfg;
@@ -29,6 +36,8 @@ class Computer;
 struct ComputerCfg
  {
   uint64 ramSize = 1_GByte ;
+  uint64 cmdCacheSize = 64_KByte ;
+  uint64 dataCacheSize = 64_KByte ;
   uint32 coreCount = 4 ;
  };
 

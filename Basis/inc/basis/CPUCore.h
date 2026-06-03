@@ -66,16 +66,18 @@ enum RegIndex : uint8
 
 class CPUCore : NoCopy
  {
-   uint64 regs[RegCount]; 
-   uint64 flags;
+   uint64 regs[RegCount]{}; 
+   uint64 flags = 0 ;
 
-   uint32 index;
+   uint32 index = 0 ;
 
-   bool modeS;
-   bool modeI;
-   bool modeL;
+   bool modeS = false ;
+   bool modeI = false ;
+   bool modeL = false ;
 
    CPUMem mem;
+
+   CPUCoreBlock *block = 0 ;
 
   public: 
 
@@ -83,7 +85,9 @@ class CPUCore : NoCopy
 
    ~CPUCore();
 
-   void init(uint32 index,SysMemPort &mpx);
+   void init(uint32 index,uint64 cmdCacheSize,uint64 dataCacheSize,CPUCoreBlock &block);
+
+   void extmem(bool enable) { mem.extmem(enable); }
 
    void step();
  };
@@ -92,8 +96,6 @@ class CPUCore : NoCopy
 
 class CPUCoreBlock : NoCopy
  {
-   SimpleArray<CPUCore> cores;
-
    uint64 sysPC = 0 ;
    uint64 sysSP = 0 ;
 
@@ -103,7 +105,19 @@ class CPUCoreBlock : NoCopy
    bool modeCore = false ;
    bool modeStop = false ;
 
+   ulen shift = 0 ;
+
    SysMemPort mpx;
+   L1Mem cache;
+   AddressMap sysmap;
+
+   SimpleArray<CPUCore> cores;
+
+   friend class CPUCore;
+
+  private: 
+
+   void extmem(bool enable);
 
   public:
 
@@ -111,7 +125,7 @@ class CPUCoreBlock : NoCopy
 
    ~CPUCoreBlock();
 
-   void init(uint32 count,SysMem &mem);
+   void init(uint32 count,uint64 cmdCacheSize,uint64 dataCacheSize,SysMem &mem);
 
    bool step();
  };
