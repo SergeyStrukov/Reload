@@ -14,7 +14,7 @@
 #ifndef Basis_inc_CPUMem_h
 #define Basis_inc_CPUMem_h
 
-#include "basis/CoreDefs.h"
+#include "basis/SysMem.h"
 
 namespace Basis {
 

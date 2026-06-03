@@ -74,12 +74,28 @@ class SysMemPort : NoCopy
  {
    struct Port
     {
+     uint64 pa;
+     uint64 data;
+     uint64 *ret;
+
+     void read(uint64 pa_,uint64 &data_) { pa=pa_; ret=&data_; }
+
+     void write(uint64 pa_,uint64 data_) { pa=pa_; data=data_; ret=0; }
+
+     Status operator () (SysMemPort &obj) const;
     };
 
    SimpleArray<Port> ports;
 
+   SimpleArray<uint64> banks;
+   ulen nbanks = 0 ;
+
    SysMem *mem = 0 ;
 
+  private:
+
+   bool useBank(uint64 pa);
+  
   public:  
 
    SysMemPort();
@@ -88,13 +104,15 @@ class SysMemPort : NoCopy
 
    void init(uint32 count,SysMem &mem);
 
+   void stepBeg() { nbanks=0; }
+
    Status readData(uint32 port,uint64 pa,uint64 &data);
 
    Status writeData(uint32 port,uint64 pa,uint64 data);
 
    Status pending(uint32 port);
 
-   void step();
+   void stepEnd() {}
  };
 
 } // namespace Basis    

@@ -15,6 +15,43 @@
 
 namespace Basis {
 
+/* class CPUCoreBlock */ 
+
+CPUCoreBlock::CPUCoreBlock()
+ {
+ }
+
+CPUCoreBlock::~CPUCoreBlock()
+ {
+ }
+
+void CPUCoreBlock::init(uint32 count,SysMem &mem)
+ {
+  cores=SimpleArray<CPUCore>(count);
+
+  for(ulen i=0; i<count ;i++)
+    {
+     cores[i].init(i,mpx);   
+    }
+
+  sysPC=0;
+  sysSP=0;
+
+  intPC=0;
+  intSP=0;
+
+  modeCore=false;
+  modeStop=false;
+
+  mpx.init(count,mem); 
+ }
+
+bool CPUCoreBlock::step()
+ {
+  // TODO
+
+  return !modeStop;  
+ }
 
 } // namespace Basis    
 

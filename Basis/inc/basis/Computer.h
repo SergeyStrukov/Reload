@@ -28,17 +28,24 @@ class Computer;
 
 struct ComputerCfg
  {
+  uint64 ramSize = 1_GByte ;
+  uint32 coreCount = 4 ;
  };
 
 /* class Computer */
 
 class Computer : NoCopy
  {
+   CPUCoreBlock cpu;
+   SysMem sysmem;
+
   public:
 
    explicit Computer(const ComputerCfg &cfg);
 
    ~Computer();
+
+   uint64 * bootROM() { return sysmem.bootROM(); }
 
    void run();
  };

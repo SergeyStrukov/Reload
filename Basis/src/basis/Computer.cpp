@@ -15,6 +15,22 @@
 
 namespace Basis {
 
+/* class Computer */
+
+Computer::Computer(const ComputerCfg &cfg)
+ {
+  cpu.init(cfg.coreCount,sysmem);  
+  sysmem.init(cfg.ramSize);  
+ }
+
+Computer::~Computer()
+ {
+ }
+
+void Computer::run()
+ {
+  while( cpu.step() );  
+ }
 
 } // namespace Basis    
 

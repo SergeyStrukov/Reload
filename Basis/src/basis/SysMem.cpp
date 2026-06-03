@@ -80,6 +80,38 @@ Status SysMem::writeData(uint64 pa,uint64 data)
 
 /* class SysMemPort */ 
 
+Status SysMemPort::Port::operator () (SysMemPort &obj) const
+ {
+  if( obj.useBank(pa) ) 
+    {
+     if( ret ) 
+       {
+        return obj.mem->readData(pa,*ret); 
+       }
+     else
+       {
+        return obj.mem->writeData(pa,data); 
+       }
+    }
+  else
+    {
+     return StatusPending; 
+    }
+ }
+
+bool SysMemPort::useBank(uint64 pa)
+ {
+  uint64 index=pa/MemBankSize;
+
+  for(ulen i=0; i<nbanks ;i++)
+    if( banks[i]==index )
+      return false; 
+
+  banks[nbanks++]=index;    
+
+  return true;    
+ }
+
 SysMemPort::SysMemPort()
  {
  }
@@ -91,24 +123,43 @@ SysMemPort::~SysMemPort()
 void SysMemPort::init(uint32 count,SysMem &mem_)
  {
   ports=SimpleArray<Port>(count);
+  banks=SimpleArray<uint64>(count);
+  nbanks=0;
 
   mem=&mem_;
  }
 
 Status SysMemPort::readData(uint32 port,uint64 pa,uint64 &data)
  {
+  if( useBank(pa) ) 
+    {
+     return mem->readData(pa,data); 
+    }
+  else
+    {
+     ports[port].read(pa,data);
+
+     return StatusPending; 
+    }
  }
 
 Status SysMemPort::writeData(uint32 port,uint64 pa,uint64 data)
  {
+  if( useBank(pa) ) 
+    {
+     return mem->writeData(pa,data); 
+    }
+  else
+    {
+     ports[port].write(pa,data);
+
+     return StatusPending; 
+    }
  }
 
 Status SysMemPort::pending(uint32 port)
  {
- }
-
-void SysMemPort::step()
- {
+  return ports[port](*this);
  }
 
 } // namespace Basis    

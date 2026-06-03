@@ -69,7 +69,7 @@ class CPUCore : NoCopy
    uint64 regs[RegCount]; 
    uint64 flags;
 
-   uint32 number;
+   uint32 index;
 
    bool modeS;
    bool modeI;
@@ -79,11 +79,11 @@ class CPUCore : NoCopy
 
   public: 
 
-   CPUCore();
+   CPUCore() noexcept;
 
    ~CPUCore();
 
-   void init(uint32 number);
+   void init(uint32 index,SysMemPort &mpx);
 
    void step();
  };
@@ -94,11 +94,16 @@ class CPUCoreBlock : NoCopy
  {
    SimpleArray<CPUCore> cores;
 
-   uint64 sysPC;
-   uint64 sysSP;
+   uint64 sysPC = 0 ;
+   uint64 sysSP = 0 ;
 
-   uint64 intPC;
-   uint64 intSP;
+   uint64 intPC = 0 ;
+   uint64 intSP = 0 ;
+
+   bool modeCore = false ;
+   bool modeStop = false ;
+
+   SysMemPort mpx;
 
   public:
 
@@ -106,7 +111,9 @@ class CPUCoreBlock : NoCopy
 
    ~CPUCoreBlock();
 
-   void init(uint32 count);
+   void init(uint32 count,SysMem &mem);
+
+   bool step();
  };
 
 } // namespace Basis    
