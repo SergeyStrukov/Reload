@@ -57,6 +57,8 @@ class L1Mem : NoCopy
    Status writeData(uint64 pa,uint16 data);
    Status writeData(uint64 pa,uint32 data);
    Status writeData(uint64 pa,uint64 data);
+
+   Status pending();   
  };
 
 /* class AddressMap */
@@ -77,19 +79,61 @@ class AddressMap : NoCopy
 
    void setup(uint64 pa);
 
-   Status map(uint64 va,uint64 &pa);
+   Status map(uint64 va,VASplit split,uint64 &pa);
+
+   Status pending();
  };
 
 /* class CPUMem */
 
 class CPUMem : NoCopy
  {
+   uint64 pa = 0 ;
+   bool paDone = false ;
+   bool useSysMap = false ;
+
+   enum OpCode
+    {
+     OpFetch, 
+
+     OpRead64,
+     OpRead32,
+     OpRead16,
+     OpRead8,
+
+     OpWrite64,
+     OpWrite32,
+     OpWrite16,
+     OpWrite8,
+    };
+
+   OpCode op = OpFetch ;
+
+   union Arg
+    {
+     uint64 *ret64; 
+     uint32 *ret32; 
+     uint16 *ret16; 
+     uint8 *ret8; 
+
+     uint64 data64; 
+     uint32 data32; 
+     uint16 data16; 
+     uint8 data8; 
+    };
+
+   Arg arg; 
+
+   bool modeDual = false ;
+
    L1Mem cache;
    AddressMap map;
 
-   AddressMap *sysmap;
+   AddressMap *sysmap = 0 ;
 
-   bool modeDual;
+  private:   
+
+   Status mapAddress(uint64 va);
 
   public:
   
@@ -99,10 +143,10 @@ class CPUMem : NoCopy
 
    void init(uint32 port,uint64 cmdCacheSize,uint64 dataCacheSize,SysMemPort &mpx,AddressMap &sysmap);
 
-   void setupVMT(uint64 pa);
+   void setupVMT(uint64 pa) { map.setup(pa); }
 
    void extmem(bool enable);
-   void dualVMT(bool enable);
+   void dualVMT(bool enable) { modeDual=enable; }
 
    Status fetchCommand(uint64 va,uint64 &cmd);
 
@@ -115,6 +159,8 @@ class CPUMem : NoCopy
    Status writeData(uint64 va,uint16 data);
    Status writeData(uint64 va,uint32 data);
    Status writeData(uint64 va,uint64 data);
+
+   Status pending();
  };
 
 } // namespace Basis    

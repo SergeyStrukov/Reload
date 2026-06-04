@@ -46,6 +46,24 @@ inline constexpr ulen operator "" _GByte (unsigned long long len) { return len*1
 
 inline constexpr ulen operator "" _TByte (unsigned long long len) { return len*1024u*1024u*1024u*1024u; }
 
+/* classes */
+
+struct VASplit
+ {
+  bool S : 1 ;
+  uint64 hpage : 39 ;
+  uint32 page : 12 ;
+  uint32 offset : 12 ;
+
+  VASplit(uint64 va)
+   {
+    S=va>>63;
+    hpage=va>>24;
+    page=va>>12;
+    offset=va;
+   }
+ };
+
 } // namespace Basis    
 
 #endif
