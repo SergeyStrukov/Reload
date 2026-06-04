@@ -17,6 +17,41 @@ namespace Basis {
 
 /* class AddressMap */
 
+Status AddressMap::completePage()
+ {
+  *ret=(pageEntry.base<<12)|split.offset; 
+
+  // TODO return 4 flags
+
+  return StatusDone;
+ }
+
+Status AddressMap::completeHuge()
+ {
+  if( hugeEntry.H )
+    {
+     *ret=(hugeEntry.base<<24)|(split.page<<12)|split.offset; 
+
+     // TODO return 4 flags
+
+     return StatusDone;
+    }
+  else  
+    {
+     if( split.page>=hugeEntry.len ) return StatusErrorMap;
+
+     uint64 addr=vmt+(hugeEntry.base+split.page)*sizeof (uint64);
+
+     Status status=cache->fetchCommand(addr,pageValue); 
+
+     if( status ) return status;
+
+     pageEntry=pageValue;
+
+     return completePage();
+    }
+ }
+
 AddressMap::AddressMap()
  {
  }
@@ -27,6 +62,16 @@ AddressMap::~AddressMap()
 
 void AddressMap::init(L1Mem &cache_)
  {
+  split=0;
+  ret=0;
+  len=0;
+  lenDone=false;
+  hugeValue=0;
+  hugeEntry=0;
+  hugeDone=false;
+  pageValue=0;
+  pageEntry=0;
+
   vmt=0;
   
   cache=&cache_;
@@ -34,10 +79,11 @@ void AddressMap::init(L1Mem &cache_)
 
 void AddressMap::setup(uint64 pa)
  {
-  vmt=pa;  
+  vmt=pa;
+  lenDone=false;  
  }
 
-Status AddressMap::map(uint64 va,VASplit split,uint64 &pa)
+Status AddressMap::map(uint64 va,VASplit split_,uint64 &pa)
  {
   if( !vmt ) 
     {
@@ -46,12 +92,62 @@ Status AddressMap::map(uint64 va,VASplit split,uint64 &pa)
      return StatusDone; 
     }
 
-  // TODO
+  split=split_;  
+  ret=&pa;
+
+  if( !lenDone )
+    {
+     Status status=cache->fetchCommand(vmt,len); 
+
+     if( status ) return status;
+
+     lenDone=true;
+    }  
+
+  if( split.hpage>=len ) return StatusErrorMap; 
+
+  uint64 addr=vmt+split.hpage*sizeof (uint64);
+
+  hugeDone=false;
+
+  {
+   Status status=cache->fetchCommand(addr,hugeValue); 
+
+   if( status ) return status;
+
+   hugeDone=true;
+   hugeEntry=hugeValue;
+  }  
+
+  return completeHuge();
  }
 
 Status AddressMap::pending()
  {
-  return StatusDone;
+  if( !lenDone )
+    {
+     Status status=cache->pending(); 
+
+     if( status ) return status;
+
+     lenDone=true;
+    }
+
+  if( !hugeDone )
+    {
+     Status status=cache->pending(); 
+
+     if( status ) return status;
+
+     hugeDone=true;
+     hugeEntry=hugeValue;
+
+     return completeHuge();
+    }  
+
+  pageEntry=pageValue;
+
+  return completePage();
  }
 
 /* class CPUMem */

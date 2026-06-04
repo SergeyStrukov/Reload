@@ -65,13 +65,27 @@ class L1Mem : NoCopy
 
 class AddressMap : NoCopy
  {
+   VASplit split;
+   uint64 *ret = 0 ;
+
    uint64 len = 0 ;
-   uint64 hugeEntry = 0 ;
-   uint64 pageEntry = 0 ;
+   bool lenDone = false ;
+
+   uint64 hugeValue = 0 ;
+   HEntrySplit hugeEntry;
+   bool hugeDone = false ;
+
+   uint64 pageValue = 0 ;
+   PEntrySplit pageEntry;
 
    uint64 vmt = 0 ;
 
    L1Mem *cache;
+
+  private: 
+
+   Status completePage();
+   Status completeHuge();
 
   public:
 

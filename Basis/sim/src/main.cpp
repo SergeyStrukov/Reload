@@ -11,12 +11,21 @@
 //
 //----------------------------------------------------------------------------------------
 
-#include "basis/Core.h"
+#include "basis/CoreDefs.h"
+
+#include <CCore/inc/Print.h>
+#include <CCore/inc/Printf.h>
 
 /* main() */
 
+using namespace Basis;
+
 int main(int argc,const char *const* argv)
  {
+  HEntrySplit split(0xFFFF'FFFF'FFFF'FFFFu);
+
+  Printf(Con,"#.h; #.h; #.h; #.h; #.h; #.h; #.h;\n",split.base,split.len,split.R,split.W,split.X,split.P,split.H);
+
   return 0;   
  }
 
