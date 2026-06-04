@@ -65,6 +65,10 @@ class L1Mem : NoCopy
 
 class AddressMap : NoCopy
  {
+   uint64 len = 0 ;
+   uint64 hugeEntry = 0 ;
+   uint64 pageEntry = 0 ;
+
    uint64 vmt = 0 ;
 
    L1Mem *cache;
