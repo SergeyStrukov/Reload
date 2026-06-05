@@ -32,8 +32,9 @@ enum Status
 
   StatusErrorAlign,  
   StatusErrorCmd,
-  StatusErrorNoCmd,
-  StatusErrorRO,
+  StatusErrorNoX,
+  StatusErrorNoR,
+  StatusErrorNoW,
 
   StatusErrorMap,
   StatusErrorAbsent,
@@ -49,6 +50,8 @@ inline constexpr ulen operator "" _TByte (unsigned long long len) { return len*1
 /* classes */
 
 struct VASplit;
+struct AddressFlags;
+struct Address;
 struct HEntrySplit;
 struct PEntrySplit;
 
@@ -70,26 +73,46 @@ struct VASplit
    }
  };
 
+/* struct AddressFlags */ 
+
+struct AddressFlags
+ {
+  uint8 R : 1 ;
+  uint8 W : 1 ;
+  uint8 X : 1 ;
+  uint8 P : 1 ;
+
+  AddressFlags(uint64 value=0)
+   {
+    R=value>>11;
+    W=value>>10;
+    X=value>>9;
+    P=value>>8;
+   }
+ };
+
+/* struct Address */
+
+struct Address
+ {
+  uint64 pa;
+  AddressFlags flags;
+ };
+
 /* struct HEntrySplit */ 
 
 struct HEntrySplit
  {
   uint64 base : 40 ;
   uint32 len : 12 ;
-  uint8 R : 1 ;
-  uint8 W : 1 ;
-  uint8 X : 1 ;
-  uint8 P : 1 ;
+  AddressFlags flags;
   uint8 H : 1 ;
 
   HEntrySplit(uint64 value=0)
    {
     base=value>>24;
     len=value>>12;
-    R=value>>11;
-    W=value>>10;
-    X=value>>9;
-    P=value>>8;
+    flags=value;
     H=value>>7;
    }
  };
@@ -99,18 +122,12 @@ struct HEntrySplit
 struct PEntrySplit
  {
   uint64 base : 52 ;
-  bool R : 1 ;
-  bool W : 1 ;
-  bool X : 1 ;
-  bool P : 1 ;
+  AddressFlags flags;
 
   PEntrySplit(uint64 value=0)
    {
     base=value>>12;
-    R=value>>11;
-    W=value>>10;
-    X=value>>9;
-    P=value>>8;
+    flags=value;
    }
  };
 

@@ -66,7 +66,7 @@ class L1Mem : NoCopy
 class AddressMap : NoCopy
  {
    VASplit split;
-   uint64 *ret = 0 ;
+   Address *ret = 0 ;
 
    uint64 len = 0 ;
    bool lenDone = false ;
@@ -97,7 +97,7 @@ class AddressMap : NoCopy
 
    void setup(uint64 pa);
 
-   Status map(uint64 va,VASplit split,uint64 &pa);
+   Status map(uint64 va,VASplit split,Address &address);
 
    Status pending();
  };
@@ -106,7 +106,7 @@ class AddressMap : NoCopy
 
 class CPUMem : NoCopy
  {
-   uint64 pa = 0 ;
+   Address address;
    bool paDone = false ;
    bool useSysMap = false ;
 
@@ -152,6 +152,18 @@ class CPUMem : NoCopy
   private:   
 
    Status mapAddress(uint64 va);
+
+   Status fetchCommand(uint64 &cmd);
+
+   Status readData(uint8 &data);
+   Status readData(uint16 &data);
+   Status readData(uint32 &data);
+   Status readData(uint64 &data);
+
+   Status writeData(uint8 data);
+   Status writeData(uint16 data);
+   Status writeData(uint32 data);
+   Status writeData(uint64 data);
 
   public:
   

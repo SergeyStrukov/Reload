@@ -19,9 +19,8 @@ namespace Basis {
 
 Status AddressMap::completePage()
  {
-  *ret=(pageEntry.base<<12)|split.offset; 
-
-  // TODO return 4 flags
+  ret->pa=(pageEntry.base<<12)|split.offset; 
+  ret->flags=pageEntry.flags;
 
   return StatusDone;
  }
@@ -30,9 +29,8 @@ Status AddressMap::completeHuge()
  {
   if( hugeEntry.H )
     {
-     *ret=(hugeEntry.base<<24)|(split.page<<12)|split.offset; 
-
-     // TODO return 4 flags
+     ret->pa=(hugeEntry.base<<24)|(split.page<<12)|split.offset; 
+     ret->flags=hugeEntry.flags;
 
      return StatusDone;
     }
@@ -83,17 +81,21 @@ void AddressMap::setup(uint64 pa)
   lenDone=false;  
  }
 
-Status AddressMap::map(uint64 va,VASplit split_,uint64 &pa)
+Status AddressMap::map(uint64 va,VASplit split_,Address &address)
  {
   if( !vmt ) 
     {
-     pa=va;
+     address.pa=va;
+     address.flags.R=1;
+     address.flags.W=1;
+     address.flags.X=1;
+     address.flags.P=1;
 
      return StatusDone; 
     }
 
   split=split_;  
-  ret=&pa;
+  ret=&address;
 
   if( !lenDone )
     {
@@ -161,21 +163,102 @@ Status CPUMem::mapAddress(uint64 va)
      if( split.S )
        {
         useSysMap=true;
-        return sysmap->map(va,split,pa);
+        return sysmap->map(va,split,address);
        }
      else
        {
         useSysMap=false;
-        return map.map(va,split,pa);
+        return map.map(va,split,address);
        }
     }
   else
     {
-     if( split.S ) return StatusErrorVoid;  
+     if( split.S ) return StatusErrorMap;  
 
      useSysMap=false;
-     return map.map(va,split,pa);
+     return map.map(va,split,address);
     }
+ }
+
+Status CPUMem::fetchCommand(uint64 &cmd)
+ {
+  if( !address.flags.P ) return StatusErrorAbsent;
+
+  if( !address.flags.X ) return StatusErrorNoX;
+
+  return cache.fetchCommand(address.pa,cmd);
+ }
+
+Status CPUMem::readData(uint8 &data)
+ {
+  if( !address.flags.P ) return StatusErrorAbsent;
+
+  if( !address.flags.R ) return StatusErrorNoR;
+
+  return cache.readData(address.pa,data);
+ }
+
+Status CPUMem::readData(uint16 &data)
+ {
+  if( !address.flags.P ) return StatusErrorAbsent;
+
+  if( !address.flags.R ) return StatusErrorNoR;
+
+  return cache.readData(address.pa,data);
+ }
+
+Status CPUMem::readData(uint32 &data)
+ {
+  if( !address.flags.P ) return StatusErrorAbsent;
+
+  if( !address.flags.R ) return StatusErrorNoR;
+
+  return cache.readData(address.pa,data);
+ }
+
+Status CPUMem::readData(uint64 &data)
+ {
+  if( !address.flags.P ) return StatusErrorAbsent;
+
+  if( !address.flags.R ) return StatusErrorNoR;
+
+  return cache.readData(address.pa,data);
+ }
+
+Status CPUMem::writeData(uint8 data)
+ {
+  if( !address.flags.P ) return StatusErrorAbsent;
+
+  if( !address.flags.R ) return StatusErrorNoW;
+
+  return cache.writeData(address.pa,data);
+ }
+
+Status CPUMem::writeData(uint16 data)
+ {
+  if( !address.flags.P ) return StatusErrorAbsent;
+
+  if( !address.flags.R ) return StatusErrorNoW;
+
+  return cache.writeData(address.pa,data);
+ }
+
+Status CPUMem::writeData(uint32 data)
+ {
+  if( !address.flags.P ) return StatusErrorAbsent;
+
+  if( !address.flags.R ) return StatusErrorNoW;
+
+  return cache.writeData(address.pa,data);
+ }
+
+Status CPUMem::writeData(uint64 data)
+ {
+  if( !address.flags.P ) return StatusErrorAbsent;
+
+  if( !address.flags.R ) return StatusErrorNoW;
+
+  return cache.writeData(address.pa,data);
  }
 
 CPUMem::CPUMem()
@@ -188,7 +271,7 @@ CPUMem::~CPUMem()
 
 void CPUMem::init(uint32 port,uint64 cmdCacheSize,uint64 dataCacheSize,SysMemPort &mpx,AddressMap &sysmap_)
  {
-  pa=0;  
+  address={0};  
   paDone=false;
   useSysMap=false;
   op=OpFetch;
@@ -225,7 +308,7 @@ Status CPUMem::fetchCommand(uint64 va,uint64 &cmd)
 
   paDone=true;
 
-  return cache.fetchCommand(pa,cmd);
+  return fetchCommand(cmd);
  }
 
 Status CPUMem::readData(uint64 va,uint8 &data)
@@ -247,7 +330,7 @@ Status CPUMem::readData(uint64 va,uint8 &data)
 
   paDone=true;
 
-  return cache.readData(pa,data);
+  return readData(data);
  }
 
 Status CPUMem::readData(uint64 va,uint16 &data)
@@ -269,7 +352,7 @@ Status CPUMem::readData(uint64 va,uint16 &data)
 
   paDone=true;
 
-  return cache.readData(pa,data);
+  return readData(data);
  }
 
 Status CPUMem::readData(uint64 va,uint32 &data)
@@ -291,7 +374,7 @@ Status CPUMem::readData(uint64 va,uint32 &data)
 
   paDone=true;
 
-  return cache.readData(pa,data);
+  return readData(data);
  }
 
 Status CPUMem::readData(uint64 va,uint64 &data)
@@ -313,7 +396,7 @@ Status CPUMem::readData(uint64 va,uint64 &data)
 
   paDone=true;
 
-  return cache.readData(pa,data);
+  return readData(data);
  }
 
 Status CPUMem::writeData(uint64 va,uint8 data)
@@ -335,7 +418,7 @@ Status CPUMem::writeData(uint64 va,uint8 data)
 
   paDone=true;
 
-  return cache.writeData(pa,data);
+  return writeData(data);
  }
 
 Status CPUMem::writeData(uint64 va,uint16 data)
@@ -357,7 +440,7 @@ Status CPUMem::writeData(uint64 va,uint16 data)
 
   paDone=true;
 
-  return cache.writeData(pa,data);
+  return writeData(data);
  }
 
 Status CPUMem::writeData(uint64 va,uint32 data)
@@ -379,7 +462,7 @@ Status CPUMem::writeData(uint64 va,uint32 data)
 
   paDone=true;
 
-  return cache.writeData(pa,data);
+  return writeData(data);
  }
 
 Status CPUMem::writeData(uint64 va,uint64 data)
@@ -401,7 +484,7 @@ Status CPUMem::writeData(uint64 va,uint64 data)
 
   paDone=true;
 
-  return cache.writeData(pa,data);
+  return writeData(data);
  }
 
 Status CPUMem::pending()
@@ -429,17 +512,17 @@ Status CPUMem::pending()
 
      switch( op )
        {
-        case OpFetch : return cache.fetchCommand(pa,*arg.ret64);
+        case OpFetch : return fetchCommand(*arg.ret64);
 
-        case OpRead8 : return cache.readData(pa,*arg.ret8);
-        case OpRead16 : return cache.readData(pa,*arg.ret16);
-        case OpRead32 : return cache.readData(pa,*arg.ret32);
-        case OpRead64 : return cache.readData(pa,*arg.ret64);
+        case OpRead8 : return readData(*arg.ret8);
+        case OpRead16 : return readData(*arg.ret16);
+        case OpRead32 : return readData(*arg.ret32);
+        case OpRead64 : return readData(*arg.ret64);
 
-        case OpWrite8 : return cache.writeData(pa,arg.data8);
-        case OpWrite16 : return cache.writeData(pa,arg.data16);
-        case OpWrite32 : return cache.writeData(pa,arg.data32);
-        case OpWrite64 : return cache.writeData(pa,arg.data64);
+        case OpWrite8 : return writeData(arg.data8);
+        case OpWrite16 : return writeData(arg.data16);
+        case OpWrite32 : return writeData(arg.data32);
+        case OpWrite64 : return writeData(arg.data64);
        }
 
      return StatusError;  
