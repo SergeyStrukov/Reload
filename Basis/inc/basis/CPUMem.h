@@ -20,11 +20,39 @@ namespace Basis {
 
 /* classes */
 
+struct CacheLine;
+
+class Cache;
+
 class L1Mem;
 
 class AddressMap;
 
 class CPUMem;
+
+/* struct CacheLine */
+
+struct CacheLine
+ {
+  uint64 line[8];
+  uint64 tag : 58 ; 
+  uint8 filled : 1 ;
+ };
+
+/* class Cache */
+
+class Cache : NoCopy
+ {
+  public:
+
+   Cache();
+
+   ~Cache();
+
+   void init(uint64 size);
+
+   CacheLine * find(uint64 pa);
+ };
 
 /* class L1Mem */
 
