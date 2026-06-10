@@ -84,9 +84,23 @@ void Cache::find(uint64 pa,Func1 match,Func2 fresh,Func3 taken)
 
 Status L1Mem::match(CacheLine &line)
  {
+  switch( op )
+    {
+     case OpRead64 : *arg.ret64=line[pa]; return StatusDone;
+     case OpRead32 : *arg.ret32=Part32(line[pa],pa); return StatusDone;
+     case OpRead16 : *arg.ret16=Part16(line[pa],pa); return StatusDone;
+     case OpRead8 : *arg.ret8=Part8(line[pa],pa); return StatusDone;
+
+     case OpWrite64 : line[pa]=arg.data64; return StatusDone;
+     case OpWrite32 : Part32(line[pa],pa,arg.data32); return StatusDone;
+     case OpWrite16 : Part16(line[pa],pa,arg.data16); return StatusDone;
+     case OpWrite8 : Part8(line[pa],pa,arg.data8); return StatusDone;
+
+     default: return StatusError;
+    }
  }
 
-Status L1Mem::fresh(uint64 pa,CacheLine &line)
+Status L1Mem::fresh(CacheLine &line)
  {
   // read line pa&mask
 
@@ -94,7 +108,7 @@ Status L1Mem::fresh(uint64 pa,CacheLine &line)
   // line.full=true;
  }
 
-Status L1Mem::taken(uint64 pa,CacheLine &line)
+Status L1Mem::taken(CacheLine &line)
  {
   // writeback line 
   // read line pa&mask
@@ -129,51 +143,158 @@ void L1Mem::extmem(bool enable)
   // TODO
  }
 
-Status L1Mem::fetchCommand(uint64 pa,uint64 &ret)
+Status L1Mem::fetchCommand(uint64 pa_,uint64 &ret)
  {
+  if( pa_%4 ) return StatusErrorAlign;
+
+  pa=pa_;
+  op=OpRead64;
+  arg.ret64=&ret;
+
   Status status;
 
-  cmd.find(pa, [&] (CacheLine &line) { status=match(line); } , 
-               [&] (CacheLine &line) { status=fresh(pa,line); } , 
-               [&] (CacheLine &line) { status=taken(pa,line); } );
+  cmd.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                [&] (CacheLine &line) { status=fresh(line); } , 
+                [&] (CacheLine &line) { status=taken(line); } );
 
   return status;             
  }
 
-Status L1Mem::readData(uint64 pa,uint8 &data)
+Status L1Mem::readData(uint64 pa_,uint8 &ret)
  {
+  pa=pa_;
+  op=OpRead8;
+  arg.ret8=&ret;
+
+  Status status;
+
+  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                 [&] (CacheLine &line) { status=fresh(line); } , 
+                 [&] (CacheLine &line) { status=taken(line); } );
+
+  return status;             
  }
 
-Status L1Mem::readData(uint64 pa,uint16 &data)
+Status L1Mem::readData(uint64 pa_,uint16 &ret)
  {
+  if( pa_%2 ) return StatusErrorAlign;
+
+  pa=pa_;
+  op=OpRead16;
+  arg.ret16=&ret;
+
+  Status status;
+
+  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                 [&] (CacheLine &line) { status=fresh(line); } , 
+                 [&] (CacheLine &line) { status=taken(line); } );
+
+  return status;             
  }
 
-Status L1Mem::readData(uint64 pa,uint32 &data)
+Status L1Mem::readData(uint64 pa_,uint32 &ret)
  {
+  if( pa_%4 ) return StatusErrorAlign;
+
+  pa=pa_;
+  op=OpRead32;
+  arg.ret32=&ret;
+
+  Status status;
+
+  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                 [&] (CacheLine &line) { status=fresh(line); } , 
+                 [&] (CacheLine &line) { status=taken(line); } );
+
+  return status;             
  }
 
-Status L1Mem::readData(uint64 pa,uint64 &data)
+Status L1Mem::readData(uint64 pa_,uint64 &ret)
  {
+  if( pa_%4 ) return StatusErrorAlign;
+
+  pa=pa_;
+  op=OpRead64;
+  arg.ret64=&ret;
+
+  Status status;
+
+  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                 [&] (CacheLine &line) { status=fresh(line); } , 
+                 [&] (CacheLine &line) { status=taken(line); } );
+
+  return status;             
  }
 
-Status L1Mem::writeData(uint64 pa,uint8 data)
+Status L1Mem::writeData(uint64 pa_,uint8 val)
  {
+  pa=pa_;
+  op=OpWrite8;
+  arg.data8=val;
+
+  Status status;
+
+  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                 [&] (CacheLine &line) { status=fresh(line); } , 
+                 [&] (CacheLine &line) { status=taken(line); } );
+
+  return status;             
  }
 
-Status L1Mem::writeData(uint64 pa,uint16 data)
+Status L1Mem::writeData(uint64 pa_,uint16 val)
  {
+  if( pa_%2 ) return StatusErrorAlign;
+
+  pa=pa_;
+  op=OpWrite16;
+  arg.data16=val;
+
+  Status status;
+
+  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                 [&] (CacheLine &line) { status=fresh(line); } , 
+                 [&] (CacheLine &line) { status=taken(line); } );
+
+  return status;             
  }
 
-Status L1Mem::writeData(uint64 pa,uint32 data)
+Status L1Mem::writeData(uint64 pa_,uint32 val)
  {
+  if( pa_%4 ) return StatusErrorAlign;
+
+  pa=pa_;
+  op=OpWrite32;
+  arg.data32=val;
+
+  Status status;
+
+  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                 [&] (CacheLine &line) { status=fresh(line); } , 
+                 [&] (CacheLine &line) { status=taken(line); } );
+
+  return status;             
  }
 
-Status L1Mem::writeData(uint64 pa,uint64 data)
+Status L1Mem::writeData(uint64 pa_,uint64 val)
  {
+  if( pa_%8 ) return StatusErrorAlign;
+
+  pa=pa_;
+  op=OpWrite64;
+  arg.data64=val;
+
+  Status status;
+
+  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                 [&] (CacheLine &line) { status=fresh(line); } , 
+                 [&] (CacheLine &line) { status=taken(line); } );
+
+  return status;             
  }
 
 Status L1Mem::pending()
  {
+  // TODO
  }
 
 /* class AddressMap */

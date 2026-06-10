@@ -41,6 +41,8 @@ struct CacheLine
   static uint64 Tag(uint64 pa) { return pa>>CacheLineBits; }
 
   uint64 pa() const { return tag<<CacheLineBits; }
+
+  uint64 & operator [] (uint64 pa) { return line[(pa>>3)&7u]; }
  };
 
 /* class Cache */
@@ -74,6 +76,38 @@ class Cache : NoCopy
 
 class L1Mem : NoCopy
  {
+   uint64 pa = 0 ;
+
+   enum OpCode
+    {
+     OpRead64,
+     OpRead32,
+     OpRead16,
+     OpRead8,
+
+     OpWrite64,
+     OpWrite32,
+     OpWrite16,
+     OpWrite8,
+    };
+
+   OpCode op = OpRead64 ;
+
+   union Arg
+    {
+     uint64 *ret64; 
+     uint32 *ret32; 
+     uint16 *ret16; 
+     uint8 *ret8; 
+
+     uint64 data64; 
+     uint32 data32; 
+     uint16 data16; 
+     uint8 data8; 
+    };
+
+   Arg arg; 
+
    uint32 port = 0 ;
 
    bool modeM = false ;
@@ -87,9 +121,9 @@ class L1Mem : NoCopy
   
    Status match(CacheLine &line);
 
-   Status fresh(uint64 pa,CacheLine &line);
+   Status fresh(CacheLine &line);
 
-   Status taken(uint64 pa,CacheLine &line);
+   Status taken(CacheLine &line);
 
   public:
 
