@@ -15,6 +15,167 @@
 
 namespace Basis {
 
+/* class Cache */
+
+template <class Func1,class Func2,class Func3>
+void Cache::Block::find(uint64 tag,Func1 match,Func2 fresh,Func3 taken)
+ {
+  for(CacheLine &line : lines )
+    if( line.full && line.tag==tag )
+      {
+       match(line);
+
+       return; 
+      }
+
+  for(CacheLine &line : lines )
+    if( !line.full )
+      {
+       fresh(line);
+
+       return; 
+      }
+
+  // TODO LRU    
+
+  taken(lines[0]);
+ }
+
+Cache::Cache()
+ {
+ }
+
+Cache::~Cache()
+ {
+ }
+
+void Cache::init(uint64 size)
+ {
+  // size>= 1024 
+
+  unsigned nbit=UIntBitFunc<uint64>::BitsOf(size)-1;
+
+  // nbit >= 10
+
+  //
+  // (2^(64-shift))*8*64 <= size
+  //
+  // (64-shift)+3+6 <= nbit
+  //
+  // shift >= 73-nbit , >= 6 , < 64
+  //
+
+  shift=73-nbit; // 73-64 < nbit <= 73-6
+                 // 10 <= nbit <= 67
+
+  mem=SimpleArray<Block>( uint64(1)<<(64-shift) );
+ }
+
+template <class Func1,class Func2,class Func3>
+void Cache::find(uint64 pa,Func1 match,Func2 fresh,Func3 taken)
+ {
+  uint64 index=pa>>shift;
+  uint64 tag=CacheLine::Tag(pa);
+
+  mem[index].find(tag,match,fresh,taken);
+ }
+
+/* class L1Mem */
+
+Status L1Mem::match(CacheLine &line)
+ {
+ }
+
+Status L1Mem::fresh(uint64 pa,CacheLine &line)
+ {
+  // read line pa&mask
+
+  // line.tag=tag;
+  // line.full=true;
+ }
+
+Status L1Mem::taken(uint64 pa,CacheLine &line)
+ {
+  // writeback line 
+  // read line pa&mask
+
+  // line.tag=tag;
+  // line.full=true;
+ }
+
+L1Mem::L1Mem()
+ {
+ }
+
+L1Mem::~L1Mem()
+ {
+ }
+
+void L1Mem::init(uint32 port_,uint64 cmdSize,uint64 dataSize,SysMemPort &mpx_)
+ {
+  port=port_;
+  modeM=false;
+
+  cmd.init(cmdSize);
+  data.init(dataSize);
+
+  mpx=&mpx_;
+ }
+
+void L1Mem::extmem(bool enable)
+ {
+  modeM=enable;
+
+  // TODO
+ }
+
+Status L1Mem::fetchCommand(uint64 pa,uint64 &ret)
+ {
+  Status status;
+
+  cmd.find(pa, [&] (CacheLine &line) { status=match(line); } , 
+               [&] (CacheLine &line) { status=fresh(pa,line); } , 
+               [&] (CacheLine &line) { status=taken(pa,line); } );
+
+  return status;             
+ }
+
+Status L1Mem::readData(uint64 pa,uint8 &data)
+ {
+ }
+
+Status L1Mem::readData(uint64 pa,uint16 &data)
+ {
+ }
+
+Status L1Mem::readData(uint64 pa,uint32 &data)
+ {
+ }
+
+Status L1Mem::readData(uint64 pa,uint64 &data)
+ {
+ }
+
+Status L1Mem::writeData(uint64 pa,uint8 data)
+ {
+ }
+
+Status L1Mem::writeData(uint64 pa,uint16 data)
+ {
+ }
+
+Status L1Mem::writeData(uint64 pa,uint32 data)
+ {
+ }
+
+Status L1Mem::writeData(uint64 pa,uint64 data)
+ {
+ }
+
+Status L1Mem::pending()
+ {
+ }
+
 /* class AddressMap */
 
 Status AddressMap::completePage()

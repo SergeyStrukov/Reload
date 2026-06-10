@@ -36,13 +36,28 @@ struct CacheLine
  {
   uint64 line[8];
   uint64 tag : 58 ; 
-  uint8 filled : 1 ;
+  uint8 full : 1 ;
+
+  static uint64 Tag(uint64 pa) { return pa>>CacheLineBits; }
+
+  uint64 pa() const { return tag<<CacheLineBits; }
  };
 
 /* class Cache */
 
 class Cache : NoCopy
  {
+   struct Block
+    {
+     CacheLine lines[8]; 
+
+     template <class Func1,class Func2,class Func3>
+     void find(uint64 tag,Func1 match,Func2 fresh,Func3 taken);
+    };
+
+   uint32 shift = 0 ; 
+   SimpleArray<Block> mem;
+
   public:
 
    Cache();
@@ -51,18 +66,30 @@ class Cache : NoCopy
 
    void init(uint64 size);
 
-   CacheLine * find(uint64 pa);
+   template <class Func1,class Func2,class Func3>
+   void find(uint64 pa,Func1 match,Func2 fresh,Func3 taken);
  };
 
 /* class L1Mem */
 
 class L1Mem : NoCopy
  {
-   uint32 port;
+   uint32 port = 0 ;
 
-   bool modeM;
+   bool modeM = false ;
 
-   SysMemPort *mpx;
+   Cache cmd;
+   Cache data;
+
+   SysMemPort *mpx = 0 ;
+
+  private:
+  
+   Status match(CacheLine &line);
+
+   Status fresh(uint64 pa,CacheLine &line);
+
+   Status taken(uint64 pa,CacheLine &line);
 
   public:
 
@@ -108,7 +135,7 @@ class AddressMap : NoCopy
 
    uint64 vmt = 0 ;
 
-   L1Mem *cache;
+   L1Mem *cache = 0 ;
 
   private: 
 

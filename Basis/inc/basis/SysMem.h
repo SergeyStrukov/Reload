@@ -40,6 +40,10 @@ inline constexpr uint64 MaxDevSize = 4_TByte ;
 
 inline constexpr uint64 MemBankSize = 4_MByte ;
 
+inline constexpr unsigned CacheLineBits = 6 ;
+
+inline constexpr uint64 CacheLineSize = uint64(1)<<CacheLineBits ;
+
 /* classes */
 
 class SysMem;
