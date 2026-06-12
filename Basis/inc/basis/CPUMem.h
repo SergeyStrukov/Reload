@@ -34,15 +34,19 @@ class CPUMem;
 
 struct CacheLine
  {
-  uint64 line[8];
-  uint64 tag : 58 ; 
+  uint64 line[CacheLineLen];
+  uint64 tag : 63 ; 
   uint8 full : 1 ;
+
+  CacheLine() noexcept { full=0; }
 
   static uint64 Tag(uint64 pa) { return pa>>CacheLineBits; }
 
+  void setTag(uint64 pa) { tag=Tag(pa); full=1; }
+
   uint64 pa() const { return tag<<CacheLineBits; }
 
-  uint64 & operator [] (uint64 pa) { return line[(pa>>3)&7u]; }
+  uint64 & operator [] (uint64 pa) { return line[(pa>>3)&7u]; } // TODO
  };
 
 /* class Cache */
@@ -107,6 +111,15 @@ class L1Mem : NoCopy
     };
 
    Arg arg; 
+
+   enum NextOp
+    {
+     NextFinish, 
+     NextRead 
+    };
+
+   NextOp nextOp = NextFinish ; 
+   CacheLine *nextLine = 0 ;
 
    uint32 port = 0 ;
 

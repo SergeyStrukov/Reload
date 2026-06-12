@@ -82,7 +82,7 @@ void Cache::find(uint64 pa,Func1 match,Func2 fresh,Func3 taken)
 
 /* class L1Mem */
 
-Status L1Mem::match(CacheLine &line)
+Status L1Mem::match(CacheLine &line) // TODO
  {
   switch( op )
     {
@@ -100,21 +100,42 @@ Status L1Mem::match(CacheLine &line)
     }
  }
 
-Status L1Mem::fresh(CacheLine &line)
+Status L1Mem::fresh(CacheLine &line) // TODO modeM==0
  {
-  // read line pa&mask
+  Status status=mpx->readData(port,pa&CacheLineMask,line.line);
 
-  // line.tag=tag;
-  // line.full=true;
+  if( status==StatusPending ) 
+    {
+     nextOp=NextFinish;
+     nextLine=&line;
+
+     return status;
+    } 
+
+  if( status ) return status; 
+
+  line.setTag(pa);
+
+  return match(line);
  }
 
-Status L1Mem::taken(CacheLine &line)
+Status L1Mem::taken(CacheLine &line) // TODO modeM==0
  {
-  // writeback line 
-  // read line pa&mask
+  Status status=mpx->writeData(port,line.pa(),line.line);
 
-  // line.tag=tag;
-  // line.full=true;
+  if( status==StatusPending ) 
+    {
+     nextOp=NextRead;
+     nextLine=&line;
+
+     return status;
+    } 
+
+  if( status ) return status; 
+
+  line.full=0;  
+
+  return fresh(line);
  }
 
 L1Mem::L1Mem()
@@ -127,6 +148,10 @@ L1Mem::~L1Mem()
 
 void L1Mem::init(uint32 port_,uint64 cmdSize,uint64 dataSize,SysMemPort &mpx_)
  {
+  pa=0;
+  op=OpRead64;
+  nextOp=NextFinish;
+  nextLine=0;
   port=port_;
   modeM=false;
 
@@ -145,7 +170,7 @@ void L1Mem::extmem(bool enable)
 
 Status L1Mem::fetchCommand(uint64 pa_,uint64 &ret)
  {
-  if( pa_%4 ) return StatusErrorAlign;
+  if( pa_%8 ) return StatusErrorAlign;
 
   pa=pa_;
   op=OpRead64;
@@ -211,7 +236,7 @@ Status L1Mem::readData(uint64 pa_,uint32 &ret)
 
 Status L1Mem::readData(uint64 pa_,uint64 &ret)
  {
-  if( pa_%4 ) return StatusErrorAlign;
+  if( pa_%8 ) return StatusErrorAlign;
 
   pa=pa_;
   op=OpRead64;
@@ -294,7 +319,32 @@ Status L1Mem::writeData(uint64 pa_,uint64 val)
 
 Status L1Mem::pending()
  {
-  // TODO
+  switch( nextOp )
+    {
+     case NextFinish :
+      {
+       Status status=mpx->pending(port); 
+
+       if( status ) return status; 
+
+       nextLine->setTag(pa);
+
+       return match(*nextLine);
+      }
+
+     case NextRead : 
+      {
+       Status status=mpx->pending(port); 
+
+       if( status ) return status; 
+
+       nextLine->full=0;  
+
+       return fresh(*nextLine);
+      }
+
+     default: return StatusError; 
+    }
  }
 
 /* class AddressMap */

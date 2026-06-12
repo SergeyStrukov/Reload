@@ -19,6 +19,10 @@ namespace Basis {
 
 /* class SysMem */
 
+static_assert( (BootROMSize%CacheLineSize)==0 );
+
+static_assert( CacheLineLen>0 );
+
 SysMem::SysMem()
  {
  }
@@ -29,7 +33,7 @@ SysMem::~SysMem()
 
 void SysMem::init(uint64 ramSize)
  {
-  if( ramSize%sizeof (uint64) )
+  if( ramSize%CacheLineSize )
     {
      Printf(Exception,"Basis::SysMem::init(#;) : unaligned",ramSize);
     }
@@ -43,20 +47,20 @@ void SysMem::init(uint64 ramSize)
   ram=SimpleArray<uint64>(ramSize/sizeof (uint64));
  }
 
-Status SysMem::readData(uint64 pa,uint64 &data)
+Status SysMem::readData(uint64 pa,uint64 line[CacheLineLen])
  {
   if( pa%sizeof (uint64) ) return StatusErrorAlign;
 
   if( pa>=BootROMAddress && pa<BootROMAddress+BootROMSize )
     {
-     data=rom[(pa-BootROMAddress)/sizeof (uint64)]; 
+     RangeCopy(line,rom.getPtr()+(pa-BootROMAddress)/sizeof (uint64),CacheLineLen);
 
      return StatusDone;
     }
 
   if( pa>=RAMAddress && pa<RAMAddress+ram.getLen()*sizeof (uint64) )
     {
-     data=ram[(pa-RAMAddress)/sizeof (uint64)]; 
+     RangeCopy(line,ram.getPtr()+(pa-RAMAddress)/sizeof (uint64),CacheLineLen);
 
      return StatusDone;
     }
@@ -64,13 +68,13 @@ Status SysMem::readData(uint64 pa,uint64 &data)
   return StatusErrorVoid;  
  }
 
-Status SysMem::writeData(uint64 pa,uint64 data)
+Status SysMem::writeData(uint64 pa,const uint64 line[CacheLineLen])
  {
   if( pa%sizeof (uint64) ) return StatusErrorAlign;
 
   if( pa>=RAMAddress && pa<RAMAddress+ram.getLen()*sizeof (uint64) )
     {
-     ram[(pa-RAMAddress)/sizeof (uint64)]=data; 
+     RangeCopy(ram.getPtr()+(pa-RAMAddress)/sizeof (uint64),line,CacheLineLen);
 
      return StatusDone;
     }
@@ -86,7 +90,7 @@ Status SysMemPort::Port::operator () (SysMemPort &obj) const
     {
      if( ret ) 
        {
-        return obj.mem->readData(pa,*ret); 
+        return obj.mem->readData(pa,ret); 
        }
      else
        {
@@ -129,29 +133,29 @@ void SysMemPort::init(uint32 count,SysMem &mem_)
   mem=&mem_;
  }
 
-Status SysMemPort::readData(uint32 port,uint64 pa,uint64 &data)
+Status SysMemPort::readData(uint32 port,uint64 pa,uint64 line[CacheLineLen])
  {
   if( useBank(pa) ) 
     {
-     return mem->readData(pa,data); 
+     return mem->readData(pa,line); 
     }
   else
     {
-     ports[port].read(pa,data);
+     ports[port].read(pa,line);
 
      return StatusPending; 
     }
  }
 
-Status SysMemPort::writeData(uint32 port,uint64 pa,uint64 data)
+Status SysMemPort::writeData(uint32 port,uint64 pa,const uint64 line[CacheLineLen])
  {
   if( useBank(pa) ) 
     {
-     return mem->writeData(pa,data); 
+     return mem->writeData(pa,line); 
     }
   else
     {
-     ports[port].write(pa,data);
+     ports[port].write(pa,line);
 
      return StatusPending; 
     }

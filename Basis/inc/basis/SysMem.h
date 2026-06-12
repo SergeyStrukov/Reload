@@ -44,6 +44,10 @@ inline constexpr unsigned CacheLineBits = 6 ;
 
 inline constexpr uint64 CacheLineSize = uint64(1)<<CacheLineBits ;
 
+inline constexpr uint64 CacheLineMask = CacheLineSize-1 ;
+
+inline constexpr uint64 CacheLineLen = CacheLineSize/sizeof (uint64) ;
+
 /* classes */
 
 class SysMem;
@@ -67,9 +71,9 @@ class SysMem : NoCopy
 
    uint64 * bootROM() { return rom.getPtr(); }
 
-   Status readData(uint64 pa,uint64 &data);
+   Status readData(uint64 pa,uint64 line[CacheLineLen]);
 
-   Status writeData(uint64 pa,uint64 data);
+   Status writeData(uint64 pa,const uint64 line[CacheLineLen]);
  };
 
 /* class SysMemPort */ 
@@ -79,12 +83,12 @@ class SysMemPort : NoCopy
    struct Port
     {
      uint64 pa;
-     uint64 data;
+     const uint64 *data;
      uint64 *ret;
 
-     void read(uint64 pa_,uint64 &data_) { pa=pa_; ret=&data_; }
+     void read(uint64 pa_,uint64 *ret_) { pa=pa_; ret=ret_; }
 
-     void write(uint64 pa_,uint64 data_) { pa=pa_; data=data_; ret=0; }
+     void write(uint64 pa_,const uint64 *data_) { pa=pa_; data=data_; ret=0; }
 
      Status operator () (SysMemPort &obj) const;
     };
@@ -110,9 +114,9 @@ class SysMemPort : NoCopy
 
    void stepBeg() { nbanks=0; }
 
-   Status readData(uint32 port,uint64 pa,uint64 &data);
+   Status readData(uint32 port,uint64 pa,uint64 line[CacheLineLen]);
 
-   Status writeData(uint32 port,uint64 pa,uint64 data);
+   Status writeData(uint32 port,uint64 pa,const uint64 line[CacheLineLen]);
 
    Status pending(uint32 port);
 
