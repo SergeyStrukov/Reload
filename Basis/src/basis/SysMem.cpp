@@ -49,7 +49,7 @@ void SysMem::init(uint64 ramSize)
 
 Status SysMem::readData(uint64 pa,uint64 line[CacheLineLen])
  {
-  if( pa%sizeof (uint64) ) return StatusErrorAlign;
+  if( pa%CacheLineSize ) return StatusErrorAlign;
 
   if( pa>=BootROMAddress && pa<BootROMAddress+BootROMSize )
     {
@@ -70,7 +70,7 @@ Status SysMem::readData(uint64 pa,uint64 line[CacheLineLen])
 
 Status SysMem::writeData(uint64 pa,const uint64 line[CacheLineLen])
  {
-  if( pa%sizeof (uint64) ) return StatusErrorAlign;
+  if( pa%CacheLineSize ) return StatusErrorAlign;
 
   if( pa>=RAMAddress && pa<RAMAddress+ram.getLen()*sizeof (uint64) )
     {

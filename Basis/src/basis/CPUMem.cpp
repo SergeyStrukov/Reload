@@ -41,6 +41,11 @@ void Cache::Block::find(uint64 tag,Func1 match,Func2 fresh,Func3 taken)
   taken(lines[0]);
  }
 
+void Cache::Block::clear()
+ {
+  for(CacheLine &line : lines ) line.full=0;
+ }
+
 Cache::Cache()
  {
  }
@@ -49,7 +54,7 @@ Cache::~Cache()
  {
  }
 
-void Cache::init(uint64 size)
+void Cache::init(uint64 size) // TODO
  {
   // size>= 1024 
 
@@ -71,6 +76,11 @@ void Cache::init(uint64 size)
   mem=SimpleArray<Block>( uint64(1)<<(64-shift) );
  }
 
+void Cache::clear()
+ {
+  for(Block &obj : mem ) obj.clear();
+ }
+
 template <class Func1,class Func2,class Func3>
 void Cache::find(uint64 pa,Func1 match,Func2 fresh,Func3 taken)
  {
@@ -82,16 +92,84 @@ void Cache::find(uint64 pa,Func1 match,Func2 fresh,Func3 taken)
 
 /* class L1Mem */
 
-Status L1Mem::match(CacheLine &line) // TODO
+uint32 L1Mem::Part32(uint64 data,uint64 pa)
+ {
+  uint64 shift=(pa&1u)*32;
+
+  return uint32( data>>shift );
+ }
+
+uint16 L1Mem::Part16(uint64 data,uint64 pa)
+ {
+  uint64 shift=(pa&3u)*16;
+
+  return uint16( data>>shift );
+ }
+
+uint8 L1Mem::Part8(uint64 data,uint64 pa)
+ {
+  uint64 shift=(pa&7u)*8;
+
+  return uint8( data>>shift );
+ }
+
+void L1Mem::InsField32(uint64 &data,uint64 val,unsigned shift)
+ {
+  uint64 mask=(uint64(1)<<32)-1;
+
+  data &= ~(mask<<shift) ;
+  data |=  (val<<shift) ;
+ }
+
+void L1Mem::InsField16(uint64 &data,uint64 val,unsigned shift)
+ {
+  uint64 mask=(uint64(1)<<16)-1;
+
+  data &= ~(mask<<shift) ;
+  data |=  (val<<shift) ;
+ }
+
+void L1Mem::InsField8(uint64 &data,uint64 val,unsigned shift)
+ {
+  uint64 mask=(uint64(1)<<8)-1;
+
+  data &= ~(mask<<shift) ;
+  data |=  (val<<shift) ;
+ }
+
+void L1Mem::Part32(uint64 &data,uint64 pa,uint32 val)
+ {
+  uint64 shift=(pa&1u)*32;
+
+  InsField32(data,val,shift); 
+ }
+
+void L1Mem::Part16(uint64 &data,uint64 pa,uint16 val)
+ {
+  uint64 shift=(pa&3u)*16;
+
+  InsField16(data,val,shift); 
+ }
+
+void L1Mem::Part8(uint64 &data,uint64 pa,uint8 val)
+ {
+  uint64 shift=(pa&7u)*8;
+
+  InsField8(data,val,shift); 
+ }
+
+Status L1Mem::match(CacheLine &line)
  {
   switch( op )
     {
      case OpRead64 : *arg.ret64=line[pa]; return StatusDone;
+
      case OpRead32 : *arg.ret32=Part32(line[pa],pa); return StatusDone;
      case OpRead16 : *arg.ret16=Part16(line[pa],pa); return StatusDone;
      case OpRead8 : *arg.ret8=Part8(line[pa],pa); return StatusDone;
 
      case OpWrite64 : line[pa]=arg.data64; return StatusDone;
+
      case OpWrite32 : Part32(line[pa],pa,arg.data32); return StatusDone;
      case OpWrite16 : Part16(line[pa],pa,arg.data16); return StatusDone;
      case OpWrite8 : Part8(line[pa],pa,arg.data8); return StatusDone;
@@ -100,9 +178,20 @@ Status L1Mem::match(CacheLine &line) // TODO
     }
  }
 
-Status L1Mem::fresh(CacheLine &line) // TODO modeM==0
+Status L1Mem::fresh(CacheLine &line)
  {
-  Status status=mpx->readData(port,pa&CacheLineMask,line.line);
+  Status status;
+
+  if( modeM )
+    {
+     status=mpx->readData(port,pa&CacheLineMask,line.line);
+    }
+  else
+    {
+     Range(line.line).set_null(); 
+
+     status=StatusDone;
+    }  
 
   if( status==StatusPending ) 
     {
@@ -119,8 +208,10 @@ Status L1Mem::fresh(CacheLine &line) // TODO modeM==0
   return match(line);
  }
 
-Status L1Mem::taken(CacheLine &line) // TODO modeM==0
+Status L1Mem::taken(CacheLine &line)
  {
+  if( !modeM ) return StatusErrorVoid;
+
   Status status=mpx->writeData(port,line.pa(),line.line);
 
   if( status==StatusPending ) 
@@ -165,7 +256,8 @@ void L1Mem::extmem(bool enable)
  {
   modeM=enable;
 
-  // TODO
+  cmd.clear();
+  data.clear();
  }
 
 Status L1Mem::fetchCommand(uint64 pa_,uint64 &ret)

@@ -59,6 +59,8 @@ class Cache : NoCopy
 
      template <class Func1,class Func2,class Func3>
      void find(uint64 tag,Func1 match,Func2 fresh,Func3 taken);
+
+     void clear();
     };
 
    uint32 shift = 0 ; 
@@ -71,6 +73,8 @@ class Cache : NoCopy
    ~Cache();
 
    void init(uint64 size);
+
+   void clear();
 
    template <class Func1,class Func2,class Func3>
    void find(uint64 pa,Func1 match,Func2 fresh,Func3 taken);
@@ -131,6 +135,24 @@ class L1Mem : NoCopy
    SysMemPort *mpx = 0 ;
 
   private:
+
+   static uint32 Part32(uint64 data,uint64 pa);
+
+   static uint16 Part16(uint64 data,uint64 pa);
+
+   static uint8 Part8(uint64 data,uint64 pa);
+
+   static void InsField32(uint64 &data,uint64 val,unsigned shift);
+
+   static void InsField16(uint64 &data,uint64 val,unsigned shift);
+
+   static void InsField8(uint64 &data,uint64 val,unsigned shift);
+
+   static void Part32(uint64 &data,uint64 pa,uint32 val);
+
+   static void Part16(uint64 &data,uint64 pa,uint16 val);
+
+   static void Part8(uint64 &data,uint64 pa,uint8 val);
   
    Status match(CacheLine &line);
 
