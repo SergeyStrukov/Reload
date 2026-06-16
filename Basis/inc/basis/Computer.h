@@ -39,6 +39,8 @@ struct ComputerCfg
   uint64 cmdCacheSize = 64_KByte ;
   uint64 dataCacheSize = 64_KByte ;
   uint32 coreCount = 4 ;
+
+  void validate() const;
  };
 
 /* class Computer */

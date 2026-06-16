@@ -17,39 +17,46 @@
 
 namespace Basis {
 
+/* struct ComputerCfg */
+
+void ComputerCfg::validate() const
+ {
+  if( coreCount==0 )
+    {
+     Printf(Exception,"Basis::ComputerCfg::validate(...) : no cores");
+    }
+
+  if( coreCount>MaxCores )
+    {
+     Printf(Exception,"Basis::ComputerCfg::validate( coreCount = #; ) : too many cores",coreCount);
+    }
+
+  if( cmdCacheSize<MinCacheSize )  
+    {
+     Printf(Exception,"Basis::ComputerCfg::validate( cmdCacheSize = #; ) : too small",cmdCacheSize);
+    }
+
+  if( cmdCacheSize>MaxCacheSize )  
+    {
+     Printf(Exception,"Basis::ComputerCfg::validate( cmdCacheSize = #; ) : too big",cmdCacheSize);
+    }
+
+  if( dataCacheSize<MinCacheSize )  
+    {
+     Printf(Exception,"Basis::ComputerCfg::validate( dataCacheSize = #; ) : too small",dataCacheSize);
+    }
+
+  if( dataCacheSize>MaxCacheSize )  
+    {
+     Printf(Exception,"Basis::ComputerCfg::validate( dataCacheSize = #; ) : too big",dataCacheSize);
+    }
+ }
+
 /* class Computer */
 
 Computer::Computer(const ComputerCfg &cfg)
  {
-  if( cfg.coreCount==0 )
-    {
-     Printf(Exception,"Basis::Computer::init(...) : no cores");
-    }
-
-  if( cfg.coreCount>MaxCores )
-    {
-     Printf(Exception,"Basis::Computer::init( cfg.coreCount = #; ) : too many cores",cfg.coreCount);
-    }
-
-  if( cfg.cmdCacheSize<MinCacheSize )  
-    {
-     Printf(Exception,"Basis::Computer::init( cfg.cmdCacheSize = #; ) : too small",cfg.cmdCacheSize);
-    }
-
-  if( cfg.cmdCacheSize>MaxCacheSize )  
-    {
-     Printf(Exception,"Basis::Computer::init( cfg.cmdCacheSize = #; ) : too big",cfg.cmdCacheSize);
-    }
-
-  if( cfg.dataCacheSize<MinCacheSize )  
-    {
-     Printf(Exception,"Basis::Computer::init( cfg.dataCacheSize = #; ) : too small",cfg.dataCacheSize);
-    }
-
-  if( cfg.dataCacheSize>MaxCacheSize )  
-    {
-     Printf(Exception,"Basis::Computer::init( cfg.dataCacheSize = #; ) : too big",cfg.dataCacheSize);
-    }
+  cfg.validate();
 
   cpu.init(cfg.coreCount,cfg.cmdCacheSize,cfg.dataCacheSize,sysmem);  
   sysmem.init(cfg.ramSize);  
