@@ -51,13 +51,6 @@ void CPUCore::step()
 
 /* class CPUCoreBlock */ 
 
-void CPUCoreBlock::extmem(bool enable)
- {
-  cache.extmem(enable);
-
-  for(ulen i=0,len=cores.getLen(); i<len ;i++) cores[i].extmem(enable);
- }
-
 CPUCoreBlock::CPUCoreBlock()
  {
  }

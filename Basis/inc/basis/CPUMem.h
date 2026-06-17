@@ -127,8 +127,6 @@ class L1Mem : NoCopy
 
    uint32 port = 0 ;
 
-   bool modeM = false ;
-
    Cache cmd;
    Cache data;
 
@@ -167,8 +165,6 @@ class L1Mem : NoCopy
    ~L1Mem();
 
    void init(uint32 port,uint64 cmdSize,uint64 dataSize,SysMemPort &mpx);
-
-   void extmem(bool enable);
 
    Status fetchCommand(uint64 pa,uint64 &cmd);
 
@@ -299,7 +295,6 @@ class CPUMem : NoCopy
 
    void setupVMT(uint64 pa) { map.setup(pa); }
 
-   void extmem(bool enable);
    void dualVMT(bool enable) { modeDual=enable; }
 
    Status fetchCommand(uint64 va,uint64 &cmd);

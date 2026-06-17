@@ -23,6 +23,18 @@ static_assert( (BootROMSize%CacheLineSize)==0 );
 
 static_assert( CacheLineLen>0 );
 
+static_assert( (BootROMAddress%MemBankSize)==0 );
+
+static_assert( (BootROMSize%MemBankSize)==0 );
+
+static_assert( (RegSpaceAddress%MemBankSize)==0 );
+
+static_assert( (RegSpaceSize%MemBankSize)==0 );
+
+static_assert( (RAMAddress%MemBankSize)==0 );
+
+static_assert( (DevAddress%MemBankSize)==0 );
+
 SysMem::SysMem()
  {
  }
@@ -33,6 +45,8 @@ SysMem::~SysMem()
 
 void SysMem::init(uint64 ramSize)
  {
+  modeM=false;
+
   if( ramSize%CacheLineSize )
     {
      Printf(Exception,"Basis::SysMem::init(#;) : unaligned",ramSize);
@@ -58,6 +72,13 @@ Status SysMem::readData(uint64 pa,uint64 line[CacheLineLen])
      return StatusDone;
     }
 
+  if( !modeM )
+    {
+     Range(line,CacheLineLen).set_null(); 
+
+     return StatusDone;
+    } 
+
   if( pa>=RAMAddress && pa<RAMAddress+ram.getLen()*sizeof (uint64) )
     {
      RangeCopy(line,ram.getPtr()+(pa-RAMAddress)/sizeof (uint64),CacheLineLen);
@@ -70,6 +91,8 @@ Status SysMem::readData(uint64 pa,uint64 line[CacheLineLen])
 
 Status SysMem::writeData(uint64 pa,const uint64 line[CacheLineLen])
  {
+  if( !modeM ) return StatusErrorVoid;
+
   if( pa%CacheLineSize ) return StatusErrorAlign;
 
   if( pa>=RAMAddress && pa<RAMAddress+ram.getLen()*sizeof (uint64) )

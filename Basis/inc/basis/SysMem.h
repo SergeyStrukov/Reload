@@ -58,6 +58,8 @@ class SysMemPort;
 
 class SysMem : NoCopy
  {
+   bool modeM = false ;
+
    SimpleArray<uint64> rom;
    SimpleArray<uint64> ram;
 
@@ -70,6 +72,8 @@ class SysMem : NoCopy
    void init(uint64 ramSize);
 
    uint64 * bootROM() { return rom.getPtr(); }
+
+   void setModeM(bool modeM_) { modeM=modeM_; }
 
    Status readData(uint64 pa,uint64 line[CacheLineLen]);
 

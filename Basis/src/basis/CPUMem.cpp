@@ -182,16 +182,7 @@ Status L1Mem::fresh(CacheLine &line)
  {
   Status status;
 
-  if( modeM )
-    {
-     status=mpx->readData(port,pa&CacheLineMask,line.line);
-    }
-  else
-    {
-     Range(line.line).set_null(); 
-
-     status=StatusDone;
-    }  
+  status=mpx->readData(port,pa&CacheLineMask,line.line);
 
   if( status==StatusPending ) 
     {
@@ -210,8 +201,6 @@ Status L1Mem::fresh(CacheLine &line)
 
 Status L1Mem::taken(CacheLine &line)
  {
-  if( !modeM ) return StatusErrorVoid;
-
   Status status=mpx->writeData(port,line.pa(),line.line);
 
   if( status==StatusPending ) 
@@ -244,20 +233,11 @@ void L1Mem::init(uint32 port_,uint64 cmdSize,uint64 dataSize,SysMemPort &mpx_)
   nextOp=NextFinish;
   nextLine=0;
   port=port_;
-  modeM=false;
 
   cmd.init(cmdSize);
   data.init(dataSize);
 
   mpx=&mpx_;
- }
-
-void L1Mem::extmem(bool enable)
- {
-  modeM=enable;
-
-  cmd.clear();
-  data.clear();
  }
 
 Status L1Mem::fetchCommand(uint64 pa_,uint64 &ret)
@@ -706,11 +686,6 @@ void CPUMem::init(uint32 port,uint64 cmdCacheSize,uint64 dataCacheSize,SysMemPor
   map.init(cache);
 
   sysmap=&sysmap_;
- }
-
-void CPUMem::extmem(bool enable)
- {
-  cache.extmem(enable);  
  }
 
 Status CPUMem::fetchCommand(uint64 va,uint64 &cmd)

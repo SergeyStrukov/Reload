@@ -87,8 +87,6 @@ class CPUCore : NoCopy
 
    void init(uint32 index,uint64 cmdCacheSize,uint64 dataCacheSize,CPUCoreBlock &block);
 
-   void extmem(bool enable) { mem.extmem(enable); }
-
    void step();
  };
 
@@ -114,10 +112,6 @@ class CPUCoreBlock : NoCopy
    SimpleArray<CPUCore> cores;
 
    friend class CPUCore;
-
-  private: 
-
-   void extmem(bool enable);
 
   public:
 
