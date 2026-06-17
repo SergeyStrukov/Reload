@@ -44,12 +44,24 @@ void CPUCore::init(uint32 index_,uint64 cmdCacheSize,uint64 dataCacheSize,CPUCor
   block=&block_;
  }
 
+void CPUCore::clearCache()
+ {
+  mem.clearCache();
+ }
+
 void CPUCore::step()
  {
   // TODO
  }
 
 /* class CPUCoreBlock */ 
+
+void CPUCoreBlock::setModeM(bool modeM)
+ {
+  mpx.setModeM(modeM);
+
+  for(CPUCore &core : cores ) core.clearCache();
+ }
 
 CPUCoreBlock::CPUCoreBlock()
  {

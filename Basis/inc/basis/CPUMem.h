@@ -166,6 +166,8 @@ class L1Mem : NoCopy
 
    void init(uint32 port,uint64 cmdSize,uint64 dataSize,SysMemPort &mpx);
 
+   void clearCache();
+   
    Status fetchCommand(uint64 pa,uint64 &cmd);
 
    Status readData(uint64 pa,uint8 &data);
@@ -292,6 +294,8 @@ class CPUMem : NoCopy
    ~CPUMem();
 
    void init(uint32 port,uint64 cmdCacheSize,uint64 dataCacheSize,SysMemPort &mpx,AddressMap &sysmap);
+
+   void clearCache();
 
    void setupVMT(uint64 pa) { map.setup(pa); }
 

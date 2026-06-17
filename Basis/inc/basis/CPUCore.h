@@ -18,14 +18,7 @@
 
 namespace Basis {
 
-/* classes */
-
-enum RegIndex : uint8 ;
-
-class CPUCore;
-class CPUCoreBlock;
-
-/* enum RegIndex */
+/* consts */
 
 enum RegIndex : uint8
  {
@@ -62,6 +55,11 @@ enum RegIndex : uint8
   RegCount
  };
 
+/* classes */
+
+class CPUCore;
+class CPUCoreBlock;
+
 /* class CPUCore */
 
 class CPUCore : NoCopy
@@ -86,6 +84,8 @@ class CPUCore : NoCopy
    ~CPUCore();
 
    void init(uint32 index,uint64 cmdCacheSize,uint64 dataCacheSize,CPUCoreBlock &block);
+
+   void clearCache();
 
    void step();
  };
@@ -112,6 +112,10 @@ class CPUCoreBlock : NoCopy
    SimpleArray<CPUCore> cores;
 
    friend class CPUCore;
+
+  private: 
+
+   void setModeM(bool modeM);
 
   public:
 

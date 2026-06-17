@@ -116,6 +116,8 @@ class SysMemPort : NoCopy
 
    void init(uint32 count,SysMem &mem);
 
+   void setModeM(bool modeM) { mem->setModeM(modeM); }
+
    void stepBeg() { nbanks=0; }
 
    Status readData(uint32 port,uint64 pa,uint64 line[CacheLineLen]);

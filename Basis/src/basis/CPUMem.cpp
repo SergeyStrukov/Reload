@@ -240,6 +240,12 @@ void L1Mem::init(uint32 port_,uint64 cmdSize,uint64 dataSize,SysMemPort &mpx_)
   mpx=&mpx_;
  }
 
+void L1Mem::clearCache()
+ {
+  cmd.clear();
+  data.clear();
+ } 
+
 Status L1Mem::fetchCommand(uint64 pa_,uint64 &ret)
  {
   if( pa_%8 ) return StatusErrorAlign;
@@ -686,6 +692,11 @@ void CPUMem::init(uint32 port,uint64 cmdCacheSize,uint64 dataCacheSize,SysMemPor
   map.init(cache);
 
   sysmap=&sysmap_;
+ }
+
+void CPUMem::clearCache()
+ {
+  cache.clearCache();
  }
 
 Status CPUMem::fetchCommand(uint64 va,uint64 &cmd)
