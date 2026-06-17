@@ -94,7 +94,7 @@ Status SysMemPort::Port::operator () (SysMemPort &obj) const
        }
      else
        {
-        return obj.mem->writeData(pa,data); 
+        return obj.mem->writeData(pa,val); 
        }
     }
   else

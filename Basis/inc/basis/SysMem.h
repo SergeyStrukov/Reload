@@ -83,12 +83,12 @@ class SysMemPort : NoCopy
    struct Port
     {
      uint64 pa;
-     const uint64 *data;
      uint64 *ret;
+     const uint64 *val;
 
      void read(uint64 pa_,uint64 *ret_) { pa=pa_; ret=ret_; }
 
-     void write(uint64 pa_,const uint64 *data_) { pa=pa_; data=data_; ret=0; }
+     void write(uint64 pa_,const uint64 *val_) { pa=pa_; ret=0; val=val_; }
 
      Status operator () (SysMemPort &obj) const;
     };
