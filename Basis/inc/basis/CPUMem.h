@@ -20,6 +20,8 @@ namespace Basis {
 
 /* classes */
 
+struct MemOp;
+
 struct CacheLine;
 
 class Cache;
@@ -29,6 +31,58 @@ class L1Mem;
 class AddressMap;
 
 class CPUMem;
+
+/* struct MemOp */
+
+struct MemOp
+ {
+  enum OpCode
+   {
+    OpFetch, 
+
+    OpRead64,
+    OpRead32,
+    OpRead16,
+    OpRead8,
+
+    OpWrite64,
+    OpWrite32,
+    OpWrite16,
+    OpWrite8,
+   };
+
+  OpCode op = OpFetch ;
+
+  union Arg
+   {
+    uint64 *ret64; 
+    uint32 *ret32; 
+    uint16 *ret16; 
+    uint8 *ret8; 
+
+    uint64 val64; 
+    uint32 val32; 
+    uint16 val16; 
+    uint8 val8; 
+   };
+
+  Arg arg; 
+
+  void fetchCommand(uint64 &cmd);
+
+  void readData(uint8 &data);
+  void readData(uint16 &data);
+  void readData(uint32 &data);
+  void readData(uint64 &data);
+
+  void writeData(uint8 data);
+  void writeData(uint16 data);
+  void writeData(uint32 data);
+  void writeData(uint64 data);
+
+  template <class T>
+  Status operator () (T &obj) const;
+};
 
 /* struct CacheLine */
 
@@ -167,7 +221,7 @@ class L1Mem : NoCopy
    void init(uint32 port,uint64 cmdSize,uint64 dataSize,SysMemPort &mpx);
 
    void clearCache();
-   
+
    Status fetchCommand(uint64 pa,uint64 &cmd);
 
    Status readData(uint64 pa,uint8 &data);
@@ -231,38 +285,7 @@ class CPUMem : NoCopy
    Address address;
    bool paDone = false ;
    bool useSysMap = false ;
-
-   enum OpCode
-    {
-     OpFetch, 
-
-     OpRead64,
-     OpRead32,
-     OpRead16,
-     OpRead8,
-
-     OpWrite64,
-     OpWrite32,
-     OpWrite16,
-     OpWrite8,
-    };
-
-   OpCode op = OpFetch ;
-
-   union Arg
-    {
-     uint64 *ret64; 
-     uint32 *ret32; 
-     uint16 *ret16; 
-     uint8 *ret8; 
-
-     uint64 data64; 
-     uint32 data32; 
-     uint16 data16; 
-     uint8 data8; 
-    };
-
-   Arg arg; 
+   MemOp memop;
 
    bool modeDual = false ;
 
@@ -287,6 +310,8 @@ class CPUMem : NoCopy
    Status writeData(uint32 data);
    Status writeData(uint64 data);
 
+   friend struct MemOp;
+
   public:
   
    CPUMem();
@@ -299,7 +324,7 @@ class CPUMem : NoCopy
 
    void setupVMT(uint64 pa) { map.setup(pa); }
 
-   void dualVMT(bool enable) { modeDual=enable; }
+   void setModeDual(bool enable) { modeDual=enable; }
 
    Status fetchCommand(uint64 va,uint64 &cmd);
 

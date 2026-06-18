@@ -15,6 +15,83 @@
 
 namespace Basis {
 
+/* struct MemOp */
+
+void MemOp::fetchCommand(uint64 &cmd)
+ {
+  op=OpFetch;
+  arg.ret64=&cmd;
+ }
+
+void MemOp::readData(uint8 &data)
+ {
+  op=OpRead8;
+  arg.ret8=&data;
+ }
+
+void MemOp::readData(uint16 &data)
+ {
+  op=OpRead16;
+  arg.ret16=&data;
+ }
+
+void MemOp::readData(uint32 &data)
+ {
+  op=OpRead32;
+  arg.ret32=&data;
+ }
+
+void MemOp::readData(uint64 &data)
+ {
+  op=OpRead64;
+  arg.ret64=&data;
+ }
+
+void MemOp::writeData(uint8 data)
+ {
+  op=OpWrite8;
+  arg.val8=data;
+ }
+
+void MemOp::writeData(uint16 data)
+ {
+  op=OpWrite16;
+  arg.val16=data;
+ }
+
+void MemOp::writeData(uint32 data)
+ {
+  op=OpWrite32;
+  arg.val32=data;
+ }
+
+void MemOp::writeData(uint64 data)
+ {
+  op=OpWrite64;
+  arg.val64=data;
+ }
+
+template <class T>
+Status MemOp::operator () (T &obj) const
+ {
+  switch( op )
+    {
+     case OpFetch : return obj.fetchCommand(*arg.ret64);
+
+     case OpRead8 : return obj.readData(*arg.ret8);
+     case OpRead16 : return obj.readData(*arg.ret16);
+     case OpRead32 : return obj.readData(*arg.ret32);
+     case OpRead64 : return obj.readData(*arg.ret64);
+
+     case OpWrite8 : return obj.writeData(arg.val8);
+     case OpWrite16 : return obj.writeData(arg.val16);
+     case OpWrite32 : return obj.writeData(arg.val32);
+     case OpWrite64 : return obj.writeData(arg.val64);
+    }
+
+  return StatusError;  
+ }
+
 /* class Cache */
 
 template <class Func1,class Func2,class Func3>
@@ -639,7 +716,7 @@ Status CPUMem::writeData(uint8 data)
  {
   if( !address.flags.P ) return StatusErrorAbsent;
 
-  if( !address.flags.R ) return StatusErrorNoW;
+  if( !address.flags.W ) return StatusErrorNoW;
 
   return cache.writeData(address.pa,data);
  }
@@ -648,7 +725,7 @@ Status CPUMem::writeData(uint16 data)
  {
   if( !address.flags.P ) return StatusErrorAbsent;
 
-  if( !address.flags.R ) return StatusErrorNoW;
+  if( !address.flags.W ) return StatusErrorNoW;
 
   return cache.writeData(address.pa,data);
  }
@@ -657,7 +734,7 @@ Status CPUMem::writeData(uint32 data)
  {
   if( !address.flags.P ) return StatusErrorAbsent;
 
-  if( !address.flags.R ) return StatusErrorNoW;
+  if( !address.flags.W ) return StatusErrorNoW;
 
   return cache.writeData(address.pa,data);
  }
@@ -666,7 +743,7 @@ Status CPUMem::writeData(uint64 data)
  {
   if( !address.flags.P ) return StatusErrorAbsent;
 
-  if( !address.flags.R ) return StatusErrorNoW;
+  if( !address.flags.W ) return StatusErrorNoW;
 
   return cache.writeData(address.pa,data);
  }
@@ -684,7 +761,7 @@ void CPUMem::init(uint32 port,uint64 cmdCacheSize,uint64 dataCacheSize,SysMemPor
   address={0};  
   paDone=false;
   useSysMap=false;
-  op=OpFetch;
+  memop={};
 
   modeDual=false;
 
@@ -707,11 +784,7 @@ Status CPUMem::fetchCommand(uint64 va,uint64 &cmd)
 
   if( status ) 
     {
-     if( status==StatusPending )
-       {
-        op=OpFetch;
-        arg.ret64=&cmd;
-       }   
+     if( status==StatusPending ) memop.fetchCommand(cmd);
 
      return status;
     }    
@@ -729,11 +802,7 @@ Status CPUMem::readData(uint64 va,uint8 &data)
 
   if( status ) 
     {
-     if( status==StatusPending )
-       {
-        op=OpRead8;
-        arg.ret8=&data;
-       }   
+     if( status==StatusPending ) memop.readData(data);
 
      return status;
     }    
@@ -751,11 +820,7 @@ Status CPUMem::readData(uint64 va,uint16 &data)
 
   if( status ) 
     {
-     if( status==StatusPending )
-       {
-        op=OpRead16;
-        arg.ret16=&data;
-       }   
+     if( status==StatusPending ) memop.readData(data);
 
      return status;
     }    
@@ -773,11 +838,7 @@ Status CPUMem::readData(uint64 va,uint32 &data)
 
   if( status ) 
     {
-     if( status==StatusPending )
-       {
-        op=OpRead32;
-        arg.ret32=&data;
-       }   
+     if( status==StatusPending ) memop.readData(data);
 
      return status;
     }    
@@ -795,11 +856,7 @@ Status CPUMem::readData(uint64 va,uint64 &data)
 
   if( status ) 
     {
-     if( status==StatusPending )
-       {
-        op=OpRead64;
-        arg.ret64=&data;
-       }   
+     if( status==StatusPending ) memop.readData(data);
 
      return status;
     }    
@@ -817,11 +874,7 @@ Status CPUMem::writeData(uint64 va,uint8 data)
 
   if( status ) 
     {
-     if( status==StatusPending )
-       {
-        op=OpWrite8;
-        arg.data8=data;
-       }   
+     if( status==StatusPending ) memop.writeData(data);
 
      return status;
     }    
@@ -839,11 +892,7 @@ Status CPUMem::writeData(uint64 va,uint16 data)
 
   if( status ) 
     {
-     if( status==StatusPending )
-       {
-        op=OpWrite16;
-        arg.data16=data;
-       }   
+     if( status==StatusPending ) memop.writeData(data);
 
      return status;
     }    
@@ -861,11 +910,7 @@ Status CPUMem::writeData(uint64 va,uint32 data)
 
   if( status ) 
     {
-     if( status==StatusPending )
-       {
-        op=OpWrite32;
-        arg.data32=data;
-       }   
+     if( status==StatusPending ) memop.writeData(data);
 
      return status;
     }    
@@ -883,11 +928,7 @@ Status CPUMem::writeData(uint64 va,uint64 data)
 
   if( status ) 
     {
-     if( status==StatusPending )
-       {
-        op=OpWrite64;
-        arg.data64=data;
-       }   
+     if( status==StatusPending ) memop.writeData(data);
 
      return status;
     }    
@@ -920,22 +961,7 @@ Status CPUMem::pending()
 
      paDone=true;
 
-     switch( op )
-       {
-        case OpFetch : return fetchCommand(*arg.ret64);
-
-        case OpRead8 : return readData(*arg.ret8);
-        case OpRead16 : return readData(*arg.ret16);
-        case OpRead32 : return readData(*arg.ret32);
-        case OpRead64 : return readData(*arg.ret64);
-
-        case OpWrite8 : return writeData(arg.data8);
-        case OpWrite16 : return writeData(arg.data16);
-        case OpWrite32 : return writeData(arg.data32);
-        case OpWrite64 : return writeData(arg.data64);
-       }
-
-     return StatusError;  
+     return memop(*this);
     }
  }
 
