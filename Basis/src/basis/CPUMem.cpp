@@ -99,25 +99,35 @@ Status MemOp::operator () (T &obj,SS && ... ss) const
 template <class Func1,class Func2,class Func3>
 void Cache::Block::find(uint64 tag,Func1 match,Func2 fresh,Func3 taken)
  {
-  for(CacheLine &line : lines )
-    if( line.full && line.tag==tag )
-      {
-       match(line);
+  for(unsigned i=0; i<NWay ;i++)
+    {
+     CacheLine &line=lines[i];
 
-       return; 
-      }
+     if( line.full && line.tag==tag )
+       {
+        match(line);
 
-  for(CacheLine &line : lines )
-    if( !line.full )
-      {
-       fresh(line);
+        table.use(i);
 
-       return; 
-      }
+        return; 
+       }
+    }
 
-  // TODO LRU    
+  for(unsigned i=0; i<NWay ;i++)
+    {
+     CacheLine &line=lines[i];
+     
+     if( !line.full )
+       {
+        fresh(line);
 
-  taken(lines[0]);
+        table.use(i);
+
+        return; 
+       }
+    }
+
+  taken(lines[table.pick()]);
  }
 
 void Cache::Block::clear()

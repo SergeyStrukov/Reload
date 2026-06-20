@@ -24,6 +24,8 @@ struct MemOp;
 
 struct CacheLine;
 
+template <unsigned Count> class LRUTable;
+
 class Cache;
 
 class L1Mem;
@@ -103,6 +105,22 @@ struct CacheLine
   uint64 & operator [] (uint64 pa) { return line[(pa>>3)&(CacheLineLen-1)]; }
  };
 
+/* class LRUTable<unsigned Count> */
+
+template <unsigned Count>
+class LRUTable : NoCopy
+ {
+   unsigned table[Count];
+
+  public:
+
+   LRUTable() noexcept;
+
+   void use(unsigned ind);
+
+   unsigned pick();
+ };
+
 /* class Cache */
 
 class Cache : NoCopy
@@ -113,6 +131,7 @@ class Cache : NoCopy
    struct Block
     {
      CacheLine lines[NWay]; 
+     LRUTable<NWay> table;
 
      template <class Func1,class Func2,class Func3>
      void find(uint64 tag,Func1 match,Func2 fresh,Func3 taken);
