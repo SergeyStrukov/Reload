@@ -71,22 +71,22 @@ void MemOp::writeData(uint64 data)
   arg.val64=data;
  }
 
-template <class T>
-Status MemOp::operator () (T &obj) const
+template <class T,class ... SS>
+Status MemOp::operator () (T &obj,SS && ... ss) const
  {
   switch( op )
     {
-     case OpFetch : return obj.fetchCommand(*arg.ret64);
+     case OpFetch : return obj.fetchCommand(*arg.ret64, std::forward<SS>(ss)... );
 
-     case OpRead8 : return obj.readData(*arg.ret8);
-     case OpRead16 : return obj.readData(*arg.ret16);
-     case OpRead32 : return obj.readData(*arg.ret32);
-     case OpRead64 : return obj.readData(*arg.ret64);
+     case OpRead8 : return obj.readData(*arg.ret8, std::forward<SS>(ss)... );
+     case OpRead16 : return obj.readData(*arg.ret16, std::forward<SS>(ss)... );
+     case OpRead32 : return obj.readData(*arg.ret32, std::forward<SS>(ss)... );
+     case OpRead64 : return obj.readData(*arg.ret64, std::forward<SS>(ss)... );
 
-     case OpWrite8 : return obj.writeData(arg.val8);
-     case OpWrite16 : return obj.writeData(arg.val16);
-     case OpWrite32 : return obj.writeData(arg.val32);
-     case OpWrite64 : return obj.writeData(arg.val64);
+     case OpWrite8 : return obj.writeData(arg.val8, std::forward<SS>(ss)... );
+     case OpWrite16 : return obj.writeData(arg.val16, std::forward<SS>(ss)... );
+     case OpWrite32 : return obj.writeData(arg.val32, std::forward<SS>(ss)... );
+     case OpWrite64 : return obj.writeData(arg.val64, std::forward<SS>(ss)... );
     }
 
   return StatusError;  
@@ -235,24 +235,72 @@ void L1Mem::Part8(uint64 &data,uint64 pa,uint8 val)
   InsField8(data,val,shift); 
  }
 
+Status L1Mem::fetchCommand(uint64 &cmd,CacheLine &line)
+ {
+  cmd=line[pa]; 
+  
+  return StatusDone;
+ }
+
+Status L1Mem::readData(uint8 &data,CacheLine &line)
+ {
+  data=Part8(line[pa],pa); 
+  
+  return StatusDone;
+ }
+
+Status L1Mem::readData(uint16 &data,CacheLine &line)
+ {
+  data=Part16(line[pa],pa); 
+  
+  return StatusDone;
+ }
+
+Status L1Mem::readData(uint32 &data,CacheLine &line)
+ {
+  data=Part32(line[pa],pa); 
+  
+  return StatusDone;
+ }
+
+Status L1Mem::readData(uint64 &data,CacheLine &line)
+ {
+  data=line[pa]; 
+  
+  return StatusDone;
+ }
+
+Status L1Mem::writeData(uint8 data,CacheLine &line)
+ {
+  Part8(line[pa],pa,data); 
+  
+  return StatusDone;
+ }
+
+Status L1Mem::writeData(uint16 data,CacheLine &line)
+ {
+  Part16(line[pa],pa,data); 
+  
+  return StatusDone;
+ }
+
+Status L1Mem::writeData(uint32 data,CacheLine &line)
+ {
+  Part32(line[pa],pa,data); 
+  
+  return StatusDone;
+ }
+
+Status L1Mem::writeData(uint64 data,CacheLine &line)
+ {
+  line[pa]=data; 
+  
+  return StatusDone;
+ }
+
 Status L1Mem::match(CacheLine &line)
  {
-  switch( op )
-    {
-     case OpRead64 : *arg.ret64=line[pa]; return StatusDone;
-
-     case OpRead32 : *arg.ret32=Part32(line[pa],pa); return StatusDone;
-     case OpRead16 : *arg.ret16=Part16(line[pa],pa); return StatusDone;
-     case OpRead8 : *arg.ret8=Part8(line[pa],pa); return StatusDone;
-
-     case OpWrite64 : line[pa]=arg.data64; return StatusDone;
-
-     case OpWrite32 : Part32(line[pa],pa,arg.data32); return StatusDone;
-     case OpWrite16 : Part16(line[pa],pa,arg.data16); return StatusDone;
-     case OpWrite8 : Part8(line[pa],pa,arg.data8); return StatusDone;
-
-     default: return StatusError;
-    }
+  return memop(*this,line);
  }
 
 Status L1Mem::fresh(CacheLine &line)
@@ -306,182 +354,173 @@ L1Mem::~L1Mem()
 void L1Mem::init(uint32 port_,uint64 cmdSize,uint64 dataSize,SysMemPort &mpx_)
  {
   pa=0;
-  op=OpRead64;
+  memop={};
   nextOp=NextFinish;
   nextLine=0;
   port=port_;
 
-  cmd.init(cmdSize);
-  data.init(dataSize);
+  cmdCache.init(cmdSize);
+  dataCache.init(dataSize);
 
   mpx=&mpx_;
  }
 
 void L1Mem::clearCache()
  {
-  cmd.clear();
-  data.clear();
+  cmdCache.clear();
+  dataCache.clear();
  } 
 
-Status L1Mem::fetchCommand(uint64 pa_,uint64 &ret)
+Status L1Mem::fetchCommand(uint64 pa_,uint64 &cmd)
  {
   if( pa_%8 ) return StatusErrorAlign;
 
   pa=pa_;
-  op=OpRead64;
-  arg.ret64=&ret;
+  memop.fetchCommand(cmd);
 
   Status status;
 
-  cmd.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
-                [&] (CacheLine &line) { status=fresh(line); } , 
-                [&] (CacheLine &line) { status=taken(line); } );
+  cmdCache.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                     [&] (CacheLine &line) { status=fresh(line); } , 
+                     [&] (CacheLine &line) { status=taken(line); } );
 
   return status;             
  }
 
-Status L1Mem::readData(uint64 pa_,uint8 &ret)
+Status L1Mem::readData(uint64 pa_,uint8 &data)
  {
   pa=pa_;
-  op=OpRead8;
-  arg.ret8=&ret;
+  memop.readData(data);
 
   Status status;
 
-  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
-                 [&] (CacheLine &line) { status=fresh(line); } , 
-                 [&] (CacheLine &line) { status=taken(line); } );
+  dataCache.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                      [&] (CacheLine &line) { status=fresh(line); } , 
+                      [&] (CacheLine &line) { status=taken(line); } );
 
   return status;             
  }
 
-Status L1Mem::readData(uint64 pa_,uint16 &ret)
+Status L1Mem::readData(uint64 pa_,uint16 &data)
  {
   if( pa_%2 ) return StatusErrorAlign;
 
   pa=pa_;
-  op=OpRead16;
-  arg.ret16=&ret;
+  memop.readData(data);
 
   Status status;
 
-  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
-                 [&] (CacheLine &line) { status=fresh(line); } , 
-                 [&] (CacheLine &line) { status=taken(line); } );
+  dataCache.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                      [&] (CacheLine &line) { status=fresh(line); } , 
+                      [&] (CacheLine &line) { status=taken(line); } );
 
   return status;             
  }
 
-Status L1Mem::readData(uint64 pa_,uint32 &ret)
+Status L1Mem::readData(uint64 pa_,uint32 &data)
  {
   if( pa_%4 ) return StatusErrorAlign;
 
   pa=pa_;
-  op=OpRead32;
-  arg.ret32=&ret;
+  memop.readData(data);
 
   Status status;
 
-  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
-                 [&] (CacheLine &line) { status=fresh(line); } , 
-                 [&] (CacheLine &line) { status=taken(line); } );
+  dataCache.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                      [&] (CacheLine &line) { status=fresh(line); } , 
+                      [&] (CacheLine &line) { status=taken(line); } );
 
   return status;             
  }
 
-Status L1Mem::readData(uint64 pa_,uint64 &ret)
+Status L1Mem::readData(uint64 pa_,uint64 &data)
  {
   if( pa_%8 ) return StatusErrorAlign;
 
   pa=pa_;
-  op=OpRead64;
-  arg.ret64=&ret;
+  memop.readData(data);
 
   Status status;
 
-  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
-                 [&] (CacheLine &line) { status=fresh(line); } , 
-                 [&] (CacheLine &line) { status=taken(line); } );
+  dataCache.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                      [&] (CacheLine &line) { status=fresh(line); } , 
+                      [&] (CacheLine &line) { status=taken(line); } );
 
   return status;             
  }
 
-Status L1Mem::writeData(uint64 pa_,uint8 val)
+Status L1Mem::writeData(uint64 pa_,uint8 data)
  {
   pa=pa_;
-  op=OpWrite8;
-  arg.data8=val;
+  memop.writeData(data);
 
   Status status;
 
-  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
-                 [&] (CacheLine &line) { status=fresh(line); } , 
-                 [&] (CacheLine &line) { status=taken(line); } );
+  dataCache.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                      [&] (CacheLine &line) { status=fresh(line); } , 
+                      [&] (CacheLine &line) { status=taken(line); } );
 
   return status;             
  }
 
-Status L1Mem::writeData(uint64 pa_,uint16 val)
+Status L1Mem::writeData(uint64 pa_,uint16 data)
  {
   if( pa_%2 ) return StatusErrorAlign;
 
   pa=pa_;
-  op=OpWrite16;
-  arg.data16=val;
+  memop.writeData(data);
 
   Status status;
 
-  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
-                 [&] (CacheLine &line) { status=fresh(line); } , 
-                 [&] (CacheLine &line) { status=taken(line); } );
+  dataCache.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                      [&] (CacheLine &line) { status=fresh(line); } , 
+                      [&] (CacheLine &line) { status=taken(line); } );
 
   return status;             
  }
 
-Status L1Mem::writeData(uint64 pa_,uint32 val)
+Status L1Mem::writeData(uint64 pa_,uint32 data)
  {
   if( pa_%4 ) return StatusErrorAlign;
 
   pa=pa_;
-  op=OpWrite32;
-  arg.data32=val;
+  memop.writeData(data);
 
   Status status;
 
-  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
-                 [&] (CacheLine &line) { status=fresh(line); } , 
-                 [&] (CacheLine &line) { status=taken(line); } );
+  dataCache.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                      [&] (CacheLine &line) { status=fresh(line); } , 
+                      [&] (CacheLine &line) { status=taken(line); } );
 
   return status;             
  }
 
-Status L1Mem::writeData(uint64 pa_,uint64 val)
+Status L1Mem::writeData(uint64 pa_,uint64 data)
  {
   if( pa_%8 ) return StatusErrorAlign;
 
   pa=pa_;
-  op=OpWrite64;
-  arg.data64=val;
+  memop.writeData(data);
 
   Status status;
 
-  data.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
-                 [&] (CacheLine &line) { status=fresh(line); } , 
-                 [&] (CacheLine &line) { status=taken(line); } );
+  dataCache.find(pa_, [&] (CacheLine &line) { status=match(line); } , 
+                      [&] (CacheLine &line) { status=fresh(line); } , 
+                      [&] (CacheLine &line) { status=taken(line); } );
 
   return status;             
  }
 
 Status L1Mem::pending()
  {
+  Status status=mpx->pending(port); 
+
+  if( status ) return status; 
+
   switch( nextOp )
     {
      case NextFinish :
       {
-       Status status=mpx->pending(port); 
-
-       if( status ) return status; 
-
        nextLine->setTag(pa);
 
        return match(*nextLine);
@@ -489,10 +528,6 @@ Status L1Mem::pending()
 
      case NextRead : 
       {
-       Status status=mpx->pending(port); 
-
-       if( status ) return status; 
-
        nextLine->full=0;  
 
        return fresh(*nextLine);

@@ -80,8 +80,8 @@ struct MemOp
   void writeData(uint32 data);
   void writeData(uint64 data);
 
-  template <class T>
-  Status operator () (T &obj) const;
+  template <class T,class ... SS>
+  Status operator () (T &obj,SS && ... ss) const;
 };
 
 /* struct CacheLine */
@@ -140,35 +140,7 @@ class L1Mem : NoCopy
  {
    uint64 pa = 0 ;
 
-   enum OpCode
-    {
-     OpRead64,
-     OpRead32,
-     OpRead16,
-     OpRead8,
-
-     OpWrite64,
-     OpWrite32,
-     OpWrite16,
-     OpWrite8,
-    };
-
-   OpCode op = OpRead64 ;
-
-   union Arg
-    {
-     uint64 *ret64; 
-     uint32 *ret32; 
-     uint16 *ret16; 
-     uint8 *ret8; 
-
-     uint64 data64; 
-     uint32 data32; 
-     uint16 data16; 
-     uint8 data8; 
-    };
-
-   Arg arg; 
+   MemOp memop;
 
    enum NextOp
     {
@@ -181,8 +153,8 @@ class L1Mem : NoCopy
 
    uint32 port = 0 ;
 
-   Cache cmd;
-   Cache data;
+   Cache cmdCache;
+   Cache dataCache;
 
    SysMemPort *mpx = 0 ;
 
@@ -206,6 +178,20 @@ class L1Mem : NoCopy
 
    static void Part8(uint64 &data,uint64 pa,uint8 val);
   
+   Status fetchCommand(uint64 &cmd,CacheLine &line);
+
+   Status readData(uint8 &data,CacheLine &line);
+   Status readData(uint16 &data,CacheLine &line);
+   Status readData(uint32 &data,CacheLine &line);
+   Status readData(uint64 &data,CacheLine &line);
+
+   Status writeData(uint8 data,CacheLine &line);
+   Status writeData(uint16 data,CacheLine &line);
+   Status writeData(uint32 data,CacheLine &line);
+   Status writeData(uint64 data,CacheLine &line);
+
+   friend struct MemOp;
+
    Status match(CacheLine &line);
 
    Status fresh(CacheLine &line);
