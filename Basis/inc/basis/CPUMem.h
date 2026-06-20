@@ -100,7 +100,7 @@ struct CacheLine
 
   uint64 pa() const { return tag<<CacheLineBits; }
 
-  uint64 & operator [] (uint64 pa) { return line[(pa>>3)&7u]; } // TODO
+  uint64 & operator [] (uint64 pa) { return line[(pa>>3)&(CacheLineLen-1)]; }
  };
 
 /* class Cache */
