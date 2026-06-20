@@ -107,9 +107,12 @@ struct CacheLine
 
 class Cache : NoCopy
  {
+   static constexpr unsigned NWayBits = 3 ;
+   static constexpr unsigned NWay = 1u<<NWayBits ;
+
    struct Block
     {
-     CacheLine lines[8]; 
+     CacheLine lines[NWay]; 
 
      template <class Func1,class Func2,class Func3>
      void find(uint64 tag,Func1 match,Func2 fresh,Func3 taken);

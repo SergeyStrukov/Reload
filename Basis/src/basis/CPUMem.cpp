@@ -13,6 +13,8 @@
 
 #include "basis/CPUMem.h"
 
+#include <CCore/inc/Exception.h>
+
 namespace Basis {
 
 /* struct MemOp */
@@ -131,24 +133,21 @@ Cache::~Cache()
  {
  }
 
-void Cache::init(uint64 size) // TODO
+void Cache::init(uint64 size)
  {
-  // size>= 1024 
+  if( !size )
+    {
+     Printf(Exception,"Basis::Cache::init(#;) : null size",size);
+    }
 
   unsigned nbit=UIntBitFunc<uint64>::BitsOf(size)-1;
 
-  // nbit >= 10
+  if( nbit<=CacheLineBits+NWayBits )
+    {
+     Printf(Exception,"Basis::Cache::init(#;) : too small size",size);
+    }
 
-  //
-  // (2^(64-shift))*8*64 <= size
-  //
-  // (64-shift)+3+6 <= nbit
-  //
-  // shift >= 73-nbit , >= 6 , < 64
-  //
-
-  shift=73-nbit; // 73-64 < nbit <= 73-6
-                 // 10 <= nbit <= 67
+  shift=(64+CacheLineBits+NWayBits)-nbit;
 
   mem=SimpleArray<Block>( uint64(1)<<(64-shift) );
  }
