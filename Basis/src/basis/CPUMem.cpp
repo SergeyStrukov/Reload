@@ -590,24 +590,6 @@ Status L1Mem::pending()
 
 /* class AddressMap */
 
-Status AddressMap::begHuge()
- {
-  if( split.hpage>=len ) return StatusErrorMap; 
-
-  uint64 addr=vmt+(split.hpage+1)*sizeof (uint64);
-
-  hugeDone=false;
-
-  Status status=cache->fetchCommand(addr,hugeValue); 
-
-  if( status ) return status;
-
-  hugeDone=true;
-  hugeEntry=hugeValue;
-
-  return status;
- }
-
 Status AddressMap::completePage()
  {
   pageEntry=pageValue;
@@ -639,6 +621,24 @@ Status AddressMap::completeHuge()
 
      return completePage();
     }
+ }
+
+Status AddressMap::begHuge()
+ {
+  if( split.hpage>=len ) return StatusErrorMap; 
+
+  uint64 addr=vmt+(split.hpage+1)*sizeof (uint64);
+
+  hugeDone=false;
+
+  Status status=cache->fetchCommand(addr,hugeValue); 
+
+  if( status ) return status;
+
+  hugeDone=true;
+  hugeEntry=hugeValue;
+
+  return completeHuge();
  }
 
 AddressMap::AddressMap()
@@ -697,11 +697,7 @@ Status AddressMap::map(uint64 va,VASplit split_,Address &address)
      lenDone=true;
     }  
 
-  Status status=begHuge();
-
-  if( status ) return status;
-
-  return completeHuge();
+  return begHuge();
  }
 
 Status AddressMap::pending()
@@ -714,11 +710,7 @@ Status AddressMap::pending()
     {
      lenDone=true;
 
-     status=begHuge();
-
-     if( status ) return status;
-
-     return completeHuge();     
+     return begHuge();     
     }
 
   if( !hugeDone )

@@ -272,9 +272,9 @@ class AddressMap : NoCopy
 
   private: 
 
-   Status begHuge();
    Status completePage();
    Status completeHuge();
+   Status begHuge();
 
   public:
 
