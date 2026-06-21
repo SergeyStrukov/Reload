@@ -94,6 +94,48 @@ Status MemOp::operator () (T &obj,SS && ... ss) const
   return StatusError;  
  }
 
+/* class LRUTable<unsigned Count> */
+
+template <unsigned Count>
+void LRUTable<Count>::shift(unsigned pos)
+ {
+  if( pos==0 ) return;
+
+  unsigned ind=table[pos];
+
+  for(unsigned i=pos; i>0 ;i--) table[i]=table[i-1];
+
+  table[0]=ind;
+ }
+
+template <unsigned Count>
+LRUTable<Count>::LRUTable() noexcept
+ {
+  for(unsigned pos=0; pos<Count ;pos++) table[pos]=pos;
+ }
+
+template <unsigned Count>
+void LRUTable<Count>::use(unsigned ind)
+ {
+  for(unsigned pos=0; pos<Count ;pos++)
+    if( table[pos]==ind )
+      {
+       shift(pos); 
+
+       return;
+      }
+ }
+
+template <unsigned Count>
+unsigned LRUTable<Count>::pick()
+ {
+  unsigned ret=table[Count-1];
+
+  shift(Count-1);
+
+  return ret;
+ }
+
 /* class Cache */
 
 template <class Func1,class Func2,class Func3>

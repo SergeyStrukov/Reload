@@ -112,6 +112,10 @@ class LRUTable : NoCopy
  {
    unsigned table[Count];
 
+  private: 
+
+   void shift(unsigned pos);
+
   public:
 
    LRUTable() noexcept;
