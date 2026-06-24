@@ -1,0 +1,120 @@
+------------------------------------
+
+Rsrc = R0 - R15
+       R0.32.0 - R15.32.1
+       ...
+Rdst = Rsrc       
+
+suffixes = u s       
+
+Csrc = 12345 -12345 12345h 
+
+suffixes = u s       
+
+------------------------------------
+
+Rdst = RCsrc
+
+Rdst = unop RCsrc
+
+Rdst = RCsrc1 binop RCsrc2
+
+Rdst,F.0 = ...
+
+[Cond] ...
+
+[Cond] Rdst = RCsrc1 : RCsrc2
+
+------------------------------------
+
+jmp RCsrc
+
+jmp PC+RCsrc
+
+call RCsrc
+
+call PC+RCsrc
+
+ret
+
+------------------------------------
+
+Dst,Src = R0-R15,LR,SP,BP,OP,CTX,TBP,CLK,FLAGS
+
+------------------------------------
+
+Dst = RCsrc
+
+Rdst = Src
+
+------------------------------------
+
+Addr = Src
+
+       (Src+RCsrc)
+
+       (Src+Csrc*Rsrc)
+
+       (Src+Csrc1*Rsrc+Csrc2)
+
+------------------------------------
+
+Dst = Addr
+
+Dst = Addr
+
+Dst = Addr
+
+Dst = Addr
+
+Dst = *Addr
+
+Dst = *Addr
+
+Dst = *Addr
+
+Dst = *Addr
+
+*Addr = Src
+
+*Addr = Src
+
+*Addr = Src
+
+*Addr = Src
+
+====================================
+
+sysentry
+
+sysexit
+
+lock *Addr
+
+unlock *Addr
+
+====================================
+
+setupCoreVMT Rsrc
+
+setupSysVMT Rsrc
+
+setupSysPC Rsrc
+
+setupSysSP Rsrc
+
+setupIntPC Rsrc
+
+setupIntSP Rsrc
+
+====================================
+
+mem.enable
+
+mem.disable
+
+cacheCore.clear
+
+cacheSys.clear
+
+====================================

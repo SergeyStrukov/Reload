@@ -51,6 +51,7 @@ enum RegIndex : uint8
   RegCTX,
   RegCLK, // RO
   RegTBP, // RO
+  RegFlags,
 
   RegCount
  };
@@ -65,7 +66,6 @@ class CPUCoreBlock;
 class CPUCore : NoCopy
  {
    uint64 regs[RegCount]{}; 
-   uint64 flags = 0 ;
 
    uint32 index = 0 ;
 

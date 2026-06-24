@@ -29,8 +29,6 @@ void CPUCore::init(uint32 index_,uint64 cmdCacheSize,uint64 dataCacheSize,CPUCor
  {
   Range(regs).set_null();
 
-  flags=0;
-
   if( index_==0 ) regs[RegPC]=BootROMAddress;
 
   index=index_;
