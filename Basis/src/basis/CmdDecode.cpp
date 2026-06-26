@@ -1,4 +1,4 @@
-/* CoreDefs.cpp */
+/* CmdDecode.cpp */
 //----------------------------------------------------------------------------------------
 //
 //  Target: Basis 1.00
@@ -11,32 +11,24 @@
 //
 //----------------------------------------------------------------------------------------
 
-#include "basis/CoreDefs.h"
+#include "basis/CmdDecode.h"
 
 namespace Basis {
 
-/* consts */
+/* consts */    
 
-const char * GetTextDesc(Status status)
+static_assert( CmdBinBase-CmdUnBase >= CmdUnopCount );
+static_assert( CmdOtherBase-CmdBinBase >= CmdBinopCount );
+
+/* struct Cmd */ 
+    
+uint32 Cmd::decode(uint64 cmd)
  {
-  static const char *const Table[]=
-   {
-    "StatusDone",
-    "StatusPending",
-    "StatusError",
+  opcode=CmdUndef;  
 
-    "StatusErrorAlign",
-    "StatusErrorCmd",
-    "StatusErrorNoX",
-    "StatusErrorNoR",
-    "StatusErrorNoW",
+  // TODO
 
-    "StatusErrorMap",
-    "StatusErrorAbsent",
-    "StatusErrorVoid"
-   };
-
-  return Table[status];  
+  return 1;
  }
 
 } // namespace Basis    

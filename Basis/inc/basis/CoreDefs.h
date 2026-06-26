@@ -41,6 +41,8 @@ enum Status
   StatusErrorVoid
  };
 
+const char * GetTextDesc(Status status); 
+
 /* unit functions */
 
 inline constexpr ulen operator "" _GByte (unsigned long long len) { return len*1024u*1024u*1024u; }
@@ -50,9 +52,13 @@ inline constexpr ulen operator "" _TByte (unsigned long long len) { return len*1
 /* classes */
 
 struct VASplit;
+
 struct AddressFlags;
+
 struct Address;
+
 struct HEntrySplit;
+
 struct PEntrySplit;
 
 /* struct VASplit */

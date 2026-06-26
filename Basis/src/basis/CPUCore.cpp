@@ -13,9 +13,64 @@
 
 #include "basis/CPUCore.h"
 
+#include <CCore/inc/Exception.h>
+
 namespace Basis {
 
 /* class CPUCore */
+
+void CPUCore::finError(Status status)
+ {
+  Printf(Exception,"Basis::CPUCore::finError(#;)",status);
+
+  // TODO
+ }
+
+void CPUCore::execute()
+ {
+  if( command.opcode==CmdUndef )
+    {
+     finError(StatusErrorCmd); 
+    }
+  else if( command.opcode==CmdNop )
+    {
+     regs[RegPC]+=sizeof (uint64); 
+    }
+  else
+    {
+     executeOp(); 
+    }
+ } 
+
+void CPUCore::step1()
+ {
+  if( cmdInd==0 )
+    {
+     cmdLen=command.decode(cmd[0]); 
+    }
+
+  while( cmdInd<cmdLen )
+    {
+     cmdInd++;  
+
+     uint64 PC=regs[RegPC]; 
+
+     Status status=mem.fetchCommand(PC+cmdInd*sizeof (uint64),cmd[cmdInd]);
+
+     if( status==StatusPending ) 
+       {
+        memPending=true; 
+        return;
+       } 
+
+     if( status!=StatusDone )
+       {
+        finError(status);  
+       } 
+    }
+
+  execute(); 
+ } 
 
 CPUCore::CPUCore() noexcept
  {
@@ -27,9 +82,12 @@ CPUCore::~CPUCore()
 
 void CPUCore::init(uint32 index_,uint64 cmdCacheSize,uint64 dataCacheSize,CPUCoreBlock &block_)
  {
-  Range(regs).set_null();
+  cmdInd=0;
+  cmdLen=0;
+  command={};
+  memPending=false;
 
-  if( index_==0 ) regs[RegPC]=BootROMAddress;
+  Range(regs).set_null();
 
   index=index_;
 
@@ -40,6 +98,12 @@ void CPUCore::init(uint32 index_,uint64 cmdCacheSize,uint64 dataCacheSize,CPUCor
   mem.init(index_,cmdCacheSize,dataCacheSize,block_.mpx,block_.sysmap);
 
   block=&block_;
+
+  if( index_==0 ) 
+    {
+     regs[RegPC]=BootROMAddress;
+     modeS=true;
+    }
  }
 
 void CPUCore::clearCache()
@@ -49,7 +113,46 @@ void CPUCore::clearCache()
 
 void CPUCore::step()
  {
-  // TODO
+  if( memPending )
+    {
+     Status status=mem.pending(); 
+
+     if( status==StatusPending ) return;
+
+     memPending=false;
+
+     if( status==StatusDone )
+       {
+        step1();
+       }
+     else
+       {
+        finError(status);  
+       }
+    }
+  else
+    {
+     cmdInd=0;
+
+     uint64 PC=regs[RegPC]; 
+
+     Status status=mem.fetchCommand(PC,cmd[0]);
+
+     if( status==StatusPending ) 
+       {
+        memPending=true; 
+        return;
+       } 
+
+     if( status==StatusDone )
+       {
+        step1(); 
+       }
+     else
+       {
+        finError(status);  
+       } 
+    }
  }
 
 /* class CPUCoreBlock */ 

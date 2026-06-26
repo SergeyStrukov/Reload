@@ -15,56 +15,27 @@
 #define Basis_inc_CPUCore_h
 
 #include "basis/CPUMem.h"
+#include "basis/CmdDecode.h"
 
 namespace Basis {
-
-/* consts */
-
-enum RegIndex : uint8
- {
-  RegR0 = 0,
-  RegR1,
-  RegR2,
-  RegR3,
-  
-  RegR4,
-  RegR5,
-  RegR6,
-  RegR7,
-  
-  RegR8,
-  RegR9,
-  RegR10,
-  RegR11,
-
-  RegR12,
-  RegR13,
-  RegR14,
-  RegR15,
-
-  RegPC,
-  RegLR,
-  RegSP,
-  RegBP,
-  RegOP,
-
-  RegCTX,
-  RegCLK, // RO
-  RegTBP, // RO
-  RegFlags,
-
-  RegCount
- };
 
 /* classes */
 
 class CPUCore;
+
 class CPUCoreBlock;
 
 /* class CPUCore */
 
 class CPUCore : NoCopy
  {
+   uint64 cmd[3]{};
+   uint32 cmdInd = 0 ;
+   uint32 cmdLen = 0 ;
+   Cmd command;
+
+   bool memPending = false ;
+
    uint64 regs[RegCount]{}; 
 
    uint32 index = 0 ;
@@ -76,6 +47,13 @@ class CPUCore : NoCopy
    CPUMem mem;
 
    CPUCoreBlock *block = 0 ;
+
+  private: 
+
+   void finError(Status status);
+   void executeOp();
+   void execute();
+   void step1();
 
   public: 
 

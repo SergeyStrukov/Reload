@@ -13,6 +13,8 @@ suffixes = u s
 
 ------------------------------------
 
+nop
+
 Rdst = RCsrc
 
 Rdst = unop RCsrc
@@ -93,7 +95,7 @@ lock *Addr
 
 unlock *Addr
 
-====================================
+------------------------------------
 
 setupCoreVMT Rsrc
 
@@ -107,7 +109,7 @@ setupIntPC Rsrc
 
 setupIntSP Rsrc
 
-====================================
+------------------------------------
 
 mem.enable
 
@@ -117,4 +119,14 @@ cacheCore.clear
 
 cacheSys.clear
 
-====================================
+Rdst = core.index 
+
+core.enable
+
+core.disable
+
+core.stop
+
+debug Rsrc
+
+------------------------------------

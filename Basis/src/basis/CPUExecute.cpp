@@ -1,4 +1,4 @@
-/* CoreDefs.cpp */
+/* CPUExecute.cpp */
 //----------------------------------------------------------------------------------------
 //
 //  Target: Basis 1.00
@@ -11,32 +11,17 @@
 //
 //----------------------------------------------------------------------------------------
 
-#include "basis/CoreDefs.h"
+#include "basis/CPUCore.h"
 
 namespace Basis {
 
-/* consts */
+/* class CPUCore */
 
-const char * GetTextDesc(Status status)
+void CPUCore::executeOp()
  {
-  static const char *const Table[]=
-   {
-    "StatusDone",
-    "StatusPending",
-    "StatusError",
+  // TODO  
 
-    "StatusErrorAlign",
-    "StatusErrorCmd",
-    "StatusErrorNoX",
-    "StatusErrorNoR",
-    "StatusErrorNoW",
-
-    "StatusErrorMap",
-    "StatusErrorAbsent",
-    "StatusErrorVoid"
-   };
-
-  return Table[status];  
+  regs[RegPC] += cmdLen*sizeof (uint64) ; 
  }
 
 } // namespace Basis    
