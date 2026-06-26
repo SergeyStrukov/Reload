@@ -51,6 +51,7 @@ class CPUCore : NoCopy
   private: 
 
    void finError(Status status);
+   void updatePC() { regs[RegPC] += cmdLen*sizeof (uint64) ; }
    void executeOp();
    void execute();
    void step1();

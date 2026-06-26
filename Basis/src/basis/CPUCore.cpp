@@ -32,9 +32,9 @@ void CPUCore::execute()
     {
      finError(StatusErrorCmd); 
     }
-  else if( command.opcode==CmdNop )
+  else if( command.opcode>=CmdSysBase && !modeS )
     {
-     regs[RegPC]+=sizeof (uint64); 
+     finError(StatusErrorCmd); 
     }
   else
     {

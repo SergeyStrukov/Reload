@@ -19,9 +19,12 @@ namespace Basis {
 
 void CPUCore::executeOp()
  {
-  // TODO  
+  switch( command.opcode )  
+    {
+     case CmdNop : updatePC(); break;   
 
-  regs[RegPC] += cmdLen*sizeof (uint64) ; 
+     // TODO
+    }
  }
 
 } // namespace Basis    
