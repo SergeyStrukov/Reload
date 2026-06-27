@@ -17,13 +17,90 @@ namespace Basis {
 
 /* class CPUCore */
 
+bool CPUCore::testCond()
+ {
+  return true;
+  
+  // TODO
+ }
+
+void CPUCore::executeCast()
+ {
+  // TODO
+ }
+
+void CPUCore::executeNeg()
+ {
+  // TODO
+ }
+
+void CPUCore::executeNot()
+ {
+  // TODO
+ }
+
+void CPUCore::executeAdd()
+ {
+  // TODO
+ }
+
+void CPUCore::executeSub()
+ {
+  // TODO
+ }
+
+void CPUCore::executeMul()
+ {
+  // TODO
+ }
+
+void CPUCore::executeDiv()
+ {
+  // TODO
+ }
+
+void CPUCore::executeRem()
+ {
+  // TODO
+ }
+
 void CPUCore::executeOp()
  {
+  if( !testCond() )
+    {
+     updatePC();
+     return;   
+    }
+
   switch( command.opcode )  
     {
      case CmdNop : updatePC(); break;   
 
-     // TODO
+     // un op
+
+     case CmdCast : executeCast(); break;
+
+     case CmdNeg : executeNeg(); break;
+
+     case CmdNot : executeNot(); break;
+
+     // bin op
+
+     case CmdAdd : executeAdd(); break;
+
+     case CmdSub : executeSub(); break;
+
+     case CmdMul : executeMul(); break;
+
+     case CmdDiv : executeDiv(); break;
+
+     case CmdRem : executeRem(); break;
+
+     // control op
+
+     // addr op
+
+     // sys op
     }
  }
 

@@ -56,54 +56,89 @@ enum RegIndex
   RegCount
  };
 
-enum CmdUnop
- {
-  CmdNeg,
-  CmdNot,  
-
-  // TODO
-
-  CmdUnopCount
- };
-
-enum CmdBinop
- {
-  CmdAdd,  
-  CmdSub,  
-  CmdMul,  
-  CmdDiv,  
-  CmdRem,  
-
-  // TODO
-
-  CmdBinopCount
- }; 
-
-enum CmdOpcode
+enum CmdOpcode // 8 bit
  {
   CmdUndef = 0,
   CmdNop, 
 
   CmdUnBase = 2,
+  CmdCast = CmdUnBase,
+  CmdNeg,
+  CmdNot,  
+  CmdUnLim,
   
   CmdBinBase = 64,
+  CmdAdd = CmdBinBase,  
+  CmdSub,  
+  CmdMul,  
+  CmdDiv,  
+  CmdRem,  
+  CmdBinLim,
 
   CmdOtherBase = 128,
+  CmdOtherLim,
 
   CmdSysBase = 128+64,
-
-  CmdOpcodeCount
+  CmdSysLim,
  };
+
+enum CmdCond // 4 bit
+ {
+  CmdAlways = 0,  
+ }; 
 
 /* classes */
 
+struct RegArg;
+
+struct ConstArg;
+
+struct ConstRegArg;
+
 struct Cmd;
+
+/* struct RegArg */
+
+struct RegArg
+ {
+  uint8 sign : 1 ;  
+  uint8 width : 2 ;
+  uint8 num : 7 ;
+ };
+
+/* struct ConstArg */ 
+
+struct ConstArg
+ {
+  uint8 ext : 1 ;
+  uint8 big : 1 ; 
+  uint64 val; // 33:23 
+ };
+
+/* struct ConstRegArg */ 
+
+struct ConstRegArg
+ {
+  uint8 isReg : 1 ;  
+  union
+   {
+    RegArg reg;
+    ConstArg cnst;
+   }; 
+ };
 
 /* struct Cmd */ 
 
 struct Cmd
  {
   CmdOpcode opcode = CmdUndef ;
+  CmdCond cond = CmdAlways ;
+  uint8 flag : 4 = 0 ;
+  uint8 flagOut : 4 = 0 ;
+
+  RegArg dst{};
+  ConstRegArg src1{};
+  ConstRegArg src2{};
   
   uint32 decode(uint64 cmd);
  };

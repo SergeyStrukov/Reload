@@ -17,8 +17,12 @@ namespace Basis {
 
 /* consts */    
 
-static_assert( CmdBinBase-CmdUnBase >= CmdUnopCount );
-static_assert( CmdOtherBase-CmdBinBase >= CmdBinopCount );
+static_assert( CmdUnLim<=CmdBinBase );
+static_assert( CmdBinLim<=CmdOtherBase );
+static_assert( CmdOtherLim<=CmdSysBase );
+static_assert( CmdOtherLim<=CmdSysBase );
+
+static_assert( CmdSysLim<=256 );
 
 /* struct Cmd */ 
     

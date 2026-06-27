@@ -50,8 +50,21 @@ class CPUCore : NoCopy
 
   private: 
 
-   void finError(Status status);
+   bool testCond();
+
+   void executeCast();
+   void executeNeg();
+   void executeNot();
+
+   void executeAdd();
+   void executeSub();
+   void executeMul();
+   void executeDiv();
+   void executeRem();
+
    void updatePC() { regs[RegPC] += cmdLen*sizeof (uint64) ; }
+
+   void finError(Status status);
    void executeOp();
    void execute();
    void step1();

@@ -1,11 +1,11 @@
 ------------------------------------
 
-Rsrc = R0 - R15
+Rsrc = R0 - R15                     16*(1+2+4+8) = 16*(16-1)    8 bit
        R0.32.0 - R15.32.1
        ...
 Rdst = Rsrc       
 
-suffixes = u s       
+suffixes = u s                      1 bit
 
 Csrc = 12345 -12345 12345h 
 
@@ -21,9 +21,9 @@ Rdst = unop RCsrc
 
 Rdst = RCsrc1 binop RCsrc2
 
-Rdst,F.0 = ...
+Rdst,F.0 = ...                       5       3 bit    
 
-[Cond] ...
+[Cond] ...                           16      4 bit
 
 [Cond] Rdst = RCsrc1 : RCsrc2
 
