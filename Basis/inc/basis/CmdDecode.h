@@ -80,11 +80,17 @@ enum CmdOpcode // 8 bit
   // hole
 
   CmdOtherBase = 128,
+  CmdJmp = CmdOtherBase,
+  CmdJmpPC,
+  CmdCall,
+  CmdCallPC,
+  CmdCallRet,
   CmdOtherLim,
 
   // hole
 
   CmdSysBase = 128+64,
+  CmdCoreStop = CmdSysBase,
   CmdSysLim,
 
   // hole
@@ -142,8 +148,8 @@ struct RegArg
 struct ConstArg
  {
   uint8 ext : 1 ;
-  uint8 big : 1 ; 
-  uint64 val; // 33:23 
+  uint8 big : 2 ; // 23,33,41
+  uint64 val;
  };
 
 /* struct ConstRegArg */ 

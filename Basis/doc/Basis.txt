@@ -41,6 +41,12 @@ ret
 
 ------------------------------------
 
+Rdst = core.index 
+
+debug Rsrc
+
+------------------------------------
+
 Dst,Src = R0-R15,LR,SP,BP,OP,CTX,TBP,CLK,FLAGS
 
 ------------------------------------
@@ -119,14 +125,10 @@ cacheCore.clear
 
 cacheSys.clear
 
-Rdst = core.index 
-
 core.enable
 
 core.disable
 
 core.stop
-
-debug Rsrc
 
 ------------------------------------
