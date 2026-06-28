@@ -49,6 +49,23 @@ inline constexpr ulen operator "" _GByte (unsigned long long len) { return len*1
 
 inline constexpr ulen operator "" _TByte (unsigned long long len) { return len*1024u*1024u*1024u*1024u; }
 
+/* functions */
+
+inline constexpr uint64 BitMask(unsigned width)
+ {
+  return (uint64(1)<<width)-1;
+ }
+
+inline constexpr uint64 BitField(uint64 val,unsigned shift)
+ {
+  return (val>>shift);
+ }
+
+inline constexpr uint64 BitField(uint64 val,unsigned shift,unsigned width)
+ {
+  return (val>>shift)&BitMask(width);
+ }
+
 /* classes */
 
 struct VASplit;
@@ -72,10 +89,10 @@ struct VASplit
 
   VASplit(uint64 va=0)
    {
-    S=va>>63;
-    hpage=va>>24;
-    page=va>>12;
-    offset=va;
+    S=BitField(va,63);
+    hpage=BitField(va,24,39);
+    page=BitField(va,12,12);
+    offset=BitField(va,0,12);
    }
  };
 
@@ -90,10 +107,10 @@ struct AddressFlags
 
   AddressFlags(uint64 value=0)
    {
-    R=value>>11;
-    W=value>>10;
-    X=value>>9;
-    P=value>>8;
+    R=BitField(value,11,1);
+    W=BitField(value,10,1);
+    X=BitField(value,9,1);
+    P=BitField(value,8,1);
    }
  };
 
@@ -116,10 +133,10 @@ struct HEntrySplit
 
   HEntrySplit(uint64 value=0)
    {
-    base=value>>24;
-    len=value>>12;
+    base=BitField(value,24);
+    len=BitField(value,12,12);
     flags=value;
-    H=value>>7;
+    H=BitField(value,7,1);
    }
  };
 
@@ -132,7 +149,7 @@ struct PEntrySplit
 
   PEntrySplit(uint64 value=0)
    {
-    base=value>>12;
+    base=BitField(value,12);
     flags=value;
    }
  };
