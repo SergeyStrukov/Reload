@@ -263,7 +263,7 @@ uint32 Cmd::decode(uint64 cmd)
              {
               src1.cnst.ext=0;
               src1.cnst.big=2;
-              src1.cnst.val=BitField(cmd,0,41);
+              src1.cnst.val=BitField(cmd,0,42);
 
               return 1;
              }  

@@ -148,7 +148,7 @@ struct RegArg
 struct ConstArg
  {
   uint8 ext : 1 ;
-  uint8 big : 2 ; // 23,33,41
+  uint8 big : 2 ; // 23,33,42
   uint64 val;
  };
 
