@@ -17,6 +17,8 @@ namespace Basis {
 
 /* consts */    
 
+static_assert( RegCount<=32 );
+
 static_assert( CmdUnLim<=CmdBinBase );
 static_assert( CmdBinLim<=CmdOtherBase );
 static_assert( CmdOtherLim<=CmdSysBase );
@@ -71,6 +73,17 @@ bool RegArg::decode(uint64 cmd)
     }
 
   return false;
+ }
+
+/* struct ExtRegArg */ 
+
+bool ExtRegArg::decode(uint64 cmd)
+ {
+  num=BitField(cmd,0,5);
+
+  if( num>=RegCount ) return false;
+
+  return true;
  }
 
 /* struct Cmd */ 
@@ -234,13 +247,13 @@ uint32 Cmd::decode(uint64 cmd)
     {
      if( opcode<=CmdCallPC ) 
        {
-        uint8 bitRC=BitField(cmd,43,1);
+        uint8 bitRC=BitField(cmd,51,1);
 
         if( bitRC )
           {
            src1.isReg=1; 
 
-           if( !src1.reg.decode(cmd>>34) )
+           if( !src1.reg.decode(cmd>>42) )
              {
               opcode=CmdUndef;   
              }
@@ -251,7 +264,7 @@ uint32 Cmd::decode(uint64 cmd)
           {
            src1.isReg=0; 
 
-           uint8 bitExt=BitField(cmd,42,1);
+           uint8 bitExt=BitField(cmd,50,1);
 
            if( bitExt )
              {
@@ -263,14 +276,103 @@ uint32 Cmd::decode(uint64 cmd)
              {
               src1.cnst.ext=0;
               src1.cnst.big=2;
-              src1.cnst.val=BitField(cmd,0,42);
+              src1.cnst.val=BitField(cmd,0,50);
 
               return 1;
              }  
           }
        }
 
-     // TODO
+     if( opcode==CmdCoreIndex )
+       {
+        if( !dst.decode(cmd>>43) )
+          {
+           opcode=CmdUndef;   
+          }
+
+        return 1;   
+       }
+
+     if( opcode==CmdDebug )
+       {
+        if( !src.decode(cmd>>43) )
+          {
+           opcode=CmdUndef;   
+          }
+
+        return 1;   
+       }
+
+     if( opcode==CmdSetReg )
+       {
+        if( !ereg.decode(cmd>>47) )
+          {
+           opcode=CmdUndef;   
+
+           return 1;
+          }  
+
+        uint8 bitRC=BitField(cmd,46,1);
+
+        if( bitRC )
+          {
+           src1.isReg=1; 
+
+           if( !src1.reg.decode(cmd>>37) )
+             {
+              opcode=CmdUndef;   
+             }
+             
+           return 1;
+          }
+        else
+          {
+           src1.isReg=0; 
+
+           uint8 bitExt=BitField(cmd,45,1);
+
+           if( bitExt )
+             {
+              src1.cnst.ext=1;
+
+              return 2;
+             }
+           else
+             {
+              src1.cnst.ext=0;
+              src1.cnst.big=2;
+              src1.cnst.val=BitField(cmd,0,45);
+
+              return 1;
+             }  
+          }
+
+        return 1;   
+       }
+
+     if( opcode==CmdGetReg )
+       {
+        if( !dst.decode(cmd>>43) )
+          {
+           opcode=CmdUndef;   
+
+           return 1;
+          }
+
+        if( !ereg.decode(cmd>>38) )
+          {
+           opcode=CmdUndef;   
+
+           return 1;
+          }  
+
+        return 1;   
+       }
+
+     if( opcode>=CmdLoadAddr && opcode<=CmdStore )
+       {
+        // TODO
+       }
 
      return 1;   
     }

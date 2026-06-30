@@ -85,6 +85,13 @@ enum CmdOpcode // 8 bit
   CmdCall,
   CmdCallPC,
   CmdCallRet,
+  CmdCoreIndex,
+  CmdDebug,
+  CmdSetReg,
+  CmdGetReg,
+  CmdLoadAddr,
+  CmdLoad,
+  CmdStore,
   CmdOtherLim,
 
   // hole
@@ -126,6 +133,8 @@ enum CmdCond // 4 bit
 
 struct RegArg;
 
+struct ExtRegArg;
+
 struct ConstArg;
 
 struct ConstRegArg;
@@ -143,12 +152,21 @@ struct RegArg
   bool decode(uint64 cmd);
  };
 
+/* struct ExtRegArg */ 
+
+struct ExtRegArg
+ {
+  uint8 num : 5 ;
+
+  bool decode(uint64 cmd);
+ };
+
 /* struct ConstArg */ 
 
 struct ConstArg
  {
   uint8 ext : 1 ;
-  uint8 big : 2 ; // 23,33,42
+  uint8 big : 2 ; // 23s,33s,64u
   uint64 val;
  };
 
@@ -176,6 +194,9 @@ struct Cmd
   RegArg dst{};
   ConstRegArg src1{};
   ConstRegArg src2{};
+
+  RegArg src;
+  ExtRegArg ereg;
   
   uint32 decode(uint64 cmd);
  };

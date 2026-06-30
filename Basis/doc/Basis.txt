@@ -21,9 +21,9 @@ Rdst = unop RCsrc
 
 Rdst = RCsrc1 binop RCsrc2
 
-Rdst,F.0 = ...                       5       3 bit    
+Rdst,F.0 = ...                       
 
-[Cond] ...                           16      4 bit
+[Cond] ...                           
 
 [Cond] Rdst = RCsrc1 : RCsrc2
 
@@ -69,25 +69,7 @@ Addr = Src
 
 Dst = Addr
 
-Dst = Addr
-
-Dst = Addr
-
-Dst = Addr
-
 Dst = *Addr
-
-Dst = *Addr
-
-Dst = *Addr
-
-Dst = *Addr
-
-*Addr = Src
-
-*Addr = Src
-
-*Addr = Src
 
 *Addr = Src
 
