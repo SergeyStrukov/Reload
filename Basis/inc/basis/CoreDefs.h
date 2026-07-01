@@ -66,6 +66,11 @@ inline constexpr uint64 BitField(uint64 val,unsigned shift,unsigned width)
   return (val>>shift)&BitMask(width);
  }
 
+inline constexpr uint64 BitSField(uint64 val,unsigned shift,unsigned width) // TODO sign extension
+ {
+  return (val>>shift)&BitMask(width);
+ }
+
 /* classes */
 
 struct VASplit;

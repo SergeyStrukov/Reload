@@ -29,31 +29,7 @@ Rdst,F.0 = ...
 
 ------------------------------------
 
-jmp RCsrc
-
-jmp PC+RCsrc
-
-call RCsrc
-
-call PC+RCsrc
-
-ret
-
-------------------------------------
-
-Rdst = core.index 
-
-debug Rsrc
-
-------------------------------------
-
 Dst,Src = R0-R15,LR,SP,BP,OP,CTX,TBP,CLK,FLAGS
-
-------------------------------------
-
-Dst = RCsrc
-
-Rdst = Src
 
 ------------------------------------
 
@@ -83,13 +59,31 @@ lock *Addr
 
 unlock *Addr
 
-====================================
+------------------------------------
 
-sysentry
+jmp RCsrc
 
-sysexit
+jmp PC+RCsrc
+
+call RCsrc
+
+call PC+RCsrc
+
+ret
 
 ------------------------------------
+
+Dst = RCsrc
+
+Rdst = Src
+
+------------------------------------
+
+Rdst = core.index 
+
+debug Rsrc
+
+====================================
 
 setupCoreVMT Rsrc
 
@@ -102,6 +96,12 @@ setupSysSP Rsrc
 setupIntPC Rsrc
 
 setupIntSP Rsrc
+
+------------------------------------
+
+sysentry
+
+sysexit
 
 ------------------------------------
 

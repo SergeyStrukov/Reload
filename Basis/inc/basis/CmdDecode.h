@@ -20,7 +20,7 @@ namespace Basis {
 
 /* consts */ 
 
-enum RegIndex
+enum RegIndex // 5 bit
  {
   RegR0 = 0,
   RegR1,
@@ -50,7 +50,7 @@ enum RegIndex
 
   RegCTX,
   RegCLK, // RO
-  RegTBP, // RO
+  RegTBP, // RO in user mode
   RegFlags,
 
   RegCount
@@ -80,16 +80,7 @@ enum CmdOpcode // 8 bit
   // hole
 
   CmdOtherBase = 128,
-  CmdJmp = CmdOtherBase,
-  CmdJmpPC,
-  CmdCall,
-  CmdCallPC,
-  CmdCallRet,
-  CmdCoreIndex,
-  CmdDebug,
-  CmdSetReg,
-  CmdGetReg,
-  CmdLoadAddr,
+  CmdLoadAddr = CmdOtherBase,
   CmdLoad,
   CmdStore,
   CmdRegLoadAddr,
@@ -97,19 +88,28 @@ enum CmdOpcode // 8 bit
   CmdRegStore,
   CmdLock,
   CmdUnlock,
+  CmdJmp,
+  CmdJmpPC,
+  CmdCall,
+  CmdCallPC,
+  CmdRet,
+  CmdCoreIndex,
+  CmdDebug,
+  CmdSetReg,
+  CmdGetReg,
   CmdOtherLim,
 
   // hole
 
-  CmdSysBase = 128+64,
-  CmdSysEntry = CmdSysBase,
-  CmdSysExit,
-  CmdSetupCoreVMT,
+  CmdSysBase = 128+32,
+  CmdSetupCoreVMT = CmdSysBase,
   CmdSetupSysVMT,
   CmdSetupSysPC,
   CmdSetupSysSP,
   CmdSetupIntPC,
   CmdSetupIntSP,
+  CmdSysEntry,
+  CmdSysExit,
   CmdMemEnable,
   CmdMemDisable,
   CmdCacheCoreClear,
@@ -120,32 +120,34 @@ enum CmdOpcode // 8 bit
   CmdSysLim,
 
   // hole
+
+  CmdExtBase = 128+64,
  };
 
 enum CmdCond // 4 bit
  {
   CmdAlways = 0,  
 
-  CmdIfZ,
-  CmdNotZ,
+  CmdIfZ,      // Z != 0
+  CmdNotZ,     // Z == 0
 
-  CmdIfC,
-  CmdNotC,
+  CmdIfC,      // C != 0
+  CmdNotC,     // C == 0
 
-  CmdIfN,
-  CmdNotN,
+  CmdIfN,      // N != 0
+  CmdNotN,     // N == 0
 
-  CmdIfO,
-  CmdNotO,
+  CmdIfO,      // O != 0
+  CmdNotO,     // O == 0
 
-  CmdIfCZ,
-  CmdNotCZ,
+  CmdIfCZ,     // C!=0 && Z==0
+  CmdNotCZ,    // C==0 || Z==1
 
-  CmdIfNisO,
-  CmdNotNisO,
+  CmdIfNisO,   // N == O
+  CmdNotNisO,  // N != O
 
-  CmdIfZNisO,
-  CmdNotZNisO,
+  CmdIfZNisO,  // Z != 0 && N == O 
+  CmdNotZNisO, // Z == 0 || N != O
  }; 
 
 /* classes */
@@ -164,7 +166,7 @@ struct Cmd;
 
 /* struct RegArg */
 
-struct RegArg
+struct RegArg // 9 bit
  {
   uint8 sign : 1 ;  
   uint8 width : 2 ; // 64,32,16,8
@@ -175,7 +177,7 @@ struct RegArg
 
 /* struct ExtRegArg */ 
 
-struct ExtRegArg
+struct ExtRegArg // 5 bit
  {
   uint8 num : 5 ;
 
@@ -187,8 +189,9 @@ struct ExtRegArg
 struct ConstArg
  {
   uint8 ext : 1 ;
-  uint8 big : 2 ; // 23s,33s,64u
   uint64 val;
+
+  void decode(uint64 cmd,unsigned width);
  };
 
 /* struct ConstRegArg */ 
@@ -196,11 +199,14 @@ struct ConstArg
 struct ConstRegArg
  {
   uint8 isReg : 1 ;  
+  uint8 ext : 1 ;
   union
    {
     RegArg reg;
     ConstArg cnst;
    }; 
+
+  bool decode(uint64 cmd,unsigned width); 
  };
 
 /* struct CmdAddress */ 
@@ -220,9 +226,9 @@ struct CmdAddress
 
 struct Cmd
  {
-  uint8 opcode = CmdUndef ;
-  uint8 cond = CmdAlways ;
-  
+  uint8 opcode : 8 = CmdUndef ;
+  uint8 cond : 4 = CmdAlways ;
+
   uint8 flag : 4 = 0 ;
   uint8 flagOut : 4 = 0 ;
 
@@ -230,9 +236,9 @@ struct Cmd
   ConstRegArg src1{};
   ConstRegArg src2{};
 
-  RegArg src;
-  ExtRegArg ereg;
-  CmdAddress address;
+  RegArg src{};
+  ExtRegArg ereg{};
+  CmdAddress address{};
   
   uint32 decode(uint64 cmd);
  };

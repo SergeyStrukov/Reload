@@ -22,9 +22,7 @@ static_assert( RegCount<=32 );
 static_assert( CmdUnLim<=CmdBinBase );
 static_assert( CmdBinLim<=CmdOtherBase );
 static_assert( CmdOtherLim<=CmdSysBase );
-static_assert( CmdOtherLim<=CmdSysBase );
-
-static_assert( CmdSysLim<=256 );
+static_assert( CmdSysLim<=CmdExtBase );
 
 /* struct RegArg */
 
@@ -84,6 +82,40 @@ bool ExtRegArg::decode(uint64 cmd)
   if( num>=RegCount ) return false;
 
   return true;
+ }
+
+/* struct ConstArg */ 
+
+void ConstArg::decode(uint64 cmd,unsigned width)
+ {
+  ext=BitField(cmd,width-1,1);
+
+  if( !ext )
+    {
+     val=BitSField(cmd,0,width-1);
+    }  
+ }
+
+/* struct ConstRegArg */ 
+
+bool ConstRegArg::decode(uint64 cmd,unsigned width)
+ {
+  isReg=BitField(cmd,width-1,1);
+
+  if( isReg )
+    {
+     ext=0; 
+
+     return reg.decode(cmd>>(width-10));
+    }
+  else
+    {
+     cnst.decode(cmd,width-1);
+
+     ext=cnst.ext;
+
+     return true;
+    }
  }
 
 /* struct CmdAddress */ 
@@ -207,49 +239,21 @@ uint32 Cmd::decode(uint64 cmd)
      flag=BitField(48,4);
      flagOut=BitField(44,4);
 
-     if( dst.decode( cmd>>35 ) )
-       {
-        uint8 bitRC=BitField(cmd,34,1);
-
-        if( bitRC )
-          {
-           src1.isReg=1; 
-
-           if( !src1.reg.decode(cmd>>25) )
-             {
-              opcode=CmdUndef;   
-             }
-
-           return 1;
-          }
-        else
-          {
-           src1.isReg=0; 
-
-           uint8 bitExt=BitField(cmd,33,1);
-
-           if( bitExt )
-             {
-              src1.cnst.ext=1;
-
-              return 2;
-             }
-           else
-             {
-              src1.cnst.ext=0;
-              src1.cnst.big=1;
-              src1.cnst.val=BitField(cmd,0,33);
-
-              return 1;
-             }  
-          }
-       }
-     else
+     if( !dst.decode(cmd>>35) )
        {
         opcode=CmdUndef;   
 
         return 1;
-       }  
+       }
+
+     if( !src1.decode(cmd,35) )
+       {
+        opcode=CmdUndef;   
+
+        return 1;
+       }
+
+     return 1+src1.ext;
     }
 
   if( opcode>=CmdBinBase && opcode<CmdBinLim )
@@ -257,7 +261,13 @@ uint32 Cmd::decode(uint64 cmd)
      flag=BitField(48,4);
      flagOut=BitField(44,4);
 
-     if( dst.decode( cmd>>35 ) )
+     if( !dst.decode(cmd>>35) )
+       {
+        opcode=CmdUndef;   
+
+        return 1;
+       }
+
        {
         uint8 bitRC1=BitField(cmd,34,1);
         uint8 bitRC2=BitField(cmd,33,1);
@@ -339,14 +349,6 @@ uint32 Cmd::decode(uint64 cmd)
 
         return 1;
        }
-     else
-       {
-        opcode=CmdUndef;   
-
-        return 1;
-       }  
-
-     return 1;   
     }
 
   if( opcode>=CmdOtherBase && opcode<CmdOtherLim )
