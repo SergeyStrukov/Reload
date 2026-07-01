@@ -95,12 +95,28 @@ enum CmdOpcode // 8 bit
   CmdRegLoadAddr,
   CmdRegLoad,
   CmdRegStore,
+  CmdLock,
+  CmdUnlock,
   CmdOtherLim,
 
   // hole
 
   CmdSysBase = 128+64,
-  CmdCoreStop = CmdSysBase,
+  CmdSysEntry = CmdSysBase,
+  CmdSysExit,
+  CmdSetupCoreVMT,
+  CmdSetupSysVMT,
+  CmdSetupSysPC,
+  CmdSetupSysSP,
+  CmdSetupIntPC,
+  CmdSetupIntSP,
+  CmdMemEnable,
+  CmdMemDisable,
+  CmdCacheCoreClear,
+  CmdSysCoreClear,
+  CmdCoreEnable,
+  CmdCoreDisable,
+  CmdCoreStop,
   CmdSysLim,
 
   // hole
@@ -206,6 +222,7 @@ struct Cmd
  {
   uint8 opcode = CmdUndef ;
   uint8 cond = CmdAlways ;
+  
   uint8 flag : 4 = 0 ;
   uint8 flagOut : 4 = 0 ;
 
@@ -223,3 +240,4 @@ struct Cmd
 } // namespace Basis    
 
 #endif
+

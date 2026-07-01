@@ -517,12 +517,29 @@ uint32 Cmd::decode(uint64 cmd)
         return ret;
        }
 
+     if( opcode>=CmdLock && opcode<=CmdUnlock )
+       {
+        uint32 ret=address.decode(cmd); 
+
+        if( !ret )
+          {
+           opcode=CmdUndef;   
+
+           return 1;
+          }
+
+        return ret;
+       }
+
      return 1;   
     }
 
   if( opcode>=CmdSysBase && opcode<CmdSysLim )
     {
-     // TODO
+     if( opcode>=CmdSetupCoreVMT && opcode<=CmdSetupIntSP )
+       {
+        if( !dst.decode(cmd>>43) ) opcode=CmdUndef;
+       }
 
      return 1;   
     }

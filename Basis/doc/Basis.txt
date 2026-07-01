@@ -79,15 +79,15 @@ Dst = *Addr
 
 *Addr = Src
 
+lock *Addr
+
+unlock *Addr
+
 ====================================
 
 sysentry
 
 sysexit
-
-lock *Addr
-
-unlock *Addr
 
 ------------------------------------
 
