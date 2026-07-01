@@ -62,7 +62,7 @@ enum CmdOpcode // 8 bit
   CmdNop, 
 
   CmdUnBase = 2,
-  CmdCast = CmdUnBase,
+  CmdCast = CmdUnBase, // dst src1
   CmdNeg,
   CmdNot,  
   CmdUnLim,
@@ -70,7 +70,7 @@ enum CmdOpcode // 8 bit
   // hole
   
   CmdBinBase = 64,
-  CmdAdd = CmdBinBase,  
+  CmdAdd = CmdBinBase, // dst src1 src2
   CmdSub,  
   CmdMul,  
   CmdDiv,  
@@ -80,40 +80,40 @@ enum CmdOpcode // 8 bit
   // hole
 
   CmdOtherBase = 128,
-  CmdLoadAddr = CmdOtherBase,
-  CmdLoad,
-  CmdStore,
-  CmdRegLoadAddr,
-  CmdRegLoad,
-  CmdRegStore,
-  CmdLock,
-  CmdUnlock,
-  CmdJmp,
-  CmdJmpPC,
-  CmdCall,
-  CmdCallPC,
-  CmdRet,
-  CmdCoreIndex,
-  CmdDebug,
-  CmdSetReg,
-  CmdGetReg,
+  CmdLoadAddr = CmdOtherBase, // dst address
+  CmdLoad,                    // dst address
+  CmdStore,                   // address dst
+  CmdRegLoadAddr,             // ereg address
+  CmdRegLoad,                 // ereg address
+  CmdRegStore,                // address ereg 
+  CmdLock,                    // address
+  CmdUnlock,                  // address
+  CmdJmp,                     // src1
+  CmdJmpPC,                   // src1 
+  CmdCall,                    // src1
+  CmdCallPC,                  // src1
+  CmdRet,                     //
+  CmdCoreIndex,               // dst 
+  CmdDebug,                   // src1
+  CmdSetReg,                  // ereg src1 
+  CmdGetReg,                  // dst ereg
   CmdOtherLim,
 
   // hole
 
   CmdSysBase = 128+32,
-  CmdSetupCoreVMT = CmdSysBase,
+  CmdSetupCoreVMT = CmdSysBase, // src1
   CmdSetupSysVMT,
   CmdSetupSysPC,
   CmdSetupSysSP,
   CmdSetupIntPC,
-  CmdSetupIntSP,
-  CmdSysEntry,
+  CmdSetupIntSP,                
+  CmdSysEntry,                  //
   CmdSysExit,
   CmdMemEnable,
   CmdMemDisable,
   CmdCacheCoreClear,
-  CmdSysCoreClear,
+  CmdCacheSysClear,
   CmdCoreEnable,
   CmdCoreDisable,
   CmdCoreStop,
@@ -211,15 +211,16 @@ struct ConstRegArg
 
 /* struct CmdAddress */ 
 
-struct CmdAddress
+struct CmdAddress // 43
  {
   ExtRegArg base;
   uint8 type : 2 ;
   ConstRegArg src;
   ConstArg cnst1;
   ConstArg cnst2;
+  uint8 ext : 2 ;
 
-  uint32 decode(uint64 cmd);
+  bool decode(uint64 cmd);
  };
 
 /* struct Cmd */ 
@@ -236,7 +237,6 @@ struct Cmd
   ConstRegArg src1{};
   ConstRegArg src2{};
 
-  RegArg src{};
   ExtRegArg ereg{};
   CmdAddress address{};
   

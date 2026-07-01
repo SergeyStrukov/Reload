@@ -81,21 +81,21 @@ Rdst = Src
 
 Rdst = core.index 
 
-debug Rsrc
+debug RCsrc
 
 ====================================
 
-setupCoreVMT Rsrc
+setupCoreVMT RCsrc
 
-setupSysVMT Rsrc
+setupSysVMT RCsrc
 
-setupSysPC Rsrc
+setupSysPC RCsrc
 
-setupSysSP Rsrc
+setupSysSP RCsrc
 
-setupIntPC Rsrc
+setupIntPC RCsrc
 
-setupIntSP Rsrc
+setupIntSP RCsrc
 
 ------------------------------------
 

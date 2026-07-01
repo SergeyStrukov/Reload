@@ -51,6 +51,11 @@ inline constexpr ulen operator "" _TByte (unsigned long long len) { return len*1
 
 /* functions */
 
+inline constexpr uint64 OneBit(unsigned ind)
+ {
+  return (uint64(1)<<ind);
+ }
+
 inline constexpr uint64 BitMask(unsigned width)
  {
   return (uint64(1)<<width)-1;
@@ -66,9 +71,13 @@ inline constexpr uint64 BitField(uint64 val,unsigned shift,unsigned width)
   return (val>>shift)&BitMask(width);
  }
 
-inline constexpr uint64 BitSField(uint64 val,unsigned shift,unsigned width) // TODO sign extension
+inline constexpr uint64 BitSField(uint64 val,unsigned shift,unsigned width)
  {
-  return (val>>shift)&BitMask(width);
+  uint64 ret=(val>>shift)&BitMask(width);
+
+  if( ret&OneBit(width-1) ) ret-=OneBit(width);
+
+  return ret;
  }
 
 /* classes */
