@@ -67,6 +67,12 @@ Addr = Src
 
 ------------------------------------
 
+Rdst = Addr
+
+Rdst = *Addr
+
+*Addr = Rsrc
+
 Dst = Addr
 
 Dst = *Addr

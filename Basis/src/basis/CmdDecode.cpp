@@ -86,6 +86,112 @@ bool ExtRegArg::decode(uint64 cmd)
   return true;
  }
 
+/* struct CmdAddress */ 
+
+uint32 CmdAddress::decode(uint64 cmd)
+ {
+  if( !base.decode(cmd>>38) ) return 1;
+
+  type=BitField(cmd,36,2);  
+
+  if( type==0 ) return 1;
+
+  if( type==1 )
+    {
+     uint8 bitRC=BitField(cmd,35,1);
+
+     if( bitRC )
+       {
+        src.isReg=1; 
+
+        if( !src.reg.decode(cmd>>26) ) return 0;
+
+        return 1;
+       }
+     else
+       {
+        src.isReg=0; 
+
+        uint8 bitExt=BitField(cmd,34,1);
+
+        if( bitExt )
+          {
+           src.cnst.ext=1;
+
+           return 2;
+          }
+        else
+          {
+           src.cnst.ext=0;
+           src.cnst.big=2;
+           src.cnst.val=BitField(cmd,0,34);
+
+           return 1;
+          }  
+       }
+    }
+
+  if( type==2 ) 
+    {
+     src.isReg=1; 
+
+     if( !src.reg.decode(cmd>>27) ) return 0;
+
+     uint8 bitExt=BitField(cmd,26,1);
+
+     if( bitExt )
+       {
+        cnst1.ext=1;
+
+        return 2;
+       }
+     else
+       {
+        cnst1.ext=0;
+        cnst1.big=2;
+        cnst1.val=BitField(cmd,0,26);
+
+        return 1;
+       }  
+    }
+
+  if( type==3 )
+    {
+     src.isReg=1; 
+
+     if( !src.reg.decode(cmd>>27) ) return 0;
+
+     uint8 bitExt1=BitField(cmd,26,1);
+     uint8 bitExt2=BitField(cmd,16,1);
+
+     if( bitExt1 )
+       {
+        cnst1.ext=1;
+       }
+     else
+       {
+        cnst1.ext=0;
+        cnst1.big=2;
+        cnst1.val=BitField(cmd,16,10);
+       }  
+
+     if( bitExt2 )
+       {
+        cnst2.ext=1;
+       }
+     else
+       {
+        cnst2.ext=0;
+        cnst2.big=2;
+        cnst2.val=BitField(cmd,0,15);
+       }  
+
+     return bitExt1+bitExt2+1;  
+    }
+
+  return 1;  
+ }
+
 /* struct Cmd */ 
     
 uint32 Cmd::decode(uint64 cmd)
@@ -369,9 +475,46 @@ uint32 Cmd::decode(uint64 cmd)
         return 1;   
        }
 
-     if( opcode>=CmdLoadAddr && opcode<=CmdStore )
+     if( opcode==CmdLoadAddr && opcode<=CmdStore )
        {
-        // TODO
+        if( !dst.decode( cmd>>43 ) )
+          {
+           opcode=CmdUndef;   
+
+           return 1;
+          }
+
+        uint32 ret=address.decode(cmd); 
+
+        if( !ret )
+          {
+           opcode=CmdUndef;   
+
+           return 1;
+          }
+
+        return ret;
+       }
+
+     if( opcode==CmdRegLoadAddr && opcode<=CmdRegStore )
+       {
+        if( !ereg.decode( cmd>>47 ) )
+          {
+           opcode=CmdUndef;   
+
+           return 1;
+          }
+
+        uint32 ret=address.decode(cmd); 
+
+        if( !ret )
+          {
+           opcode=CmdUndef;   
+
+           return 1;
+          }
+
+        return ret;
        }
 
      return 1;   

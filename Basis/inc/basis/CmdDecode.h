@@ -92,6 +92,9 @@ enum CmdOpcode // 8 bit
   CmdLoadAddr,
   CmdLoad,
   CmdStore,
+  CmdRegLoadAddr,
+  CmdRegLoad,
+  CmdRegStore,
   CmdOtherLim,
 
   // hole
@@ -139,6 +142,8 @@ struct ConstArg;
 
 struct ConstRegArg;
 
+struct CmdAddress;
+
 struct Cmd;
 
 /* struct RegArg */
@@ -182,6 +187,19 @@ struct ConstRegArg
    }; 
  };
 
+/* struct CmdAddress */ 
+
+struct CmdAddress
+ {
+  ExtRegArg base;
+  uint8 type : 2 ;
+  ConstRegArg src;
+  ConstArg cnst1;
+  ConstArg cnst2;
+
+  uint32 decode(uint64 cmd);
+ };
+
 /* struct Cmd */ 
 
 struct Cmd
@@ -197,6 +215,7 @@ struct Cmd
 
   RegArg src;
   ExtRegArg ereg;
+  CmdAddress address;
   
   uint32 decode(uint64 cmd);
  };
