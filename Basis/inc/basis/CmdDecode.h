@@ -211,7 +211,7 @@ struct ConstRegArg // >= 10 bit
 
 /* struct CmdAddress */ 
 
-struct CmdAddress // 43
+struct CmdAddress // 43 or 39
  {
   ExtRegArg base;
   uint8 type : 2 ;
@@ -221,6 +221,7 @@ struct CmdAddress // 43
   uint8 ext : 2 ;
 
   bool decode(uint64 cmd);
+  bool decode39(uint64 cmd);
  };
 
 /* struct Cmd */ 
