@@ -244,14 +244,14 @@ void CPUCore::executeCoreEnable()
 
 void CPUCore::executeCoreDisable()
  {
-  block->modeCore=false;
+  block->disableCores();
 
   updatePC();
  }
 
 void CPUCore::executeCoreStop()
  {
-  block->modeStop=true;
+  block->stop();
 
   updatePC();
  }

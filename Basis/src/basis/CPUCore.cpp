@@ -92,6 +92,12 @@ void CPUCore::init(uint32 index_,uint64 cmdCacheSize,uint64 dataCacheSize,CPUCor
 
   index=index_;
 
+  sysPC=0;
+  sysSP=0;
+
+  intPC=0;
+  intSP=0;
+
   modeS=false;
   modeI=false;
   modeL=false;
@@ -112,7 +118,7 @@ void CPUCore::clearCache()
   mem.clearCache();
  }
 
-void CPUCore::enable(uint64 sysPC,uint64 sysSP)
+void CPUCore::enable()
  {
   regs[RegPC]=sysPC;
   regs[RegSP]=sysSP;
@@ -167,36 +173,8 @@ void CPUCore::step()
 
 /* class CPUCoreBlock */ 
 
-void CPUCoreBlock::setModeM(bool modeM)
- {
-  mpx.setModeM(modeM);
-
-  for(CPUCore &core : cores ) core.clearCache();
- }
-
-void CPUCoreBlock::enableCores()
- {
-  for(ulen ind=1,len=cores.getLen(); ind<len ;ind++) cores[ind].enable(sysPC,sysSP);
-
-  modeCore=true;
- }
-
-CPUCoreBlock::CPUCoreBlock()
- {
- }
-
-CPUCoreBlock::~CPUCoreBlock()
- {
- }
-
 void CPUCoreBlock::init(uint32 count,uint64 cmdCacheSize,uint64 dataCacheSize,SysMem &mem)
  {
-  sysPC=0;
-  sysSP=0;
-
-  intPC=0;
-  intSP=0;
-
   modeCore=false;
   modeStop=false;
 
@@ -212,6 +190,30 @@ void CPUCoreBlock::init(uint32 count,uint64 cmdCacheSize,uint64 dataCacheSize,Sy
     {
      cores[i].init(i,cmdCacheSize,dataCacheSize,*this);   
     }
+ }
+
+void CPUCoreBlock::setModeM(bool modeM)
+ {
+  mpx.setModeM(modeM);
+
+  for(CPUCore &core : cores ) core.clearCache();
+
+  cache.clearCache();
+ }
+
+void CPUCoreBlock::enableCores()
+ {
+  for(ulen ind=1,len=cores.getLen(); ind<len ;ind++) cores[ind].enable();
+
+  modeCore=true;
+ }
+
+CPUCoreBlock::CPUCoreBlock()
+ {
+ }
+
+CPUCoreBlock::~CPUCoreBlock()
+ {
  }
 
 bool CPUCoreBlock::step()

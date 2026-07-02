@@ -60,6 +60,12 @@ class CPUCore : NoCopy
 
    uint32 index = 0 ;
 
+   uint64 sysPC = 0 ;
+   uint64 sysSP = 0 ;
+
+   uint64 intPC = 0 ;
+   uint64 intSP = 0 ;
+
    bool modeS = false ;
    bool modeI = false ;
    bool modeL = false ;
@@ -140,7 +146,7 @@ class CPUCore : NoCopy
 
    void clearCache();
 
-   void enable(uint64 sysPC,uint64 sysSP);
+   void enable();
 
    void step();
  };
@@ -149,12 +155,6 @@ class CPUCore : NoCopy
 
 class CPUCoreBlock : NoCopy
  {
-   uint64 sysPC = 0 ;
-   uint64 sysSP = 0 ;
-
-   uint64 intPC = 0 ;
-   uint64 intSP = 0 ;
-
    bool modeCore = false ;
    bool modeStop = false ;
 
@@ -168,12 +168,6 @@ class CPUCoreBlock : NoCopy
 
    friend class CPUCore;
 
-  private: 
-
-   void setModeM(bool modeM);
-
-   void enableCores();
-
   public:
 
    CPUCoreBlock();
@@ -181,6 +175,14 @@ class CPUCoreBlock : NoCopy
    ~CPUCoreBlock();
 
    void init(uint32 count,uint64 cmdCacheSize,uint64 dataCacheSize,SysMem &mem);
+
+   void setModeM(bool modeM);
+
+   void enableCores();
+
+   void disableCores() { modeCore=false; }
+
+   void stop() { modeStop=true; }
 
    bool step();
  };
