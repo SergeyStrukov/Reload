@@ -229,6 +229,8 @@ uint32 Cmd::decode(uint64 cmd)
 
            if( bitRC2 )
              {
+              src2.isReg=1;
+              
               if( !src2.reg.decode(cmd>>15) )
                 {
                  opcode=CmdUndef;   

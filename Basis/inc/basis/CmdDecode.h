@@ -186,7 +186,7 @@ struct ExtRegArg // 5 bit
 
 /* struct ConstArg */ 
 
-struct ConstArg
+struct ConstArg // > 1 bit
  {
   uint8 ext : 1 ;
   uint64 val;
@@ -196,7 +196,7 @@ struct ConstArg
 
 /* struct ConstRegArg */ 
 
-struct ConstRegArg
+struct ConstRegArg // >= 10 bit
  {
   uint8 isReg : 1 ;  
   uint8 ext : 1 ;
@@ -246,4 +246,3 @@ struct Cmd
 } // namespace Basis    
 
 #endif
-
