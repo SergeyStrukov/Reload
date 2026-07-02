@@ -40,5 +40,15 @@ const char * GetTextDesc(Status status)
   return Table[status];  
  }
 
+const char * GetTextDesc(FatalCode code)
+ {
+  static const char *const Table[]=
+   {
+    "Bad core index",
+   };
+
+  return Table[code];  
+ }
+
 } // namespace Basis    
 

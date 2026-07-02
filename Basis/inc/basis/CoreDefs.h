@@ -44,6 +44,13 @@ enum Status
 
 const char * GetTextDesc(Status status); 
 
+enum FatalCode
+ {
+  FatalCoreIndex = 0,
+ };
+
+const char * GetTextDesc(FatalCode code); 
+
 /* unit functions */
 
 inline constexpr ulen operator "" _GByte (unsigned long long len) { return len*1024u*1024u*1024u; }

@@ -14,6 +14,7 @@
 #include "basis/CPUCore.h"
 
 #include <CCore/inc/Exception.h>
+#include <CCore/inc/Print.h>
 
 namespace Basis {
 
@@ -246,7 +247,7 @@ void CPUCoreBlock::setupCoreVMT(uint64 index,uint64 pa)
     }
   else
     {
-     stop(); 
+     fatal(FatalCoreIndex); 
     }  
  }
 
@@ -258,7 +259,7 @@ void CPUCoreBlock::setupSysPC(uint64 index,uint64 PC)
     }
   else
     {
-     stop(); 
+     fatal(FatalCoreIndex); 
     }  
  }
 
@@ -270,7 +271,7 @@ void CPUCoreBlock::setupSysSP(uint64 index,uint64 SP)
     }
   else
     {
-     stop(); 
+     fatal(FatalCoreIndex); 
     }  
  }
 
@@ -282,7 +283,7 @@ void CPUCoreBlock::setupIntPC(uint64 index,uint64 PC)
     }
   else
     {
-     stop(); 
+     fatal(FatalCoreIndex); 
     }  
  }
 
@@ -294,7 +295,7 @@ void CPUCoreBlock::setupIntSP(uint64 index,uint64 SP)
     }
   else
     {
-     stop(); 
+     fatal(FatalCoreIndex); 
     }  
  }
 
@@ -309,6 +310,13 @@ CPUCoreBlock::CPUCoreBlock()
 
 CPUCoreBlock::~CPUCoreBlock()
  {
+ }
+
+void CPUCoreBlock::fatal(FatalCode code)
+ {
+  Printf(Con,"Fatal CPU stop: #;\n",code);
+
+  stop();
  }
 
 bool CPUCoreBlock::step()

@@ -224,6 +224,8 @@ class CPUCoreBlock : NoCopy
 
    void setupSysVMT(uint64 pa);
 
+   void fatal(FatalCode code);
+
    void stop() { modeStop=true; }
 
    bool step();
