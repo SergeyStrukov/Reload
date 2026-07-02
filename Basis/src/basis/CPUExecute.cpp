@@ -13,6 +13,8 @@
 
 #include "basis/CPUCore.h"
 
+#include <CCore/inc/Exception.h>
+
 namespace Basis {
 
 /* class CPUCore */
@@ -79,28 +81,68 @@ void CPUCore::executeOp()
      // un op
 
      case CmdCast : executeCast(); break;
-
      case CmdNeg : executeNeg(); break;
-
      case CmdNot : executeNot(); break;
 
      // bin op
 
      case CmdAdd : executeAdd(); break;
-
      case CmdSub : executeSub(); break;
-
      case CmdMul : executeMul(); break;
-
      case CmdDiv : executeDiv(); break;
-
      case CmdRem : executeRem(); break;
+
+     // mem op
+
+     case CmdLoadAddr : executeLoadAddr(); break;
+     case CmdLoad : executeLoad(); break;
+     case CmdStore : executeStore(); break;
+     case CmdRegLoadAddr : executeRegLoadAddr(); break;
+     case CmdRegLoad : executeRegLoad(); break;
+     case CmdRegStore : executeRegStore(); break;
+
+     // lock op
+
+     case CmdLock : executeLock(); break;
+     case CmdUnlock : executeUnlock(); break;
 
      // control op
 
-     // addr op
+     case CmdJmp : executeJmp(); break;
+     case CmdJmpPC : executeJmpPC(); break;
+     case CmdCall : executeCall(); break;
+     case CmdCallPC : executeCallPC(); break;
+     case CmdRet : executeRet(); break;
+
+     // misc op
+
+     case CmdCoreIndex : executeCoreIndex(); break;
+     case CmdDebug : executeDebug(); break;
+     case CmdSetReg : executeSetReg(); break;
+     case CmdGetReg : executeGetReg(); break;
 
      // sys op
+
+     case CmdSetupCoreVMT : executeSetupCoreVMT(); break;
+     case CmdSetupSysVMT : executeSetupSysVMT(); break;
+     case CmdSetupSysPC : executeSetupSysPC(); break;
+     case CmdSetupSysSP : executeSetupSysSP(); break;
+     case CmdSetupIntPC : executeSetupIntPC(); break;
+     case CmdSetupIntSP : executeSetupIntSP(); break;
+     case CmdSysEntry : executeSysEntry(); break;
+     case CmdSysExit : executeSysExit(); break;
+     case CmdMemEnable : executeMemEnable(); break;
+     case CmdMemDisable : executeMemDisable(); break;
+     case CmdCacheCoreClear : executeCacheCoreClear(); break;
+     case CmdCacheSysClear : executeCacheSysClear(); break;
+     case CmdCoreEnable : executeCoreEnable(); break;
+     case CmdCoreDisable : executeCoreDisable(); break;
+     case CmdCoreStop : executeCoreStop(); break;
+
+     default:
+      {
+       Printf(Exception,"Basis::CPUCore::executeOp() : unknown opcode #;",command.opcode);
+      }
     }
  }
 

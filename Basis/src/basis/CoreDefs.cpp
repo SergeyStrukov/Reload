@@ -26,14 +26,15 @@ const char * GetTextDesc(Status status)
     "StatusError",
 
     "StatusErrorAlign",
-    "StatusErrorCmd",
     "StatusErrorNoX",
     "StatusErrorNoR",
     "StatusErrorNoW",
 
     "StatusErrorMap",
     "StatusErrorAbsent",
-    "StatusErrorVoid"
+    "StatusErrorVoid",
+    
+    "StatusErrorCmd",
    };
 
   return Table[status];  

@@ -32,7 +32,7 @@ void CPUCore::execute()
     {
      finError(StatusErrorCmd); 
     }
-  else if( command.opcode>=CmdSysBase && !modeS )
+  else if( command.opcode>=CmdSysBase && userMode() )
     {
      finError(StatusErrorCmd); 
     }
@@ -66,6 +66,7 @@ void CPUCore::step1()
      if( status!=StatusDone )
        {
         finError(status);  
+        return;
        } 
     }
 

@@ -50,6 +50,8 @@ class CPUCore : NoCopy
 
   private: 
 
+   bool userMode() const { return modeS==0 && modeI==0 ; }
+
    bool testCond();
 
    void executeCast();
@@ -61,6 +63,43 @@ class CPUCore : NoCopy
    void executeMul();
    void executeDiv();
    void executeRem();
+
+   void executeLoadAddr();
+   void executeLoad();
+   void executeStore();
+   void executeRegLoadAddr();
+   void executeRegLoad();
+   void executeRegStore();
+
+   void executeLock();
+   void executeUnlock();
+
+   void executeJmp();
+   void executeJmpPC();
+   void executeCall();
+   void executeCallPC();
+   void executeRet();
+
+   void executeCoreIndex();
+   void executeDebug();
+   void executeSetReg();
+   void executeGetReg();
+
+   void executeSetupCoreVMT();
+   void executeSetupSysVMT();
+   void executeSetupSysPC();
+   void executeSetupSysSP();
+   void executeSetupIntPC();
+   void executeSetupIntSP();
+   void executeSysEntry();
+   void executeSysExit();
+   void executeMemEnable();
+   void executeMemDisable();
+   void executeCacheCoreClear();
+   void executeCacheSysClear();
+   void executeCoreEnable();
+   void executeCoreDisable();
+   void executeCoreStop();
 
    void updatePC() { regs[RegPC] += cmdLen*sizeof (uint64) ; }
 

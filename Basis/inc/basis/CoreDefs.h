@@ -31,14 +31,15 @@ enum Status
   StatusError,
 
   StatusErrorAlign,  
-  StatusErrorCmd,
   StatusErrorNoX,
   StatusErrorNoR,
   StatusErrorNoW,
 
   StatusErrorMap,
   StatusErrorAbsent,
-  StatusErrorVoid
+  StatusErrorVoid,
+  
+  StatusErrorCmd,
  };
 
 const char * GetTextDesc(Status status); 
