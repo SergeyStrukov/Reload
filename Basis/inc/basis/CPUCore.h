@@ -140,6 +140,8 @@ class CPUCore : NoCopy
 
    void clearCache();
 
+   void enable(uint64 sysPC,uint64 sysSP);
+
    void step();
  };
 
@@ -169,6 +171,8 @@ class CPUCoreBlock : NoCopy
   private: 
 
    void setModeM(bool modeM);
+
+   void enableCores();
 
   public:
 

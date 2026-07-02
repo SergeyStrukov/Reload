@@ -237,17 +237,23 @@ void CPUCore::executeCacheSysClear()
 
 void CPUCore::executeCoreEnable()
  {
-  // TODO
+  block->enableCores();
+
+  updatePC();
  }
 
 void CPUCore::executeCoreDisable()
  {
-  // TODO
+  block->modeCore=false;
+
+  updatePC();
  }
 
 void CPUCore::executeCoreStop()
  {
-  // TODO
+  block->modeStop=true;
+
+  updatePC();
  }
 
 void CPUCore::executeOp()

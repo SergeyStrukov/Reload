@@ -91,9 +91,14 @@ Status SysMem::readData(uint64 pa,uint64 line[CacheLineLen])
 
 Status SysMem::writeData(uint64 pa,const uint64 line[CacheLineLen])
  {
-  if( !modeM ) return StatusErrorVoid;
-
   if( pa%CacheLineSize ) return StatusErrorAlign;
+
+  if( pa>=BootROMAddress && pa<BootROMAddress+BootROMSize )
+    {
+     return StatusErrorNoW;
+    }
+
+  if( !modeM ) return StatusErrorVoid;
 
   if( pa>=RAMAddress && pa<RAMAddress+ram.getLen()*sizeof (uint64) )
     {

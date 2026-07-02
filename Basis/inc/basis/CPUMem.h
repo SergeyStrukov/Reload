@@ -93,6 +93,7 @@ struct CacheLine
   uint64 line[CacheLineLen];
   uint64 tag : 63 ; 
   uint8 full : 1 ;
+  uint8 dirty : 1 ; // TODO
 
   CacheLine() noexcept { full=0; }
 

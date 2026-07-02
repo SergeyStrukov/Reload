@@ -112,6 +112,15 @@ void CPUCore::clearCache()
   mem.clearCache();
  }
 
+void CPUCore::enable(uint64 sysPC,uint64 sysSP)
+ {
+  regs[RegPC]=sysPC;
+  regs[RegSP]=sysSP;
+  modeS=true;
+
+  clearCache();
+ }
+
 void CPUCore::step()
  {
   if( memPending )
@@ -163,6 +172,13 @@ void CPUCoreBlock::setModeM(bool modeM)
   mpx.setModeM(modeM);
 
   for(CPUCore &core : cores ) core.clearCache();
+ }
+
+void CPUCoreBlock::enableCores()
+ {
+  for(ulen ind=1,len=cores.getLen(); ind<len ;ind++) cores[ind].enable(sysPC,sysSP);
+
+  modeCore=true;
  }
 
 CPUCoreBlock::CPUCoreBlock()
