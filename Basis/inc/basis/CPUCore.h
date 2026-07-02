@@ -148,6 +148,16 @@ class CPUCore : NoCopy
 
    void enable();
 
+   void setupCoreVMT(uint64 pa);
+
+   void setupSysPC(uint64 PC);
+
+   void setupSysSP(uint64 SP);
+
+   void setupIntPC(uint64 PC);
+
+   void setupIntSP(uint64 SP);
+
    void step();
  };
 
@@ -178,9 +188,23 @@ class CPUCoreBlock : NoCopy
 
    void setModeM(bool modeM);
 
+   void clearCache();
+
    void enableCores();
 
    void disableCores() { modeCore=false; }
+
+   void setupCoreVMT(uint64 index,uint64 pa);
+
+   void setupSysPC(uint64 index,uint64 PC);
+
+   void setupSysSP(uint64 index,uint64 SP);
+
+   void setupIntPC(uint64 index,uint64 PC);
+
+   void setupIntSP(uint64 index,uint64 SP);
+
+   void setupSysVMT(uint64 pa);
 
    void stop() { modeStop=true; }
 

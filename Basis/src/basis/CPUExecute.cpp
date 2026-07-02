@@ -217,22 +217,30 @@ void CPUCore::executeSysExit()
 
 void CPUCore::executeMemEnable()
  {
-  // TODO
+  block->setModeM(true);
+
+  updatePC();
  }
 
 void CPUCore::executeMemDisable()
  {
-  // TODO
+  block->setModeM(false);
+
+  updatePC();
  }
 
 void CPUCore::executeCacheCoreClear()
  {
-  // TODO
+  clearCache();
+
+  updatePC();
  }
 
 void CPUCore::executeCacheSysClear()
  {
-  // TODO
+  block->clearCache();
+
+  updatePC();
  }
 
 void CPUCore::executeCoreEnable()

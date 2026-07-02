@@ -127,6 +127,31 @@ void CPUCore::enable()
   clearCache();
  }
 
+void CPUCore::setupCoreVMT(uint64 pa)
+ {
+  mem.setupVMT(pa);
+ }
+
+void CPUCore::setupSysPC(uint64 PC)
+ {
+  sysPC=PC;
+ }
+
+void CPUCore::setupSysSP(uint64 SP)
+ {
+  sysSP=SP;
+ }
+
+void CPUCore::setupIntPC(uint64 PC)
+ {
+  intPC=PC;
+ }
+
+void CPUCore::setupIntSP(uint64 SP)
+ {
+  intSP=SP;
+ }
+
 void CPUCore::step()
  {
   if( memPending )
@@ -201,11 +226,81 @@ void CPUCoreBlock::setModeM(bool modeM)
   cache.clearCache();
  }
 
+void CPUCoreBlock::clearCache()
+ {
+  cache.clearCache();
+ }
+
 void CPUCoreBlock::enableCores()
  {
   for(ulen ind=1,len=cores.getLen(); ind<len ;ind++) cores[ind].enable();
 
   modeCore=true;
+ }
+
+void CPUCoreBlock::setupCoreVMT(uint64 index,uint64 pa)
+ {
+  if( index<cores.getLen() )
+    {
+     cores[index].setupCoreVMT(pa); 
+    }
+  else
+    {
+     stop(); 
+    }  
+ }
+
+void CPUCoreBlock::setupSysPC(uint64 index,uint64 PC)
+ {
+  if( index<cores.getLen() )
+    {
+     cores[index].setupSysPC(PC); 
+    }
+  else
+    {
+     stop(); 
+    }  
+ }
+
+void CPUCoreBlock::setupSysSP(uint64 index,uint64 SP)
+ {
+  if( index<cores.getLen() )
+    {
+     cores[index].setupSysSP(SP); 
+    }
+  else
+    {
+     stop(); 
+    }  
+ }
+
+void CPUCoreBlock::setupIntPC(uint64 index,uint64 PC)
+ {
+  if( index<cores.getLen() )
+    {
+     cores[index].setupIntPC(PC); 
+    }
+  else
+    {
+     stop(); 
+    }  
+ }
+
+void CPUCoreBlock::setupIntSP(uint64 index,uint64 SP)
+ {
+  if( index<cores.getLen() )
+    {
+     cores[index].setupIntSP(SP); 
+    }
+  else
+    {
+     stop(); 
+    }  
+ }
+
+void CPUCoreBlock::setupSysVMT(uint64 pa)
+ {
+  sysmap.setup(pa);
  }
 
 CPUCoreBlock::CPUCoreBlock()
