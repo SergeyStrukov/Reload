@@ -19,6 +19,20 @@
 
 namespace Basis {
 
+/* functions */  
+
+uint64 Ext32to64(uint8 sign,uint32 val);
+
+uint64 Ext16to64(uint8 sign,uint16 val);
+
+uint64 Ext8to64(uint8 sign,uint8 val);
+
+uint64 Ext32to64(uint8 sign,uint64 val,uint8 part);
+
+uint64 Ext16to64(uint8 sign,uint64 val,uint8 part);
+
+uint64 Ext8to64(uint8 sign,uint64 val,uint8 part);
+
 /* classes */
 
 struct FlagBits;
@@ -80,7 +94,11 @@ class CPUCore : NoCopy
 
    FlagBits condFlags() const { return {regs[RegFlags]>>(command.flag*4)}; }
 
-   bool testCond();
+   bool testCond() const;
+
+   uint64 get64(const RegArg &reg) const;
+   uint64 get64(const ConstArg &cnst) const;
+   uint64 get64(const ConstRegArg &reg) const;
 
    void executeCast();
    void executeNeg();

@@ -17,9 +17,47 @@
 
 namespace Basis {
 
+/* functions */  
+
+uint64 Ext32to64(uint8 sign,uint32 val)
+ {
+  if( sign && (val>>31) ) return uint64(val)-OneBit(32);
+
+  return val;
+ }
+
+uint64 Ext16to64(uint8 sign,uint16 val)
+ {
+  if( sign && (val>>15) ) return uint64(val)-OneBit(16);
+
+  return val;
+ }
+
+uint64 Ext8to64(uint8 sign,uint8 val)
+ {
+  if( sign && (val>>7) ) return uint64(val)-OneBit(8);
+
+  return val;
+ }
+
+uint64 Ext32to64(uint8 sign,uint64 val,uint8 part)
+ {
+  return Ext32to64(sign,uint32( val>>(part*32) ));
+ }
+
+uint64 Ext16to64(uint8 sign,uint64 val,uint8 part)
+ {
+  return Ext16to64(sign,uint16( val>>(part*16) ));
+ }
+
+uint64 Ext8to64(uint8 sign,uint64 val,uint8 part)
+ {
+  return Ext8to64(sign,uint8( val>>(part*8) ));
+ }
+
 /* class CPUCore */
 
-bool CPUCore::testCond()
+bool CPUCore::testCond() const
  {
   switch( command.cond )
     {
@@ -46,8 +84,58 @@ bool CPUCore::testCond()
      case CmdIfZNisO : return condFlags().isZNisO();
      case CmdNotZNisO : return !condFlags().isZNisO();
 
-     default: return false; 
+     default: 
+      {
+       Printf(Exception,"Basis::CPUCore::testCond() : unknown condition code #;",command.cond); 
+
+       return false;
+      }
     }
+ }
+
+uint64 CPUCore::get64(const RegArg &reg) const
+ {
+  switch( reg.width )
+    {
+     case 0 : // 64
+       return regs[reg.num];
+     break;
+
+     case 1 : // 32
+       return Ext32to64(reg.sign,regs[reg.num/2],reg.num%2);
+     break;
+
+     case 2 : // 16
+       return Ext16to64(reg.sign,regs[reg.num/4],reg.num%4);
+     break;
+
+     case 3 : // 8
+       return Ext8to64(reg.sign,regs[reg.num/8],reg.num%8);
+     break;
+
+     default: 
+      {
+       Printf(Exception,"Basis::CPUCore::get64(...) : unknown register width #;",reg.width); 
+
+       return 0;
+      }
+    }
+ }
+
+uint64 CPUCore::get64(const ConstArg &cnst) const
+ {
+  if( cnst.ext )
+    return cmd[1];
+  else
+    return cnst.val;
+ }
+
+uint64 CPUCore::get64(const ConstRegArg &reg) const
+ {
+  if( reg.isReg ) 
+    return get64(reg.reg);
+  else  
+    return get64(reg.cnst);
  }
 
 void CPUCore::executeCast()
@@ -177,32 +265,44 @@ void CPUCore::executeGetReg()
 
 void CPUCore::executeSetupCoreVMT()
  {
-  // TODO
+  block->setupCoreVMT(get64(command.dst),get64(command.src1));
+
+  updatePC();
  }
 
 void CPUCore::executeSetupSysPC()
  {
-  // TODO
+  block->setupSysPC(get64(command.dst),get64(command.src1));
+
+  updatePC();
  }
 
 void CPUCore::executeSetupSysSP()
  {
-  // TODO
+  block->setupSysSP(get64(command.dst),get64(command.src1));
+
+  updatePC();
  }
 
 void CPUCore::executeSetupIntPC()
  {
-  // TODO
+  block->setupIntPC(get64(command.dst),get64(command.src1));
+
+  updatePC();
  }
 
 void CPUCore::executeSetupIntSP()
  {
-  // TODO
+  block->setupIntSP(get64(command.dst),get64(command.src1));
+
+  updatePC();
  }
 
 void CPUCore::executeSetupSysVMT()
  {
-  // TODO
+  block->setupSysVMT(get64(command.src1));
+
+  updatePC();
  }
 
 void CPUCore::executeSysEntry()
