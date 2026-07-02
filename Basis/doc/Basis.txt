@@ -85,17 +85,17 @@ debug RCsrc
 
 ====================================
 
-setupCoreVMT RCsrc
+setupCoreVMT Rdst RCsrc
+
+setupSysPC Rdst RCsrc
+
+setupSysSP Rdst RCsrc
+
+setupIntPC Rdst RCsrc
+
+setupIntSP Rdst RCsrc
 
 setupSysVMT RCsrc
-
-setupSysPC RCsrc
-
-setupSysSP RCsrc
-
-setupIntPC RCsrc
-
-setupIntSP RCsrc
 
 ------------------------------------
 

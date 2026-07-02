@@ -102,22 +102,22 @@ enum CmdOpcode // 8 bit
   // hole
 
   CmdSysBase = 128+32,
-  CmdSetupCoreVMT = CmdSysBase, // src1
-  CmdSetupSysVMT,
-  CmdSetupSysPC,
-  CmdSetupSysSP,
-  CmdSetupIntPC,
-  CmdSetupIntSP,                
+  CmdSetupCoreVMT = CmdSysBase, // dst src1
+  CmdSetupSysPC,                // dst src1
+  CmdSetupSysSP,                // dst src1
+  CmdSetupIntPC,                // dst src1
+  CmdSetupIntSP,                // dst src1
+  CmdSetupSysVMT,               // src1
   CmdSysEntry,                  //
-  CmdSysExit,
-  CmdMemEnable,
-  CmdMemDisable,
-  CmdCacheCoreClear,
-  CmdCacheSysClear,
-  CmdCoreEnable,
-  CmdCoreDisable,
-  CmdCoreStop,
-  CmdSysLim,
+  CmdSysExit,                   // 
+  CmdMemEnable,                 //
+  CmdMemDisable,                // 
+  CmdCacheCoreClear,            //
+  CmdCacheSysClear,             //
+  CmdCoreEnable,                // 
+  CmdCoreDisable,               //
+  CmdCoreStop,                  //
+  CmdSysLim,  
 
   // hole
 
@@ -186,9 +186,10 @@ struct ExtRegArg // 5 bit
 
 /* struct ConstArg */ 
 
-struct ConstArg // > 1 bit
+struct ConstArg // >= 2 bit
  {
   uint8 ext : 1 ;
+  uint8 sign : 1 ;
   uint64 val;
 
   void decode(uint64 cmd,unsigned width);

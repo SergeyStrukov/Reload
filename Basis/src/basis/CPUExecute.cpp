@@ -180,11 +180,6 @@ void CPUCore::executeSetupCoreVMT()
   // TODO
  }
 
-void CPUCore::executeSetupSysVMT()
- {
-  // TODO
- }
-
 void CPUCore::executeSetupSysPC()
  {
   // TODO
@@ -201,6 +196,11 @@ void CPUCore::executeSetupIntPC()
  }
 
 void CPUCore::executeSetupIntSP()
+ {
+  // TODO
+ }
+
+void CPUCore::executeSetupSysVMT()
  {
   // TODO
  }
@@ -314,11 +314,11 @@ void CPUCore::executeOp()
      // sys op
 
      case CmdSetupCoreVMT : executeSetupCoreVMT(); break;
-     case CmdSetupSysVMT : executeSetupSysVMT(); break;
      case CmdSetupSysPC : executeSetupSysPC(); break;
      case CmdSetupSysSP : executeSetupSysSP(); break;
      case CmdSetupIntPC : executeSetupIntPC(); break;
      case CmdSetupIntSP : executeSetupIntSP(); break;
+     case CmdSetupSysVMT : executeSetupSysVMT(); break;
      case CmdSysEntry : executeSysEntry(); break;
      case CmdSysExit : executeSysExit(); break;
      case CmdMemEnable : executeMemEnable(); break;

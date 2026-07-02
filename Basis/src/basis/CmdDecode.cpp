@@ -90,8 +90,13 @@ void ConstArg::decode(uint64 cmd,unsigned width)
  {
   ext=BitField(cmd,width-1,1);
 
-  if( !ext )
+  if( ext )
     {
+     sign=BitField(cmd,width-2,1);
+    }
+  else
+    {
+     sign=1; 
      val=BitSField(cmd,0,width-1);
     }  
  }
@@ -450,6 +455,25 @@ uint32 Cmd::decode(uint64 cmd)
   if( opcode>=CmdSysBase && opcode<CmdSysLim )
     {
      if( opcode<=CmdSetupIntSP )
+       {
+        if( !dst.decode(cmd>>39) )
+          {
+           opcode=CmdUndef;   
+
+           return 1;
+          }
+
+        if( !src1.decode(cmd,39) ) 
+          {
+           opcode=CmdUndef;
+
+           return 1;
+          }
+
+        return 1+src1.ext;
+       }
+
+     if( opcode==CmdSetupSysVMT )
        {
         if( !src1.decode(cmd,48) ) 
           {
