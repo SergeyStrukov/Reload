@@ -21,9 +21,33 @@ namespace Basis {
 
 bool CPUCore::testCond()
  {
-  return true;
-  
-  // TODO
+  switch( command.cond )
+    {
+     case CmdAlways : return true;
+
+     case CmdIfZ : return condFlags().bitZ();
+     case CmdNotZ : return !condFlags().bitZ();
+
+     case CmdIfC : return condFlags().bitC();
+     case CmdNotC : return !condFlags().bitC();
+
+     case CmdIfN : return condFlags().bitN();
+     case CmdNotN : return !condFlags().bitN();
+
+     case CmdIfO : return condFlags().bitO();
+     case CmdNotO : return !condFlags().bitO();
+
+     case CmdIfCnZ : return condFlags().isCnZ();
+     case CmdNotCnZ : return !condFlags().isCnZ();
+
+     case CmdIfNisO : return condFlags().isNisO();
+     case CmdNotNisO : return !condFlags().isNisO();
+
+     case CmdIfZNisO : return condFlags().isZNisO();
+     case CmdNotZNisO : return !condFlags().isZNisO();
+
+     default: return false; 
+    }
  }
 
 void CPUCore::executeCast()
@@ -62,6 +86,166 @@ void CPUCore::executeDiv()
  }
 
 void CPUCore::executeRem()
+ {
+  // TODO
+ }
+
+void CPUCore::executeLoadAddr()
+ {
+  // TODO
+ }
+
+void CPUCore::executeLoad()
+ {
+  // TODO
+ }
+
+void CPUCore::executeStore()
+ {
+  // TODO
+ }
+
+void CPUCore::executeRegLoadAddr()
+ {
+  // TODO
+ }
+
+void CPUCore::executeRegLoad()
+ {
+  // TODO
+ }
+
+void CPUCore::executeRegStore()
+ {
+  // TODO
+ }
+
+void CPUCore::executeLock()
+ {
+  // TODO
+ }
+
+void CPUCore::executeUnlock()
+ {
+  // TODO
+ }
+
+void CPUCore::executeJmp()
+ {
+  // TODO
+ }
+
+void CPUCore::executeJmpPC()
+ {
+  // TODO
+ }
+
+void CPUCore::executeCall()
+ {
+  // TODO
+ }
+
+void CPUCore::executeCallPC()
+ {
+  // TODO
+ }
+
+void CPUCore::executeRet()
+ {
+  // TODO
+ }
+
+void CPUCore::executeCoreIndex()
+ {
+  // TODO
+ }
+
+void CPUCore::executeDebug()
+ {
+  // TODO
+ }
+
+void CPUCore::executeSetReg()
+ {
+  // TODO
+ }
+
+void CPUCore::executeGetReg()
+ {
+  // TODO
+ }
+
+void CPUCore::executeSetupCoreVMT()
+ {
+  // TODO
+ }
+
+void CPUCore::executeSetupSysVMT()
+ {
+  // TODO
+ }
+
+void CPUCore::executeSetupSysPC()
+ {
+  // TODO
+ }
+
+void CPUCore::executeSetupSysSP()
+ {
+  // TODO
+ }
+
+void CPUCore::executeSetupIntPC()
+ {
+  // TODO
+ }
+
+void CPUCore::executeSetupIntSP()
+ {
+  // TODO
+ }
+
+void CPUCore::executeSysEntry()
+ {
+  // TODO
+ }
+
+void CPUCore::executeSysExit()
+ {
+  // TODO
+ }
+
+void CPUCore::executeMemEnable()
+ {
+  // TODO
+ }
+
+void CPUCore::executeMemDisable()
+ {
+  // TODO
+ }
+
+void CPUCore::executeCacheCoreClear()
+ {
+  // TODO
+ }
+
+void CPUCore::executeCacheSysClear()
+ {
+  // TODO
+ }
+
+void CPUCore::executeCoreEnable()
+ {
+  // TODO
+ }
+
+void CPUCore::executeCoreDisable()
+ {
+  // TODO
+ }
+
+void CPUCore::executeCoreStop()
  {
   // TODO
  }

@@ -140,8 +140,8 @@ enum CmdCond // 4 bit
   CmdIfO,      // O != 0
   CmdNotO,     // O == 0
 
-  CmdIfCZ,     // C!=0 && Z==0
-  CmdNotCZ,    // C==0 || Z==1
+  CmdIfCnZ,    // C!=0 && Z==0
+  CmdNotCnZ,   // C==0 || Z==1
 
   CmdIfNisO,   // N == O
   CmdNotNisO,  // N != O

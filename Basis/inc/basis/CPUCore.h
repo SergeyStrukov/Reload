@@ -21,9 +21,29 @@ namespace Basis {
 
 /* classes */
 
+struct FlagBits;
+
 class CPUCore;
 
 class CPUCoreBlock;
+
+/* struct FlagBits */
+
+struct FlagBits
+ {
+  uint64 bits;
+
+  uint8 bitZ() const { return bits&1u; }
+  uint8 bitC() const { return bits&2u; }
+  uint8 bitN() const { return bits&4u; }
+  uint8 bitO() const { return bits&8u; }
+
+  bool isCnZ() const { return (bits&3u)==2 ; }
+
+  bool isNisO() const { uint8 m=bits&12u; return m==0 || m==12 ; }
+
+  bool isZNisO() const { uint8 m=bits&13u; return m==1 || m==13 ; }
+ };
 
 /* class CPUCore */
 
@@ -51,6 +71,8 @@ class CPUCore : NoCopy
   private: 
 
    bool userMode() const { return modeS==0 && modeI==0 ; }
+
+   FlagBits condFlags() const { return {regs[RegFlags]>>(command.flag*4)}; }
 
    bool testCond();
 
