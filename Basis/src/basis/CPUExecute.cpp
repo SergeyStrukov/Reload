@@ -34,20 +34,17 @@ uint64 Ext16to64(uint8 sign,uint16 val) { return ExtTo64<16,uint16>(sign,val); }
 
 uint64 Ext8to64(uint8 sign,uint8 val) { return ExtTo64<8,uint8>(sign,val); }
 
-uint64 Ext32to64(uint8 sign,uint64 val,uint8 part)
+template <unsigned W,UIntType UInt>
+uint64 ExtTo64(uint8 sign,uint64 val,uint8 part)
  {
-  return Ext32to64(sign,uint32( val>>(part*32u) ));
+  return ExtTo64<W,UInt>(sign,UInt( val>>(part*W) ));
  }
 
-uint64 Ext16to64(uint8 sign,uint64 val,uint8 part)
- {
-  return Ext16to64(sign,uint16( val>>(part*16u) ));
- }
+uint64 Ext32to64(uint8 sign,uint64 val,uint8 part) { return ExtTo64<32,uint32>(sign,val,part); }
 
-uint64 Ext8to64(uint8 sign,uint64 val,uint8 part)
- {
-  return Ext8to64(sign,uint8( val>>(part*8u) ));
- }
+uint64 Ext16to64(uint8 sign,uint64 val,uint8 part) { return ExtTo64<16,uint16>(sign,val,part); }
+
+uint64 Ext8to64(uint8 sign,uint64 val,uint8 part) { return ExtTo64<8,uint8>(sign,val,part); }
 
 template <unsigned W>
 void SetPart(uint64 &reg,uint8 part,uint64 val)

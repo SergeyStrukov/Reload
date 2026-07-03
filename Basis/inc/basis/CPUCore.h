@@ -30,7 +30,7 @@ uint64 Ext16to64(uint8 sign,uint16 val);
 
 uint64 Ext8to64(uint8 sign,uint8 val);
 
-template <unsigned W>
+template <unsigned W,UIntType UInt>
 uint64 ExtTo64(uint8 sign,uint64 val,uint8 part);
 
 uint64 Ext32to64(uint8 sign,uint64 val,uint8 part);
