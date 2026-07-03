@@ -14,6 +14,7 @@
 #include "basis/CPUCore.h"
 
 #include <CCore/inc/Exception.h>
+#include <CCore/inc/Print.h>
 
 namespace Basis {
 
@@ -53,6 +54,21 @@ uint64 Ext16to64(uint8 sign,uint64 val,uint8 part)
 uint64 Ext8to64(uint8 sign,uint64 val,uint8 part)
  {
   return Ext8to64(sign,uint8( val>>(part*8) ));
+ }
+
+void SetPart32(uint64 &reg,uint8 part,uint32 val)
+ {
+  // TODO
+ }
+
+void SetPart16(uint64 &reg,uint8 part,uint16 val)
+ {
+  // TODO
+ }
+
+void SetPart8(uint64 &reg,uint8 part,uint8 val)
+ {
+  // TODO
  }
 
 /* class CPUCore */
@@ -138,6 +154,33 @@ uint64 CPUCore::get64(const ConstRegArg &reg) const
     return get64(reg.cnst);
  }
 
+void CPUCore::set64(const RegArg &reg,uint64 val)
+ {
+  switch( reg.width )
+    {
+     case 0 : // 64
+       regs[reg.num]=val;
+     break;
+
+     case 1 : // 32
+       SetPart32(regs[reg.num/2],reg.num%2,val);
+     break;
+
+     case 2 : // 16
+       SetPart16(regs[reg.num/4],reg.num%4,val);
+     break;
+
+     case 3 : // 8
+       SetPart8(regs[reg.num/8],reg.num%8,val);
+     break;
+
+     default: 
+      {
+       Printf(Exception,"Basis::CPUCore::set64(...) : unknown register width #;",reg.width); 
+      }
+    }
+ }
+
 void CPUCore::executeCast()
  {
   // TODO
@@ -220,47 +263,92 @@ void CPUCore::executeUnlock()
 
 void CPUCore::executeJmp()
  {
-  // TODO
+  uint64 PC=get64(command.src1);
+
+  regs[RegPC]=PC;
  }
 
 void CPUCore::executeJmpPC()
  {
-  // TODO
+  updatePC();
+
+  uint64 dPC=get64(command.src1);
+
+  regs[RegPC]+=dPC;
  }
 
 void CPUCore::executeCall()
  {
-  // TODO
+  uint64 PC=get64(command.src1);
+
+  regs[RegLR]=regs[RegPC];
+  regs[RegPC]=PC;
  }
 
 void CPUCore::executeCallPC()
  {
-  // TODO
+  updatePC();
+
+  uint64 dPC=get64(command.src1);
+
+  regs[RegLR]=regs[RegPC];
+  regs[RegPC]+=dPC;
  }
 
 void CPUCore::executeRet()
  {
-  // TODO
+  regs[RegPC]=regs[RegLR];
  }
 
 void CPUCore::executeCoreIndex()
  {
-  // TODO
+  set64(command.dst,index);
+
+  updatePC();
  }
 
 void CPUCore::executeDebug()
  {
-  // TODO
+  uint64 val=get64(command.src1);
+
+  Printf(Con,"DebugCore#; PC = #; Val = #;",index,regs[RegPC],val);
+
+  updatePC();
  }
 
 void CPUCore::executeSetReg()
  {
-  // TODO
+  uint64 val=get64(command.src1);
+
+  if( userMode() )
+    {
+     if( command.ereg.num==RegPC || command.ereg.num==RegCLK || command.ereg.num==RegTBP ) 
+       {
+        finError(StatusErrorROReg);
+        return;
+       }
+    }
+  else
+    {
+     if( command.ereg.num==RegPC ) 
+       {
+        block->fatal(FatalROReg);
+        return;
+       }
+    }  
+
+  regs[command.ereg.num]=val;
+
+  updatePC();
  }
 
 void CPUCore::executeGetReg()
  {
-  // TODO
+  uint64 val=regs[command.ereg.num];
+
+  set64(command.dst,val);
+
+  updatePC();
  }
 
 void CPUCore::executeSetupCoreVMT()

@@ -33,6 +33,12 @@ uint64 Ext16to64(uint8 sign,uint64 val,uint8 part);
 
 uint64 Ext8to64(uint8 sign,uint64 val,uint8 part);
 
+void SetPart32(uint64 &reg,uint8 part,uint32 val);
+
+void SetPart16(uint64 &reg,uint8 part,uint16 val);
+
+void SetPart8(uint64 &reg,uint8 part,uint8 val);
+
 /* classes */
 
 struct FlagBits;
@@ -99,6 +105,8 @@ class CPUCore : NoCopy
    uint64 get64(const RegArg &reg) const;
    uint64 get64(const ConstArg &cnst) const;
    uint64 get64(const ConstRegArg &reg) const;
+
+   void set64(const RegArg &reg,uint64 val);
 
    void executeCast();
    void executeNeg();

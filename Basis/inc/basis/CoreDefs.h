@@ -40,6 +40,7 @@ enum Status
   StatusErrorVoid,
   
   StatusErrorCmd,
+  StatusErrorROReg,
  };
 
 const char * GetTextDesc(Status status); 
@@ -47,6 +48,7 @@ const char * GetTextDesc(Status status);
 enum FatalCode
  {
   FatalCoreIndex = 0,
+  FatalROReg,
  };
 
 const char * GetTextDesc(FatalCode code); 

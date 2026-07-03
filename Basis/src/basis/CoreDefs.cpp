@@ -21,20 +21,21 @@ const char * GetTextDesc(Status status)
  {
   static const char *const Table[]=
    {
-    "StatusDone",
-    "StatusPending",
-    "StatusError",
+    "Status Done",
+    "Status Pending",
+    "Status Error",
 
-    "StatusErrorAlign",
-    "StatusErrorNoX",
-    "StatusErrorNoR",
-    "StatusErrorNoW",
+    "Status Error Align",
+    "Status Error NoX",
+    "Status Error NoR",
+    "Status Error NoW",
 
-    "StatusErrorMap",
-    "StatusErrorAbsent",
-    "StatusErrorVoid",
+    "Status Error Map",
+    "Status Error Absent",
+    "Status Error Void",
     
-    "StatusErrorCmd",
+    "Status Error Cmd",
+    "Status Error ROReg",
    };
 
   return Table[status];  
@@ -45,6 +46,7 @@ const char * GetTextDesc(FatalCode code)
   static const char *const Table[]=
    {
     "Bad core index",
+    "Read-only register",
    };
 
   return Table[code];  

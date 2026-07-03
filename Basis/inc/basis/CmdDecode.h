@@ -42,14 +42,14 @@ enum RegIndex // 5 bit
   RegR14,
   RegR15,
 
-  RegPC,
+  RegPC,  // RO
   RegLR,
   RegSP,
   RegBP,
   RegOP,
 
   RegCTX,
-  RegCLK, // RO
+  RegCLK, // RO in user mode
   RegTBP, // RO in user mode
   RegFlags,
 

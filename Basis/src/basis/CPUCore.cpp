@@ -155,6 +155,8 @@ void CPUCore::setupIntSP(uint64 SP)
 
 void CPUCore::step()
  {
+  regs[RegCLK]++;
+
   if( memPending )
     {
      Status status=mem.pending(); 
