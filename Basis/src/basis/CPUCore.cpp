@@ -160,7 +160,7 @@ void CPUCore::setupIntSP(uint64 SP)
 
 void CPUCore::step()
  {
-  regs[RegCLK]++;
+  if( userMode() ) regs[RegCLK]++;
 
   if( memPending )
     {
