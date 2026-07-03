@@ -388,12 +388,36 @@ void CPUCore::executeSetupSysVMT()
 
 void CPUCore::executeSysEntry()
  {
-  // TODO
+  if( !userMode() )
+    {
+     block->fatal(FatalSysEntry,index,regs[RegPC]); 
+     return;
+    }
+
+  updatePC();
+
+  regs[RegR1]=regs[RegPC];
+  regs[RegR2]=regs[RegSP];
+
+  regs[RegPC]=sysPC;
+  regs[RegSP]=sysSP;
  }
 
 void CPUCore::executeSysExit()
  {
-  // TODO
+  if( userMode() )
+    {
+     finError(StatusErrorSysExit);
+     return; 
+    }
+  else if( modeI )
+    {
+     block->fatal(FatalSysExit,index,regs[RegPC]); 
+     return;
+    }
+
+  regs[RegPC]=regs[RegR1];
+  regs[RegSP]=regs[RegR2];
  }
 
 void CPUCore::executeMemEnable()

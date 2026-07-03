@@ -36,6 +36,7 @@ const char * GetTextDesc(Status status)
     
     "Status Error Cmd",
     "Status Error ROReg",
+    "Status Error SysExit in user mode",
    };
 
   return Table[status];  
@@ -47,6 +48,8 @@ const char * GetTextDesc(FatalCode code)
    {
     "Bad core index",
     "Read-only register",
+    "SysEntry in not user mode",
+    "SysExit in int mode",
    };
 
   return Table[code];  
