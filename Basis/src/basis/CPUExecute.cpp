@@ -20,26 +20,19 @@ namespace Basis {
 
 /* functions */  
 
-uint64 Ext32to64(uint8 sign,uint32 val)
+template <unsigned W,UIntType UInt>
+uint64 ExtTo64(uint8 sign,UInt val)
  {
-  if( sign && (val>>31) ) return uint64(val)-OneBit(32);
+  if( sign && (val>>(W-1)) ) return uint64(val)-OneBit(W);
 
   return val;
  }
 
-uint64 Ext16to64(uint8 sign,uint16 val)
- {
-  if( sign && (val>>15) ) return uint64(val)-OneBit(16);
+uint64 Ext32to64(uint8 sign,uint32 val) { return ExtTo64<32,uint32>(sign,val); }
 
-  return val;
- }
+uint64 Ext16to64(uint8 sign,uint16 val) { return ExtTo64<16,uint16>(sign,val); }
 
-uint64 Ext8to64(uint8 sign,uint8 val)
- {
-  if( sign && (val>>7) ) return uint64(val)-OneBit(8);
-
-  return val;
- }
+uint64 Ext8to64(uint8 sign,uint8 val) { return ExtTo64<8,uint8>(sign,val); }
 
 uint64 Ext32to64(uint8 sign,uint64 val,uint8 part)
  {
@@ -56,38 +49,23 @@ uint64 Ext8to64(uint8 sign,uint64 val,uint8 part)
   return Ext8to64(sign,uint8( val>>(part*8u) ));
  }
 
-void SetPart32(uint64 &reg,uint8 part,uint32 val)
+template <unsigned W>
+void SetPart(uint64 &reg,uint8 part,uint64 val)
  {
-  unsigned shift=part*32u;
+  unsigned shift=part*W;
 
-  uint64 mask=BitMask(32);
+  uint64 mask=BitMask(W);
 
   reg &= ~(mask<<shift);
 
-  reg |= (uint64(val)<<shift) ;
+  reg |= (val<<shift) ;
  }
 
-void SetPart16(uint64 &reg,uint8 part,uint16 val)
- {
-  unsigned shift=part*16u;
+void SetPart32(uint64 &reg,uint8 part,uint32 val) { SetPart<32>(reg,part,val); }
 
-  uint64 mask=BitMask(16);
+void SetPart16(uint64 &reg,uint8 part,uint16 val) { SetPart<16>(reg,part,val); }
 
-  reg &= ~(mask<<shift);
-
-  reg |= (uint64(val)<<shift) ;
- }
-
-void SetPart8(uint64 &reg,uint8 part,uint8 val)
- {
-  unsigned shift=part*8u;
-
-  uint64 mask=BitMask(8);
-
-  reg &= ~(mask<<shift);
-
-  reg |= (uint64(val)<<shift) ;
- }
+void SetPart8(uint64 &reg,uint8 part,uint8 val) { SetPart<8>(reg,part,val); }
 
 /* class CPUCore */
 
@@ -181,15 +159,15 @@ void CPUCore::set64(const RegArg &reg,uint64 val)
      break;
 
      case 1 : // 32
-       SetPart32(regs[reg.num/2],reg.num%2,val);
+       SetPart32(regs[reg.num/2],reg.num%2,uint32(val));
      break;
 
      case 2 : // 16
-       SetPart16(regs[reg.num/4],reg.num%4,val);
+       SetPart16(regs[reg.num/4],reg.num%4,uint16(val));
      break;
 
      case 3 : // 8
-       SetPart8(regs[reg.num/8],reg.num%8,val);
+       SetPart8(regs[reg.num/8],reg.num%8,uint8(val));
      break;
 
      default: 

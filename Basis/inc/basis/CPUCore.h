@@ -21,17 +21,26 @@ namespace Basis {
 
 /* functions */  
 
+template <unsigned W,UIntType UInt>
+uint64 ExtTo64(uint8 sign,UInt val);
+
 uint64 Ext32to64(uint8 sign,uint32 val);
 
 uint64 Ext16to64(uint8 sign,uint16 val);
 
 uint64 Ext8to64(uint8 sign,uint8 val);
 
+template <unsigned W>
+uint64 ExtTo64(uint8 sign,uint64 val,uint8 part);
+
 uint64 Ext32to64(uint8 sign,uint64 val,uint8 part);
 
 uint64 Ext16to64(uint8 sign,uint64 val,uint8 part);
 
 uint64 Ext8to64(uint8 sign,uint64 val,uint8 part);
+
+template <unsigned W>
+void SetPart(uint64 &reg,uint8 part,uint64 val);
 
 void SetPart32(uint64 &reg,uint8 part,uint32 val);
 
