@@ -111,9 +111,14 @@ class CPUCore : NoCopy
 
    bool testCond() const;
 
+   bool isROReg();
+
    uint64 get64(const RegArg &reg) const;
    uint64 get64(const ConstArg &cnst) const;
+   uint64 get64(const ConstArg &cnst,bool cmd2) const;
    uint64 get64(const ConstRegArg &reg) const;
+
+   uint64 getAddr() const;
 
    void set64(const RegArg &reg,uint64 val);
 

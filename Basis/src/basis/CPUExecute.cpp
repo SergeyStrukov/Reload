@@ -102,6 +102,30 @@ bool CPUCore::testCond() const
     }
  }
 
+bool CPUCore::isROReg()
+ {
+  if( userMode() )
+    {
+     if( command.ereg.num==RegPC || command.ereg.num==RegCLK || command.ereg.num==RegTBP ) 
+       {
+        finError(StatusErrorROReg);
+
+        return true;
+       }
+    }
+  else
+    {
+     if( command.ereg.num==RegPC ) 
+       {
+        block->fatal(FatalROReg,index,regs[RegPC]);
+
+        return true;
+       }
+    }  
+
+  return false;  
+ }
+
 uint64 CPUCore::get64(const RegArg &reg) const
  {
   switch( reg.width )
@@ -139,12 +163,48 @@ uint64 CPUCore::get64(const ConstArg &cnst) const
     return cnst.val;
  }
 
+uint64 CPUCore::get64(const ConstArg &cnst,bool cmd2) const
+ {
+  if( cnst.ext )
+    return cmd2? cmd[2] : cmd[1] ;
+  else
+    return cnst.val;
+ }
+
 uint64 CPUCore::get64(const ConstRegArg &reg) const
  {
   if( reg.isReg ) 
     return get64(reg.reg);
   else  
     return get64(reg.cnst);
+ }
+
+uint64 CPUCore::getAddr() const
+ {
+  uint64 addr=regs[command.address.base.num];
+
+  switch( command.address.type )
+    {
+     case 1 :
+      {
+       addr+=get64(command.address.src); 
+      }
+     break;
+
+     case 2 :
+      {
+       addr+=get64(command.address.src.reg)*get64(command.address.cnst1); 
+      }
+     break;
+
+     case 3 : 
+      {
+       addr+=get64(command.address.src.reg)*get64(command.address.cnst1)+get64(command.address.cnst2,command.address.cnst1.ext); 
+      }
+     break;
+    }
+
+  return addr;
  }
 
 void CPUCore::set64(const RegArg &reg,uint64 val)
@@ -216,7 +276,11 @@ void CPUCore::executeRem()
 
 void CPUCore::executeLoadAddr()
  {
-  // TODO
+  uint64 addr=getAddr();
+
+  set64(command.dst,addr);
+
+  updatePC();  
  }
 
 void CPUCore::executeLoad()
@@ -231,12 +295,24 @@ void CPUCore::executeStore()
 
 void CPUCore::executeRegLoadAddr()
  {
-  // TODO
+  if( isROReg() ) return;
+
+  uint64 addr=getAddr();
+
+  regs[command.ereg.num]=addr;
+
+  updatePC();  
  }
 
 void CPUCore::executeRegLoad()
  {
+  if( isROReg() ) return;
+
+  uint64 addr=getAddr();
+  
   // TODO
+
+  updatePC();  
  }
 
 void CPUCore::executeRegStore()
@@ -311,24 +387,9 @@ void CPUCore::executeDebug()
 
 void CPUCore::executeSetReg()
  {
-  uint64 val=get64(command.src1);
+  if( isROReg() ) return;
 
-  if( userMode() )
-    {
-     if( command.ereg.num==RegPC || command.ereg.num==RegCLK || command.ereg.num==RegTBP ) 
-       {
-        finError(StatusErrorROReg);
-        return;
-       }
-    }
-  else
-    {
-     if( command.ereg.num==RegPC ) 
-       {
-        block->fatal(FatalROReg,index,regs[RegPC]);
-        return;
-       }
-    }  
+  uint64 val=get64(command.src1);
 
   regs[command.ereg.num]=val;
 
