@@ -325,7 +325,7 @@ void CPUCore::executeSetReg()
     {
      if( command.ereg.num==RegPC ) 
        {
-        block->fatal(FatalROReg);
+        block->fatal(FatalROReg,index,regs[RegPC]);
         return;
        }
     }  
@@ -346,35 +346,35 @@ void CPUCore::executeGetReg()
 
 void CPUCore::executeSetupCoreVMT()
  {
-  block->setupCoreVMT(get64(command.dst),get64(command.src1));
+  block->setupCoreVMT(get64(command.dst),get64(command.src1),index,regs[RegPC]);
 
   updatePC();
  }
 
 void CPUCore::executeSetupSysPC()
  {
-  block->setupSysPC(get64(command.dst),get64(command.src1));
+  block->setupSysPC(get64(command.dst),get64(command.src1),index,regs[RegPC]);
 
   updatePC();
  }
 
 void CPUCore::executeSetupSysSP()
  {
-  block->setupSysSP(get64(command.dst),get64(command.src1));
+  block->setupSysSP(get64(command.dst),get64(command.src1),index,regs[RegPC]);
 
   updatePC();
  }
 
 void CPUCore::executeSetupIntPC()
  {
-  block->setupIntPC(get64(command.dst),get64(command.src1));
+  block->setupIntPC(get64(command.dst),get64(command.src1),index,regs[RegPC]);
 
   updatePC();
  }
 
 void CPUCore::executeSetupIntSP()
  {
-  block->setupIntSP(get64(command.dst),get64(command.src1));
+  block->setupIntSP(get64(command.dst),get64(command.src1),index,regs[RegPC]);
 
   updatePC();
  }

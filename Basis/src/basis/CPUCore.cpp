@@ -246,7 +246,7 @@ void CPUCoreBlock::enableCores()
   modeCore=true;
  }
 
-void CPUCoreBlock::setupCoreVMT(uint64 index,uint64 pa)
+void CPUCoreBlock::setupCoreVMT(uint64 index,uint64 pa,uint32 exeIndex,uint64 exePC)
  {
   if( index<cores.getLen() )
     {
@@ -254,11 +254,11 @@ void CPUCoreBlock::setupCoreVMT(uint64 index,uint64 pa)
     }
   else
     {
-     fatal(FatalCoreIndex); 
+     fatal(FatalCoreIndex,exeIndex,exePC); 
     }  
  }
 
-void CPUCoreBlock::setupSysPC(uint64 index,uint64 PC)
+void CPUCoreBlock::setupSysPC(uint64 index,uint64 PC,uint32 exeIndex,uint64 exePC)
  {
   if( index<cores.getLen() )
     {
@@ -266,11 +266,11 @@ void CPUCoreBlock::setupSysPC(uint64 index,uint64 PC)
     }
   else
     {
-     fatal(FatalCoreIndex); 
+     fatal(FatalCoreIndex,exeIndex,exePC); 
     }  
  }
 
-void CPUCoreBlock::setupSysSP(uint64 index,uint64 SP)
+void CPUCoreBlock::setupSysSP(uint64 index,uint64 SP,uint32 exeIndex,uint64 exePC)
  {
   if( index<cores.getLen() )
     {
@@ -278,11 +278,11 @@ void CPUCoreBlock::setupSysSP(uint64 index,uint64 SP)
     }
   else
     {
-     fatal(FatalCoreIndex); 
+     fatal(FatalCoreIndex,exeIndex,exePC); 
     }  
  }
 
-void CPUCoreBlock::setupIntPC(uint64 index,uint64 PC)
+void CPUCoreBlock::setupIntPC(uint64 index,uint64 PC,uint32 exeIndex,uint64 exePC)
  {
   if( index<cores.getLen() )
     {
@@ -290,11 +290,11 @@ void CPUCoreBlock::setupIntPC(uint64 index,uint64 PC)
     }
   else
     {
-     fatal(FatalCoreIndex); 
+     fatal(FatalCoreIndex,exeIndex,exePC); 
     }  
  }
 
-void CPUCoreBlock::setupIntSP(uint64 index,uint64 SP)
+void CPUCoreBlock::setupIntSP(uint64 index,uint64 SP,uint32 exeIndex,uint64 exePC)
  {
   if( index<cores.getLen() )
     {
@@ -302,7 +302,7 @@ void CPUCoreBlock::setupIntSP(uint64 index,uint64 SP)
     }
   else
     {
-     fatal(FatalCoreIndex); 
+     fatal(FatalCoreIndex,exeIndex,exePC); 
     }  
  }
 
@@ -319,9 +319,9 @@ CPUCoreBlock::~CPUCoreBlock()
  {
  }
 
-void CPUCoreBlock::fatal(FatalCode code)
+void CPUCoreBlock::fatal(FatalCode code,uint32 index,uint64 PC)
  {
-  Printf(Con,"Fatal CPU stop: #;\n",code);
+  Printf(Con,"Fatal CPU stop: core #; PC = #.h; #;\n",index,PC,code);
 
   stop();
  }

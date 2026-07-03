@@ -232,19 +232,19 @@ class CPUCoreBlock : NoCopy
 
    void disableCores() { modeCore=false; }
 
-   void setupCoreVMT(uint64 index,uint64 pa);
+   void setupCoreVMT(uint64 index,uint64 pa,uint32 exeIndex,uint64 exePC);
 
-   void setupSysPC(uint64 index,uint64 PC);
+   void setupSysPC(uint64 index,uint64 PC,uint32 exeIndex,uint64 exePC);
 
-   void setupSysSP(uint64 index,uint64 SP);
+   void setupSysSP(uint64 index,uint64 SP,uint32 exeIndex,uint64 exePC);
 
-   void setupIntPC(uint64 index,uint64 PC);
+   void setupIntPC(uint64 index,uint64 PC,uint32 exeIndex,uint64 exePC);
 
-   void setupIntSP(uint64 index,uint64 SP);
+   void setupIntSP(uint64 index,uint64 SP,uint32 exeIndex,uint64 exePC);
 
    void setupSysVMT(uint64 pa);
 
-   void fatal(FatalCode code);
+   void fatal(FatalCode code,uint32 index,uint64 PC);
 
    void stop() { modeStop=true; }
 
