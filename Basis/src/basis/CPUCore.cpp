@@ -22,7 +22,12 @@ namespace Basis {
 
 void CPUCore::finError(Status status)
  {
-  Printf(Exception,"Basis::CPUCore::finError(#;)",status);
+  finError(status,regs[RegPC]);
+ }
+
+void CPUCore::finError(Status status,uint64 va)
+ {
+  Printf(Exception,"Basis::CPUCore::finError(#;,#.h;)",status,va);
 
   // TODO
  }
@@ -54,9 +59,9 @@ void CPUCore::step1()
     {
      cmdInd++;  
 
-     uint64 PC=regs[RegPC]; 
+     uint64 va=cmdVA();
 
-     Status status=mem.fetchCommand(PC+cmdInd*sizeof (uint64),cmd[cmdInd]);
+     Status status=mem.fetchCommand(va,cmd[cmdInd]);
 
      if( status==StatusPending ) 
        {
@@ -66,7 +71,7 @@ void CPUCore::step1()
 
      if( status!=StatusDone )
        {
-        finError(status);  
+        finError(status,va);  
         return;
        } 
     }
@@ -171,7 +176,7 @@ void CPUCore::step()
        }
      else
        {
-        finError(status);  
+        finError(status,cmdVA());  
        }
     }
   else
@@ -194,7 +199,7 @@ void CPUCore::step()
        }
      else
        {
-        finError(status);  
+        finError(status,PC);  
        } 
     }
  }

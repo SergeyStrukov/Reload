@@ -43,32 +43,50 @@ uint64 Ext8to64(uint8 sign,uint8 val)
 
 uint64 Ext32to64(uint8 sign,uint64 val,uint8 part)
  {
-  return Ext32to64(sign,uint32( val>>(part*32) ));
+  return Ext32to64(sign,uint32( val>>(part*32u) ));
  }
 
 uint64 Ext16to64(uint8 sign,uint64 val,uint8 part)
  {
-  return Ext16to64(sign,uint16( val>>(part*16) ));
+  return Ext16to64(sign,uint16( val>>(part*16u) ));
  }
 
 uint64 Ext8to64(uint8 sign,uint64 val,uint8 part)
  {
-  return Ext8to64(sign,uint8( val>>(part*8) ));
+  return Ext8to64(sign,uint8( val>>(part*8u) ));
  }
 
 void SetPart32(uint64 &reg,uint8 part,uint32 val)
  {
-  // TODO
+  unsigned shift=part*32u;
+
+  uint64 mask=BitMask(32);
+
+  reg &= ~(mask<<shift);
+
+  reg |= (uint64(val)<<shift) ;
  }
 
 void SetPart16(uint64 &reg,uint8 part,uint16 val)
  {
-  // TODO
+  unsigned shift=part*16u;
+
+  uint64 mask=BitMask(16);
+
+  reg &= ~(mask<<shift);
+
+  reg |= (uint64(val)<<shift) ;
  }
 
 void SetPart8(uint64 &reg,uint8 part,uint8 val)
  {
-  // TODO
+  unsigned shift=part*8u;
+
+  uint64 mask=BitMask(8);
+
+  reg &= ~(mask<<shift);
+
+  reg |= (uint64(val)<<shift) ;
  }
 
 /* class CPUCore */

@@ -155,9 +155,12 @@ class CPUCore : NoCopy
    void executeCoreDisable();
    void executeCoreStop();
 
+   uint64 cmdVA() const { return regs[RegPC]+cmdInd*sizeof (uint64); }
+
    void updatePC() { regs[RegPC] += cmdLen*sizeof (uint64) ; }
 
    void finError(Status status);
+   void finError(Status status,uint64 va);
    void executeOp();
    void execute();
    void step1();
