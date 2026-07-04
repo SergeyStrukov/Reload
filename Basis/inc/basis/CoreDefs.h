@@ -93,6 +93,32 @@ inline constexpr uint64 BitSField(uint64 val,unsigned shift,unsigned width)
   return ret;
  }
 
+/* part functions */
+
+template <unsigned Width>
+void SetPart(uint64 &reg,uint8 part,uint64 val)
+ {
+  unsigned shift=part*Width;
+
+  uint64 mask=BitMask(Width);
+
+  reg &= ~(mask<<shift);
+
+  reg |= (val<<shift) ;
+ }
+
+inline void SetPart32(uint64 &reg,uint8 part,uint32 val) { SetPart<32>(reg,part,val); }
+
+inline void SetPart16(uint64 &reg,uint8 part,uint16 val) { SetPart<16>(reg,part,val); }
+
+inline void SetPart8(uint64 &reg,uint8 part,uint8 val) { SetPart<8>(reg,part,val); }
+
+inline uint32 GetPart32(uint64 reg,uint8 part) { return uint32(reg>>part*32u); }
+
+inline uint16 GetPart16(uint64 reg,uint8 part) { return uint16(reg>>part*16u); }
+
+inline uint8 GetPart8(uint64 reg,uint8 part) { return uint8(reg>>part*8u); }
+
 /* classes */
 
 struct VASplit;

@@ -187,24 +187,6 @@ class L1Mem : NoCopy
 
   private:
 
-   static uint32 Part32(uint64 data,uint64 pa);
-
-   static uint16 Part16(uint64 data,uint64 pa);
-
-   static uint8 Part8(uint64 data,uint64 pa);
-
-   static void InsField32(uint64 &data,uint64 val,unsigned shift);
-
-   static void InsField16(uint64 &data,uint64 val,unsigned shift);
-
-   static void InsField8(uint64 &data,uint64 val,unsigned shift);
-
-   static void Part32(uint64 &data,uint64 pa,uint32 val);
-
-   static void Part16(uint64 &data,uint64 pa,uint16 val);
-
-   static void Part8(uint64 &data,uint64 pa,uint8 val);
-  
    Status fetchCommand(uint64 &cmd,CacheLine &line);
 
    Status readData(uint8 &data,CacheLine &line);

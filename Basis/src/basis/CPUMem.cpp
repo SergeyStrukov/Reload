@@ -220,72 +220,6 @@ void Cache::find(uint64 pa,Func1 match,Func2 fresh,Func3 taken)
 
 /* class L1Mem */
 
-uint32 L1Mem::Part32(uint64 data,uint64 pa)
- {
-  uint64 shift=(pa&1u)*32;
-
-  return uint32( data>>shift );
- }
-
-uint16 L1Mem::Part16(uint64 data,uint64 pa)
- {
-  uint64 shift=(pa&3u)*16;
-
-  return uint16( data>>shift );
- }
-
-uint8 L1Mem::Part8(uint64 data,uint64 pa)
- {
-  uint64 shift=(pa&7u)*8;
-
-  return uint8( data>>shift );
- }
-
-void L1Mem::InsField32(uint64 &data,uint64 val,unsigned shift)
- {
-  uint64 mask=(uint64(1)<<32)-1;
-
-  data &= ~(mask<<shift) ;
-  data |=  (val<<shift) ;
- }
-
-void L1Mem::InsField16(uint64 &data,uint64 val,unsigned shift)
- {
-  uint64 mask=(uint64(1)<<16)-1;
-
-  data &= ~(mask<<shift) ;
-  data |=  (val<<shift) ;
- }
-
-void L1Mem::InsField8(uint64 &data,uint64 val,unsigned shift)
- {
-  uint64 mask=(uint64(1)<<8)-1;
-
-  data &= ~(mask<<shift) ;
-  data |=  (val<<shift) ;
- }
-
-void L1Mem::Part32(uint64 &data,uint64 pa,uint32 val)
- {
-  uint64 shift=(pa&1u)*32;
-
-  InsField32(data,val,shift); 
- }
-
-void L1Mem::Part16(uint64 &data,uint64 pa,uint16 val)
- {
-  uint64 shift=(pa&3u)*16;
-
-  InsField16(data,val,shift); 
- }
-
-void L1Mem::Part8(uint64 &data,uint64 pa,uint8 val)
- {
-  uint64 shift=(pa&7u)*8;
-
-  InsField8(data,val,shift); 
- }
-
 Status L1Mem::fetchCommand(uint64 &cmd,CacheLine &line)
  {
   cmd=line[pa]; 
@@ -295,21 +229,21 @@ Status L1Mem::fetchCommand(uint64 &cmd,CacheLine &line)
 
 Status L1Mem::readData(uint8 &data,CacheLine &line)
  {
-  data=Part8(line[pa],pa); 
+  data=GetPart8(line[pa],pa&7u); 
   
   return StatusDone;
  }
 
 Status L1Mem::readData(uint16 &data,CacheLine &line)
  {
-  data=Part16(line[pa],pa); 
+  data=GetPart16(line[pa],pa&3u); 
   
   return StatusDone;
  }
 
 Status L1Mem::readData(uint32 &data,CacheLine &line)
  {
-  data=Part32(line[pa],pa); 
+  data=GetPart32(line[pa],pa&1u); 
   
   return StatusDone;
  }
@@ -323,21 +257,21 @@ Status L1Mem::readData(uint64 &data,CacheLine &line)
 
 Status L1Mem::writeData(uint8 data,CacheLine &line)
  {
-  Part8(line[pa],pa,data); 
+  SetPart8(line[pa],pa&7u,data); 
   
   return StatusDone;
  }
 
 Status L1Mem::writeData(uint16 data,CacheLine &line)
  {
-  Part16(line[pa],pa,data); 
+  SetPart16(line[pa],pa&3u,data); 
   
   return StatusDone;
  }
 
 Status L1Mem::writeData(uint32 data,CacheLine &line)
  {
-  Part32(line[pa],pa,data); 
+  SetPart32(line[pa],pa&1u,data); 
   
   return StatusDone;
  }

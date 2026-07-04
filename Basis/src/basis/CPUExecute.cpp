@@ -46,30 +46,6 @@ uint64 Ext16to64(uint8 sign,uint64 val,uint8 part) { return ExtTo64<16,uint16>(s
 
 uint64 Ext8to64(uint8 sign,uint64 val,uint8 part) { return ExtTo64<8,uint8>(sign,val,part); }
 
-template <unsigned W>
-void SetPart(uint64 &reg,uint8 part,uint64 val)
- {
-  unsigned shift=part*W;
-
-  uint64 mask=BitMask(W);
-
-  reg &= ~(mask<<shift);
-
-  reg |= (val<<shift) ;
- }
-
-void SetPart32(uint64 &reg,uint8 part,uint32 val) { SetPart<32>(reg,part,val); }
-
-void SetPart16(uint64 &reg,uint8 part,uint16 val) { SetPart<16>(reg,part,val); }
-
-void SetPart8(uint64 &reg,uint8 part,uint8 val) { SetPart<8>(reg,part,val); }
-
-uint32 GetPart32(uint64 reg,uint8 part) { return uint32(reg>>part*32u); }
-
-uint16 GetPart16(uint64 reg,uint8 part) { return uint16(reg>>part*16u); }
-
-uint8 GetPart8(uint64 reg,uint8 part) { return uint8(reg>>part*8u); }
-
 /* class CPUCore */
 
 bool CPUCore::testCond() const

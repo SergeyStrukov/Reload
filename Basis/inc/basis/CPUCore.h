@@ -39,21 +39,6 @@ uint64 Ext16to64(uint8 sign,uint64 val,uint8 part);
 
 uint64 Ext8to64(uint8 sign,uint64 val,uint8 part);
 
-template <unsigned W>
-void SetPart(uint64 &reg,uint8 part,uint64 val);
-
-void SetPart32(uint64 &reg,uint8 part,uint32 val);
-
-void SetPart16(uint64 &reg,uint8 part,uint16 val);
-
-void SetPart8(uint64 &reg,uint8 part,uint8 val);
-
-uint32 GetPart32(uint64 reg,uint8 part);
-
-uint16 GetPart16(uint64 reg,uint8 part);
-
-uint8 GetPart8(uint64 reg,uint8 part);
-
 /* classes */
 
 struct FlagBits;
