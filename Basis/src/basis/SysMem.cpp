@@ -112,9 +112,9 @@ Status SysMem::writeData(uint64 pa,const uint64 line[CacheLineLen])
 
 /* class SysMemPort */ 
 
-Status SysMemPort::Port::operator () (SysMemPort &obj) const
+Status SysMemPort::Port::operator () (SysMemPort &obj,uint32 port)
  {
-  if( obj.useBank(pa) ) 
+  if( obj.useBank(port,pa) ) 
     {
      if( ret ) 
        {
@@ -131,8 +131,12 @@ Status SysMemPort::Port::operator () (SysMemPort &obj) const
     }
  }
 
-bool SysMemPort::useBank(uint64 pa)
+bool SysMemPort::useBank(uint32 port,uint64 pa)
  {
+  if( ports[port].used ) return false;
+
+  ports[port].used=true;
+
   uint64 index=pa/MemBankSize;
 
   for(ulen i=0; i<nbanks ;i++)
@@ -161,9 +165,16 @@ void SysMemPort::init(uint32 count,SysMem &mem_)
   mem=&mem_;
  }
 
+void SysMemPort::stepBeg() 
+ { 
+  nbanks=0; 
+
+  for(auto &obj : ports ) obj.used=false;
+ }
+
 Status SysMemPort::readData(uint32 port,uint64 pa,uint64 line[CacheLineLen])
  {
-  if( useBank(pa) ) 
+  if( useBank(port,pa) ) 
     {
      return mem->readData(pa,line); 
     }
@@ -177,7 +188,7 @@ Status SysMemPort::readData(uint32 port,uint64 pa,uint64 line[CacheLineLen])
 
 Status SysMemPort::writeData(uint32 port,uint64 pa,const uint64 line[CacheLineLen])
  {
-  if( useBank(pa) ) 
+  if( useBank(port,pa) ) 
     {
      return mem->writeData(pa,line); 
     }
@@ -191,7 +202,7 @@ Status SysMemPort::writeData(uint32 port,uint64 pa,const uint64 line[CacheLineLe
 
 Status SysMemPort::pending(uint32 port)
  {
-  return ports[port](*this);
+  return ports[port](*this,port);
  }
 
 } // namespace Basis    

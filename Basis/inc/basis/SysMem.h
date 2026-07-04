@@ -89,12 +89,13 @@ class SysMemPort : NoCopy
      uint64 pa;
      uint64 *ret;
      const uint64 *val;
+     bool used;
 
      void read(uint64 pa_,uint64 *ret_) { pa=pa_; ret=ret_; }
 
      void write(uint64 pa_,const uint64 *val_) { pa=pa_; ret=0; val=val_; }
 
-     Status operator () (SysMemPort &obj) const;
+     Status operator () (SysMemPort &obj,uint32 port);
     };
 
    SimpleArray<Port> ports;
@@ -106,7 +107,7 @@ class SysMemPort : NoCopy
 
   private:
 
-   bool useBank(uint64 pa);
+   bool useBank(uint32 port,uint64 pa);
   
   public:  
 
@@ -118,7 +119,7 @@ class SysMemPort : NoCopy
 
    void setModeM(bool modeM) { mem->setModeM(modeM); }
 
-   void stepBeg() { nbanks=0; }
+   void stepBeg();
 
    Status readData(uint32 port,uint64 pa,uint64 line[CacheLineLen]);
 
