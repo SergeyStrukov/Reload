@@ -133,14 +133,14 @@ bool CmdAddress::decode(uint64 cmd)
 
   type=BitField(cmd,36,2);  
 
-  if( type==0 ) 
+  if( type==CmdAddressBase ) 
     {
      ext=0;
 
      return true;
     }
 
-  if( type==1 )
+  if( type==CmdAddressBaseReg )
     {
      if( !src.decode(cmd,36) ) return false;
 
@@ -153,7 +153,7 @@ bool CmdAddress::decode(uint64 cmd)
 
   if( !src.reg.decode(cmd>>27) ) return false;
 
-  if( type==2 ) 
+  if( type==CmdAddressBaseRegConst ) 
     {
      cnst1.decode(cmd,27);
 
@@ -162,7 +162,7 @@ bool CmdAddress::decode(uint64 cmd)
      return true;
     }
 
-  if( type==3 )
+  if( type==CmdAddressBaseRegConstConst )
     {
      cnst1.decode(cmd>>16,11);
      cnst2.decode(cmd,16);
@@ -181,14 +181,14 @@ bool CmdAddress::decode39(uint64 cmd)
 
   type=BitField(cmd,32,2);  
 
-  if( type==0 ) 
+  if( type==CmdAddressBase ) 
     {
      ext=0;
 
      return true;
     }
 
-  if( type==1 )
+  if( type==CmdAddressBaseReg )
     {
      if( !src.decode(cmd,32) ) return false;
 
@@ -201,7 +201,7 @@ bool CmdAddress::decode39(uint64 cmd)
 
   if( !src.reg.decode(cmd>>23) ) return false;
 
-  if( type==2 ) 
+  if( type==CmdAddressBaseRegConst ) 
     {
      cnst1.decode(cmd,23);
 
@@ -210,7 +210,7 @@ bool CmdAddress::decode39(uint64 cmd)
      return true;
     }
 
-  if( type==3 )
+  if( type==CmdAddressBaseRegConstConst )
     {
      cnst1.decode(cmd>>12,11);
      cnst2.decode(cmd,12);
@@ -266,65 +266,63 @@ uint32 Cmd::decode(uint64 cmd)
         return 1;
        }
 
+     uint8 bitRC1=BitField(cmd,34,1);
+     uint8 bitRC2=BitField(cmd,33,1);
+
+     if( bitRC1 )
        {
-        uint8 bitRC1=BitField(cmd,34,1);
-        uint8 bitRC2=BitField(cmd,33,1);
+        src1.isReg=1;
 
-        if( bitRC1 )
+        if( !src1.reg.decode(cmd>>24) )
           {
-           src1.isReg=1;
+           opcode=CmdUndef;   
 
-           if( !src1.reg.decode(cmd>>24) )
-             {
-              opcode=CmdUndef;   
-
-              return 1;
-             }
-
-           if( bitRC2 )
-             {
-              src2.isReg=1;
-
-              if( !src2.reg.decode(cmd>>15) )
-                {
-                 opcode=CmdUndef;   
-
-                 return 1;
-                }
-
-              return 1;
-             } 
-           else
-             {
-              src2.isReg=0;   
-
-              src2.cnst.decode(cmd,24);
-
-              return 1+src2.cnst.ext;
-             } 
+           return 1;
           }
-        else if( bitRC2 )
+
+        if( bitRC2 )
           {
            src2.isReg=1;
 
-           if( !src2.reg.decode(cmd>>24) )
+           if( !src2.reg.decode(cmd>>15) )
              {
               opcode=CmdUndef;   
 
               return 1;
              }
 
-           src1.isReg=0;   
+           return 1;
+          } 
+        else
+          {
+           src2.isReg=0;   
 
-           src1.cnst.decode(cmd,24);
+           src2.cnst.decode(cmd,24);
 
-           return 1+src1.cnst.ext;
+           return 1+src2.cnst.ext;
+          } 
+       }
+     else if( bitRC2 )
+       {
+        src2.isReg=1;
+
+        if( !src2.reg.decode(cmd>>24) )
+          {
+           opcode=CmdUndef;   
+
+           return 1;
           }
 
-        opcode=CmdUndef;   
+        src1.isReg=0;   
 
-        return 1;
+        src1.cnst.decode(cmd,24);
+
+        return 1+src1.cnst.ext;
        }
+
+     opcode=CmdUndef;   
+
+     return 1;
     }
 
   if( opcode>=CmdOtherBase && opcode<CmdOtherLim )

@@ -157,7 +157,15 @@ enum RegWidth
   Reg64bit = 0 ,  
   Reg32bit,
   Reg16bit,
-  Reg8bit,
+  Reg8bit
+ }; 
+
+enum CmdAddressType
+ {
+  CmdAddressBase = 0,  
+  CmdAddressBaseReg,  
+  CmdAddressBaseRegConst,  
+  CmdAddressBaseRegConstConst  
  }; 
 
 /* classes */
