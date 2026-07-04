@@ -144,7 +144,7 @@ class Cache : NoCopy
      void clear();
     };
 
-   uint32 shift = 0 ; 
+   unsigned width = 0 ; 
    SimpleArray<Block> mem;
 
   public:

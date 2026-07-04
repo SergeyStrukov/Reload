@@ -199,9 +199,9 @@ void Cache::init(uint64 size)
      Printf(Exception,"Basis::Cache::init(#;) : too small size",size);
     }
 
-  shift=(64+CacheLineBits+NWayBits)-nbit;
+  width=nbit-(CacheLineBits+NWayBits);
 
-  mem=SimpleArray<Block>( uint64(1)<<(64-shift) );
+  mem=SimpleArray<Block>( OneBit(width) );
  }
 
 void Cache::clear()
@@ -212,8 +212,8 @@ void Cache::clear()
 template <class Func1,class Func2,class Func3>
 void Cache::find(uint64 pa,Func1 match,Func2 fresh,Func3 taken)
  {
-  uint64 index=pa>>shift;
   uint64 tag=CacheLine::Tag(pa);
+  uint64 index=tag&BitMask(width);
 
   mem[index].find(tag,match,fresh,taken);
  }
