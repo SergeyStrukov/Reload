@@ -48,6 +48,12 @@ void SetPart16(uint64 &reg,uint8 part,uint16 val);
 
 void SetPart8(uint64 &reg,uint8 part,uint8 val);
 
+uint32 GetPart32(uint64 reg,uint8 part);
+
+uint16 GetPart16(uint64 reg,uint8 part);
+
+uint8 GetPart8(uint64 reg,uint8 part);
+
 /* classes */
 
 struct FlagBits;
@@ -82,7 +88,19 @@ class CPUCore : NoCopy
    uint32 cmdInd = 0 ;
    uint32 cmdLen = 0 ;
    Cmd command;
+   
+   union 
+    {
+     uint64 temp64;
+     uint32 temp32;
+     uint16 temp16;
+     uint8 temp8;
+    };
 
+   uint64 ioAddr = 0 ; 
+   bool ioTemp = false ;
+
+   bool ioPending = false ;
    bool memPending = false ;
 
    uint64 regs[RegCount]{}; 
@@ -118,9 +136,19 @@ class CPUCore : NoCopy
    uint64 get64(const ConstArg &cnst,bool cmd2) const;
    uint64 get64(const ConstRegArg &reg) const;
 
+   uint32 get32reg(const RegArg &reg) const;
+   uint16 get16reg(const RegArg &reg) const;
+   uint8 get8reg(const RegArg &reg) const;
+
    uint64 getAddr() const;
 
    void set64(const RegArg &reg,uint64 val);
+
+   void set32reg(const RegArg &reg,uint32 val);
+   void set16reg(const RegArg &reg,uint16 val);
+   void set8reg(const RegArg &reg,uint8 val);
+
+   void completeIO(Status status);
 
    void executeCast();
    void executeNeg();

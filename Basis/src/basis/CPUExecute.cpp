@@ -64,6 +64,12 @@ void SetPart16(uint64 &reg,uint8 part,uint16 val) { SetPart<16>(reg,part,val); }
 
 void SetPart8(uint64 &reg,uint8 part,uint8 val) { SetPart<8>(reg,part,val); }
 
+uint32 GetPart32(uint64 reg,uint8 part) { return uint32(reg>>part*32u); }
+
+uint16 GetPart16(uint64 reg,uint8 part) { return uint16(reg>>part*16u); }
+
+uint8 GetPart8(uint64 reg,uint8 part) { return uint8(reg>>part*8u); }
+
 /* class CPUCore */
 
 bool CPUCore::testCond() const
@@ -179,6 +185,21 @@ uint64 CPUCore::get64(const ConstRegArg &reg) const
     return get64(reg.cnst);
  }
 
+uint32 CPUCore::get32reg(const RegArg &reg) const
+ {
+  return GetPart32(regs[reg.num/2],reg.num%2);
+ }
+
+uint16 CPUCore::get16reg(const RegArg &reg) const
+ {
+  return GetPart16(regs[reg.num/4],reg.num%4);
+ }
+
+uint8 CPUCore::get8reg(const RegArg &reg) const
+ {
+  return GetPart8(regs[reg.num/8],reg.num%8);
+ }
+
 uint64 CPUCore::getAddr() const
  {
   uint64 addr=regs[command.address.base.num];
@@ -234,6 +255,44 @@ void CPUCore::set64(const RegArg &reg,uint64 val)
     }
  }
 
+void CPUCore::set32reg(const RegArg &reg,uint32 val)
+ {
+  SetPart32(regs[reg.num/2],reg.num%2,val);
+ }
+
+void CPUCore::set16reg(const RegArg &reg,uint16 val)
+ {
+  SetPart16(regs[reg.num/4],reg.num%4,val);
+ }
+
+void CPUCore::set8reg(const RegArg &reg,uint8 val)
+ {
+  SetPart8(regs[reg.num/8],reg.num%8,val);
+ }
+
+void CPUCore::completeIO(Status status)
+ {
+  if( status==StatusDone )  
+    {
+     if( ioTemp ) 
+       {
+        switch( command.dst.width )
+          {
+           case 0 : regs[command.dst.num]=temp64; break;
+           case 1 : set32reg(command.dst,temp32); break;
+           case 2 : set16reg(command.dst,temp16); break;
+           case 3 : set8reg(command.dst,temp8); break;
+          }
+       }
+
+     updatePC();  
+    }
+  else
+    {
+     finError(status,ioAddr); 
+    }
+ }
+
 void CPUCore::executeCast()
  {
   // TODO
@@ -285,12 +344,70 @@ void CPUCore::executeLoadAddr()
 
 void CPUCore::executeLoad()
  {
-  // TODO
+  uint64 addr=getAddr();
+
+  Status status=StatusError;
+
+  switch( command.dst.width )
+    {
+     case 0 : status=mem.readData(addr,temp64); break;
+     case 1 : status=mem.readData(addr,temp32); break;
+     case 2 : status=mem.readData(addr,temp16); break;
+     case 3 : status=mem.readData(addr,temp8); break;
+    }
+
+  if( status==StatusDone )  
+    {
+     switch( command.dst.width )
+       {
+        case 0 : regs[command.dst.num]=temp64; break;
+        case 1 : set32reg(command.dst,temp32); break;
+        case 2 : set16reg(command.dst,temp16); break;
+        case 3 : set8reg(command.dst,temp8); break;
+       }
+
+     updatePC();  
+    }
+  else if( status==StatusError )
+    {
+     finError(status,addr); 
+    }
+  else
+    {
+     ioAddr=addr;
+     ioTemp=true;
+     ioPending=true; 
+    }  
  }
 
 void CPUCore::executeStore()
  {
-  // TODO
+  uint64 addr=getAddr();
+
+  Status status=StatusError;
+
+  switch( command.dst.width )
+    {
+     case 0 : status=mem.writeData(addr,regs[command.dst.num]); break;
+     case 1 : status=mem.writeData(addr,get32reg(command.dst)); break;
+     case 2 : status=mem.writeData(addr,get16reg(command.dst)); break;
+     case 3 : status=mem.writeData(addr,get8reg(command.dst)); break;
+    }
+
+  if( status==StatusDone )  
+    {
+     updatePC();  
+    }
+  else if( status==StatusError )
+    {
+     finError(status,addr); 
+    }
+  else
+    {
+     ioAddr=addr;
+     ioTemp=false;
+     ioPending=true; 
+    }  
  }
 
 void CPUCore::executeRegLoadAddr()
@@ -309,15 +426,45 @@ void CPUCore::executeRegLoad()
   if( isROReg() ) return;
 
   uint64 addr=getAddr();
-  
-  // TODO
 
-  updatePC();  
+  Status status=mem.readData(addr,regs[command.ereg.num]);
+
+  if( status==StatusDone )  
+    {
+     updatePC();  
+    }
+  else if( status==StatusError )
+    {
+     finError(status,addr); 
+    }
+  else
+    {
+     ioAddr=addr;
+     ioTemp=false;
+     ioPending=true; 
+    }  
  }
 
 void CPUCore::executeRegStore()
  {
-  // TODO
+  uint64 addr=getAddr();
+
+  Status status=mem.writeData(addr,regs[command.ereg.num]);
+
+  if( status==StatusDone )  
+    {
+     updatePC();  
+    }
+  else if( status==StatusError )
+    {
+     finError(status,addr); 
+    }
+  else
+    {
+     ioAddr=addr;
+     ioTemp=false;
+     ioPending=true; 
+    }  
  }
 
 void CPUCore::executeLock()

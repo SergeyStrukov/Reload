@@ -92,6 +92,10 @@ void CPUCore::init(uint32 index_,uint64 cmdCacheSize,uint64 dataCacheSize,CPUCor
   cmdInd=0;
   cmdLen=0;
   command={};
+
+  ioAddr=0; 
+  ioTemp=false;
+  ioPending=false;
   memPending=false;
 
   Range(regs).set_null();
@@ -162,7 +166,17 @@ void CPUCore::step()
  {
   if( userMode() ) regs[RegCLK]++;
 
-  if( memPending )
+  if( ioPending )
+    {
+     Status status=mem.pending(); 
+
+     if( status==StatusPending ) return;
+
+     ioPending=false;
+
+     completeIO(status);
+    }
+  else if( memPending )
     {
      Status status=mem.pending(); 
 
