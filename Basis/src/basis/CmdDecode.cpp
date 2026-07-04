@@ -32,39 +32,41 @@ bool RegArg::decode(uint64 cmd)
 
   uint8 ind=BitField(cmd,0,8);
 
-  if( ind<16 )
+  constexpr unsigned Cnt = CommonRegCount ;
+
+  if( ind<Cnt )
     {
-     width=0;
+     width=Reg64bit;
      num=ind;  
 
      return true;
     }
 
-  ind-=16;
+  ind-=Cnt;
   
-  if( ind<2*16 )
+  if( ind<2*Cnt )
     {
-     width=1;
+     width=Reg32bit;
      num=ind;  
 
      return true;
     }
 
-  ind-=2*16;  
+  ind-=2*Cnt;  
 
-  if( ind<4*16 )
+  if( ind<4*Cnt )
     {
-     width=2;
+     width=Reg16bit;
      num=ind;  
 
      return true;
     }
 
-  ind-=4*16;  
+  ind-=4*Cnt;  
 
-  if( ind<8*16 )
+  if( ind<8*Cnt )
     {
-     width=3;
+     width=Reg8bit;
      num=ind;  
 
      return true;

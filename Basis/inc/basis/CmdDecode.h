@@ -56,6 +56,8 @@ enum RegIndex // 5 bit
   RegCount
  };
 
+inline constexpr unsigned CommonRegCount = 16 ; 
+
 enum CmdOpcode // 8 bit
  {
   CmdUndef = 0,
@@ -148,6 +150,14 @@ enum CmdCond // 4 bit
 
   CmdIfZNisO,  // Z != 0 && N == O 
   CmdNotZNisO, // Z == 0 || N != O
+ }; 
+
+enum RegWidth
+ {
+  Reg64bit = 0 ,  
+  Reg32bit,
+  Reg16bit,
+  Reg8bit,
  }; 
 
 /* classes */
