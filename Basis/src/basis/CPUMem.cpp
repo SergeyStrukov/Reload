@@ -258,6 +258,8 @@ Status L1Mem::readData(uint64 &data,CacheLine &line)
 Status L1Mem::writeData(uint8 data,CacheLine &line)
  {
   SetPart8(line[pa],pa&7u,data); 
+
+  line.dirty=1;
   
   return StatusDone;
  }
@@ -265,6 +267,8 @@ Status L1Mem::writeData(uint8 data,CacheLine &line)
 Status L1Mem::writeData(uint16 data,CacheLine &line)
  {
   SetPart16(line[pa],pa&3u,data); 
+
+  line.dirty=1;
   
   return StatusDone;
  }
@@ -272,6 +276,8 @@ Status L1Mem::writeData(uint16 data,CacheLine &line)
 Status L1Mem::writeData(uint32 data,CacheLine &line)
  {
   SetPart32(line[pa],pa&1u,data); 
+
+  line.dirty=1;
   
   return StatusDone;
  }
@@ -279,6 +285,8 @@ Status L1Mem::writeData(uint32 data,CacheLine &line)
 Status L1Mem::writeData(uint64 data,CacheLine &line)
  {
   line[pa]=data; 
+
+  line.dirty=1;
   
   return StatusDone;
  }
@@ -311,17 +319,20 @@ Status L1Mem::fresh(CacheLine &line)
 
 Status L1Mem::taken(CacheLine &line)
  {
-  Status status=mpx->writeData(port,line.pa(),line.line);
-
-  if( status==StatusPending ) 
+  if( line.dirty )
     {
-     nextOp=NextRead;
-     nextLine=&line;
+     Status status=mpx->writeData(port,line.pa(),line.line);
 
-     return status;
-    } 
+     if( status==StatusPending ) 
+       {
+        nextOp=NextRead;
+        nextLine=&line;
 
-  if( status ) return status; 
+        return status;
+       } 
+
+     if( status ) return status; 
+    }
 
   line.used=0;  
 
