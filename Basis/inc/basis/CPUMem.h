@@ -296,7 +296,7 @@ class AddressMap : NoCopy
 
 class CPUMem : NoCopy
  {
-   Address address;
+   Address address{};
    bool paDone = false ;
    bool useSysMap = false ;
    MemOp memop;
@@ -334,7 +334,7 @@ class CPUMem : NoCopy
 
    void init(uint32 port,uint64 cmdCacheSize,uint64 dataCacheSize,SysMemPort &mpx,AddressMap &sysmap);
 
-   void clearCache();
+   void clearCache() { cache.clearCache(); }
 
    void setupVMT(uint64 pa) { map.setup(pa); }
 

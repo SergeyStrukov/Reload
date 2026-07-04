@@ -47,8 +47,8 @@ struct ComputerCfg
 
 class Computer : NoCopy
  {
-   CPUCoreBlock cpu;
    SysMem sysmem;
+   CPUCoreBlock cpu;
 
   public:
 

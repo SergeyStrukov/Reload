@@ -86,9 +86,9 @@ inline constexpr uint64 BitField(uint64 val,unsigned shift,unsigned width)
 
 inline constexpr uint64 BitSField(uint64 val,unsigned shift,unsigned width)
  {
-  uint64 ret=(val>>shift)&BitMask(width);
+  uint64 ret=BitField(val,shift,width);
 
-  if( ret&OneBit(width-1) ) ret-=OneBit(width);
+  if( ret>>(width-1) ) ret-=OneBit(width);
 
   return ret;
  }

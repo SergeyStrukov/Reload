@@ -735,11 +735,13 @@ Status CPUMem::mapAddress(uint64 va)
      if( split.S )
        {
         useSysMap=true;
+        
         return sysmap->map(va,split,address);
        }
      else
        {
         useSysMap=false;
+
         return map.map(va,split,address);
        }
     }
@@ -748,6 +750,7 @@ Status CPUMem::mapAddress(uint64 va)
      if( split.S ) return StatusErrorMap;  
 
      useSysMap=false;
+
      return map.map(va,split,address);
     }
  }
@@ -843,7 +846,7 @@ CPUMem::~CPUMem()
 
 void CPUMem::init(uint32 port,uint64 cmdCacheSize,uint64 dataCacheSize,SysMemPort &mpx,AddressMap &sysmap_)
  {
-  address={0};  
+  address={};  
   paDone=false;
   useSysMap=false;
   memop={};
@@ -854,11 +857,6 @@ void CPUMem::init(uint32 port,uint64 cmdCacheSize,uint64 dataCacheSize,SysMemPor
   map.init(cache);
 
   sysmap=&sysmap_;
- }
-
-void CPUMem::clearCache()
- {
-  cache.clearCache();
  }
 
 Status CPUMem::fetchCommand(uint64 va,uint64 &cmd)

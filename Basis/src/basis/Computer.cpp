@@ -58,8 +58,8 @@ Computer::Computer(const ComputerCfg &cfg)
  {
   cfg.validate();
 
-  cpu.init(cfg.coreCount,cfg.cmdCacheSize,cfg.dataCacheSize,sysmem);  
   sysmem.init(cfg.ramSize);  
+  cpu.init(cfg.coreCount,cfg.cmdCacheSize,cfg.dataCacheSize,sysmem);  
  }
 
 Computer::~Computer()
