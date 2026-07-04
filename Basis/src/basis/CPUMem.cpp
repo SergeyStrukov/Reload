@@ -145,7 +145,7 @@ void Cache::Block::find(uint64 tag,Func1 match,Func2 fresh,Func3 taken)
     {
      CacheLine &line=lines[i];
 
-     if( line.full && line.tag==tag )
+     if( line.used && line.tag==tag )
        {
         match(line);
 
@@ -159,7 +159,7 @@ void Cache::Block::find(uint64 tag,Func1 match,Func2 fresh,Func3 taken)
     {
      CacheLine &line=lines[i];
      
-     if( !line.full )
+     if( !line.used )
        {
         fresh(line);
 
@@ -174,7 +174,7 @@ void Cache::Block::find(uint64 tag,Func1 match,Func2 fresh,Func3 taken)
 
 void Cache::Block::clear()
  {
-  for(CacheLine &line : lines ) line.full=0;
+  for(CacheLine &line : lines ) line.used=0;
  }
 
 Cache::Cache()
@@ -358,7 +358,7 @@ Status L1Mem::fresh(CacheLine &line)
  {
   Status status;
 
-  status=mpx->readData(port,pa&CacheLineMask,line.line);
+  status=mpx->readData(port,pa&~CacheLineMask,line.line);
 
   if( status==StatusPending ) 
     {
@@ -389,7 +389,7 @@ Status L1Mem::taken(CacheLine &line)
 
   if( status ) return status; 
 
-  line.full=0;  
+  line.used=0;  
 
   return fresh(line);
  }
@@ -579,7 +579,7 @@ Status L1Mem::pending()
 
      case NextRead : 
       {
-       nextLine->full=0;  
+       nextLine->used=0;  
 
        return fresh(*nextLine);
       }

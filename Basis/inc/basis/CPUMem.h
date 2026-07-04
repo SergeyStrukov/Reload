@@ -91,15 +91,15 @@ struct MemOp
 struct CacheLine
  {
   uint64 line[CacheLineLen];
-  uint64 tag : 63 ; 
-  uint8 full : 1 ;
+  uint64 tag : 62 ; 
+  uint8 used : 1 ;
   uint8 dirty : 1 ; // TODO
 
-  CacheLine() noexcept { full=0; }
+  CacheLine() noexcept { used=0; }
 
   static uint64 Tag(uint64 pa) { return pa>>CacheLineBits; }
 
-  void setTag(uint64 pa) { tag=Tag(pa); full=1; }
+  void setTag(uint64 pa) { tag=Tag(pa); used=1; }
 
   uint64 pa() const { return tag<<CacheLineBits; }
 
@@ -167,7 +167,7 @@ class L1Mem : NoCopy
  {
    uint64 pa = 0 ;
 
-   MemOp memop;
+   MemOp memop{};
 
    enum NextOp
     {
