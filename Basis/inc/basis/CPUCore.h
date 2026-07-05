@@ -60,9 +60,9 @@ struct FlagBits
 
   bool isCnZ() const { return (bits&3u)==2 ; }
 
-  bool isNisO() const { uint8 m=bits&12u; return m==0 || m==12 ; }
+  bool isNisO() const { uint8 m=bits&12u; return m==0 || m==12u ; }
 
-  bool isZNisO() const { uint8 m=bits&13u; return m==1 || m==13 ; }
+  bool isZNisO() const { uint8 m=bits&13u; return m==1u || m==13u ; }
  };
 
 /* class CPUCore */
@@ -137,6 +137,8 @@ class CPUCore : NoCopy
    uint32 get32arg(const ConstRegArg &arg) const;
    uint16 get16arg(const ConstRegArg &arg) const;
    uint8 get8arg(const ConstRegArg &arg) const;
+
+   void setFlags(uint8 flags);
 
    void completeIO(Status status);
 

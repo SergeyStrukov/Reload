@@ -279,6 +279,20 @@ uint8 CPUCore::get8arg(const ConstRegArg &arg) const
     return 0; // impossible
  }
 
+void CPUCore::setFlags(uint8 flags)
+ {
+  unsigned part=command.flagOut;
+
+  if( part<8 )
+    {
+     SetPart<4>(regs[RegFlags],part,flags);
+    }
+  else
+    {
+     OrPart<4>(regs[RegFlags],part,flags);
+    }
+ }
+
 void CPUCore::completeIO(Status status)
  {
   if( status==StatusDone )  
@@ -305,7 +319,9 @@ void CPUCore::completeIO(Status status)
 template <class F,class Dst,class Src>
 void CPUCore::executeUn(Dst &dst,Src src)
  {
-  F()(dst,src);
+  setFlags(F()(dst,src));
+
+  updatePC();
  }
 
 template <class F,class Dst>
@@ -361,8 +377,6 @@ void CPUCore::executeUn()
 void CPUCore::executeCast()
  {
   executeUn<Op::OpCast>();
-
-  updatePC();
  }
 
 void CPUCore::executeNeg()
@@ -378,7 +392,9 @@ void CPUCore::executeNot()
 template <class F,class Dst,class Src1,class Src2>
 void CPUCore::executeBin(Dst &dst,Src1 src1,Src2 src2)
  {
-  F()(dst,src1,src2);
+  setFlags(F()(dst,src1,src2));
+
+  updatePC();
  }
 
 template <class F,class Dst,class Src1>
@@ -459,8 +475,6 @@ void CPUCore::executeBin()
 void CPUCore::executeAdd()
  {
   executeBin<Op::OpAdd>();
-
-  updatePC();
  }
 
 void CPUCore::executeSub()

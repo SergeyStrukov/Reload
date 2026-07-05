@@ -18,6 +18,16 @@
 
 namespace Basis::Op {
 
+/* consts */    
+
+enum OpBit : uint8
+ {
+  BitZ = 1u,  
+  BitC = 2u,  
+  BitN = 4u,  
+  BitO = 8u,  
+ };
+
 /* classes */    
 
 struct UInt64;
@@ -101,7 +111,7 @@ struct SInt8
 struct OpCast
  {
   template <class Dst,class Src>  
-  void operator () (Dst &dst,Src src);  
+  uint8 operator () (Dst &dst,Src src);  
  };
 
 /* struct OpAdd */
@@ -109,7 +119,7 @@ struct OpCast
 struct OpAdd
  {
   template <class Dst,class Src1,class Src2>  
-  void operator () (Dst &dst,Src1 src1,Src2 src2);  
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2);  
  };
 
 } // namespace Basis::Op    

@@ -97,6 +97,14 @@ inline constexpr uint64 BitSField(uint64 val,unsigned shift,unsigned width)
 /* part functions */
 
 template <unsigned Width>
+void OrPart(uint64 &reg,uint8 part,uint64 val)
+ {
+  unsigned shift=part*Width;
+
+  reg |= (val<<shift) ;
+ }
+
+template <unsigned Width>
 void SetPart(uint64 &reg,uint8 part,uint64 val)
  {
   unsigned shift=part*Width;
