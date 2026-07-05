@@ -121,6 +121,7 @@ class CPUCore : NoCopy
    uint64 get64(const ConstArg &cnst,bool cmd2) const;
    uint64 get64(const ConstRegArg &arg) const;
 
+   uint64 get64reg(const RegArg &reg) const;
    uint32 get32reg(const RegArg &reg) const;
    uint16 get16reg(const RegArg &reg) const;
    uint8 get8reg(const RegArg &reg) const;
@@ -129,6 +130,7 @@ class CPUCore : NoCopy
 
    void set64(const RegArg &reg,uint64 val);
 
+   void set64reg(const RegArg &reg,uint64 val);
    void set32reg(const RegArg &reg,uint32 val);
    void set16reg(const RegArg &reg,uint16 val);
    void set8reg(const RegArg &reg,uint8 val);

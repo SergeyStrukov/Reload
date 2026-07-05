@@ -162,6 +162,11 @@ uint64 CPUCore::get64(const ConstRegArg &arg) const
     return get64(arg.cnst);
  }
 
+uint64 CPUCore::get64reg(const RegArg &reg) const
+ {
+  return regs[reg.num];
+ }
+
 uint32 CPUCore::get32reg(const RegArg &reg) const
  {
   return GetPart32(regs[reg.num/2],reg.num%2);
@@ -232,6 +237,11 @@ void CPUCore::set64(const RegArg &reg,uint64 val)
     }
  }
 
+void CPUCore::set64reg(const RegArg &reg,uint64 val)
+ {
+  regs[reg.num]=val;
+ }
+
 void CPUCore::set32reg(const RegArg &reg,uint32 val)
  {
   SetPart32(regs[reg.num/2],reg.num%2,val);
@@ -250,33 +260,24 @@ void CPUCore::set8reg(const RegArg &reg,uint8 val)
 uint64 CPUCore::get64arg(const ConstRegArg &arg) const
  {
   if( arg.isReg )
-    return regs[arg.reg.num];
+    return get64reg(arg.reg);
   else
     return get64(arg.cnst);
  }
 
 uint32 CPUCore::get32arg(const ConstRegArg &arg) const
  {
-  if( arg.isReg )
-    return get32reg(arg.reg);
-  else
-    return 0; // impossible
+  return get32reg(arg.reg);
  }
 
 uint16 CPUCore::get16arg(const ConstRegArg &arg) const
  {
-  if( arg.isReg )
-    return get16reg(arg.reg);
-  else
-    return 0; // impossible
+  return get16reg(arg.reg);
  }
 
 uint8 CPUCore::get8arg(const ConstRegArg &arg) const
  {
-  if( arg.isReg )
-    return get8reg(arg.reg);
-  else
-    return 0; // impossible
+  return get8reg(arg.reg);
  }
 
 void CPUCore::setFlags(uint8 flags)
@@ -301,7 +302,7 @@ void CPUCore::completeIO(Status status)
        {
         switch( command.dst.width )
           {
-           case Reg64bit : regs[command.dst.num]=temp64; break;
+           case Reg64bit : set64reg(command.dst,temp64); break;
            case Reg32bit : set32reg(command.dst,temp32); break;
            case Reg16bit : set16reg(command.dst,temp16); break;
            case Reg8bit : set8reg(command.dst,temp8); break;
@@ -356,7 +357,7 @@ void CPUCore::executeUn()
     {
      switch( command.dst.width )
        {
-        case Reg64bit : { Op::SInt64 dst; executeUn<F>(dst); regs[command.dst.num]=dst.val; } break;
+        case Reg64bit : { Op::SInt64 dst; executeUn<F>(dst); set64reg(command.dst,dst.val); } break;
         case Reg32bit : { Op::SInt32 dst; executeUn<F>(dst); set32reg(command.dst,dst.val); } break;
         case Reg16bit : { Op::SInt16 dst; executeUn<F>(dst); set16reg(command.dst,dst.val); } break;
         case Reg8bit :  { Op::SInt8 dst;  executeUn<F>(dst); set8reg(command.dst,dst.val); } break;
@@ -366,7 +367,7 @@ void CPUCore::executeUn()
     {
      switch( command.dst.width )
        {
-        case Reg64bit : { Op::UInt64 dst; executeUn<F>(dst); regs[command.dst.num]=dst.val; } break;
+        case Reg64bit : { Op::UInt64 dst; executeUn<F>(dst); set64reg(command.dst,dst.val); } break;
         case Reg32bit : { Op::UInt32 dst; executeUn<F>(dst); set32reg(command.dst,dst.val); } break;
         case Reg16bit : { Op::UInt16 dst; executeUn<F>(dst); set16reg(command.dst,dst.val); } break;
         case Reg8bit :  { Op::UInt8 dst;  executeUn<F>(dst); set8reg(command.dst,dst.val); } break;
@@ -454,7 +455,7 @@ void CPUCore::executeBin()
     {
      switch( command.dst.width )
        {
-        case Reg64bit : { Op::SInt64 dst; executeBin<F>(dst); regs[command.dst.num]=dst.val; } break;
+        case Reg64bit : { Op::SInt64 dst; executeBin<F>(dst); set64reg(command.dst,dst.val); } break;
         case Reg32bit : { Op::SInt32 dst; executeBin<F>(dst); set32reg(command.dst,dst.val); } break;
         case Reg16bit : { Op::SInt16 dst; executeBin<F>(dst); set16reg(command.dst,dst.val); } break;
         case Reg8bit :  { Op::SInt8 dst;  executeBin<F>(dst); set8reg(command.dst,dst.val); } break;
@@ -464,7 +465,7 @@ void CPUCore::executeBin()
     {
      switch( command.dst.width )
        {
-        case Reg64bit : { Op::UInt64 dst; executeBin<F>(dst); regs[command.dst.num]=dst.val; } break;
+        case Reg64bit : { Op::UInt64 dst; executeBin<F>(dst); set64reg(command.dst,dst.val); } break;
         case Reg32bit : { Op::UInt32 dst; executeBin<F>(dst); set32reg(command.dst,dst.val); } break;
         case Reg16bit : { Op::UInt16 dst; executeBin<F>(dst); set16reg(command.dst,dst.val); } break;
         case Reg8bit :  { Op::UInt8 dst;  executeBin<F>(dst); set8reg(command.dst,dst.val); } break;
@@ -524,7 +525,7 @@ void CPUCore::executeLoad()
     {
      switch( command.dst.width )
        {
-        case Reg64bit : regs[command.dst.num]=temp64; break;
+        case Reg64bit : set64reg(command.dst,temp64); break;
         case Reg32bit : set32reg(command.dst,temp32); break;
         case Reg16bit : set16reg(command.dst,temp16); break;
         case Reg8bit : set8reg(command.dst,temp8); break;
@@ -552,7 +553,7 @@ void CPUCore::executeStore()
 
   switch( command.dst.width )
     {
-     case Reg64bit : status=mem.writeData(addr,regs[command.dst.num]); break;
+     case Reg64bit : status=mem.writeData(addr,get64reg(command.dst)); break;
      case Reg32bit : status=mem.writeData(addr,get32reg(command.dst)); break;
      case Reg16bit : status=mem.writeData(addr,get16reg(command.dst)); break;
      case Reg8bit : status=mem.writeData(addr,get8reg(command.dst)); break;
