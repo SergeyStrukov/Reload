@@ -119,6 +119,7 @@ void CPUCore::init(uint32 index_,uint64 cmdCacheSize,uint64 dataCacheSize,CPUCor
   if( index_==0 ) 
     {
      regs[RegPC]=BootROMAddress;
+
      modeS=true;
     }
  }
@@ -132,7 +133,10 @@ void CPUCore::enable()
  {
   regs[RegPC]=sysPC;
   regs[RegSP]=sysSP;
+
   modeS=true;
+  modeI=false;
+  modeL=false;
 
   clearCache();
  }
@@ -219,6 +223,15 @@ void CPUCore::step()
  }
 
 /* class CPUCoreBlock */ 
+
+CPUCoreBlock::CPUCoreBlock(const char *fileName)
+ : log(fileName)
+ {
+ }
+
+CPUCoreBlock::~CPUCoreBlock()
+ {
+ }
 
 void CPUCoreBlock::init(uint32 count,uint64 cmdCacheSize,uint64 dataCacheSize,SysMem &mem)
  {
@@ -325,17 +338,9 @@ void CPUCoreBlock::setupSysVMT(uint64 pa)
   sysmap.setup(pa);
  }
 
-CPUCoreBlock::CPUCoreBlock()
- {
- }
-
-CPUCoreBlock::~CPUCoreBlock()
- {
- }
-
 void CPUCoreBlock::fatal(FatalCode code,uint32 index,uint64 PC)
  {
-  Printf(Con,"Fatal CPU stop: core #; PC = #.h; #;\n",index,PC,code);
+  Printf(log,"Fatal CPU stop: core #; PC = #.h; #;\n",index,PC,code);
 
   stop();
  }

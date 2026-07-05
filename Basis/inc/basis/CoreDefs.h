@@ -15,6 +15,7 @@
 #define Basis_inc_CoreDefs_h
 
 #include "CCore/inc/Array.h"
+#include "CCore/inc/Print.h"
 
 namespace Basis {
 

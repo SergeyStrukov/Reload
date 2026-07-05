@@ -254,10 +254,10 @@ void CPUCore::completeIO(Status status)
        {
         switch( command.dst.width )
           {
-           case 0 : regs[command.dst.num]=temp64; break;
-           case 1 : set32reg(command.dst,temp32); break;
-           case 2 : set16reg(command.dst,temp16); break;
-           case 3 : set8reg(command.dst,temp8); break;
+           case Reg64bit : regs[command.dst.num]=temp64; break;
+           case Reg32bit : set32reg(command.dst,temp32); break;
+           case Reg16bit : set16reg(command.dst,temp16); break;
+           case Reg8bit : set8reg(command.dst,temp8); break;
           }
        }
 
@@ -503,7 +503,7 @@ void CPUCore::executeDebug()
  {
   uint64 val=get64(command.src1);
 
-  Printf(Con,"DebugCore#; PC = #; Val = #;",index,regs[RegPC],val);
+  Printf(block->log,"DebugCore#; PC = #; Val = #;\n",index,regs[RegPC],val);
 
   updatePC();
  }

@@ -232,11 +232,13 @@ class CPUCoreBlock : NoCopy
 
    SimpleArray<CPUCore> cores;
 
+   PrintFile log;
+
    friend class CPUCore;
 
   public:
 
-   CPUCoreBlock();
+   explicit CPUCoreBlock(const char *fileName);
 
    ~CPUCoreBlock();
 

@@ -54,7 +54,8 @@ void ComputerCfg::validate() const
 
 /* class Computer */
 
-Computer::Computer(const ComputerCfg &cfg)
+Computer::Computer(const ComputerCfg &cfg,const char *fileName)
+ : cpu(fileName)
  {
   cfg.validate();
 

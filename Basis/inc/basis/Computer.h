@@ -52,7 +52,7 @@ class Computer : NoCopy
 
   public:
 
-   explicit Computer(const ComputerCfg &cfg);
+   Computer(const ComputerCfg &cfg,const char *fileName);
 
    ~Computer();
 
