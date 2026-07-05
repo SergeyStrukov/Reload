@@ -121,6 +121,8 @@ void CPUCore::init(uint32 index_,uint64 cmdCacheSize,uint64 dataCacheSize,CPUCor
      regs[RegPC]=BootROMAddress;
 
      modeS=true;
+
+     mem.setModeDual(true);
     }
  }
 

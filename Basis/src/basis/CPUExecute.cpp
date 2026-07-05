@@ -768,11 +768,13 @@ void CPUCore::executeSysEntry()
 
   updatePC();
 
-  regs[RegR1]=regs[RegPC];
-  regs[RegR2]=regs[RegSP];
+  regs[RegLR]=regs[RegPC];
+  regs[RegR0]=regs[RegSP];
 
   regs[RegPC]=sysPC;
   regs[RegSP]=sysSP;
+
+  mem.setModeDual(true);
  }
 
 void CPUCore::executeSysExit()
@@ -788,8 +790,10 @@ void CPUCore::executeSysExit()
      return;
     }
 
-  regs[RegPC]=regs[RegR1];
-  regs[RegSP]=regs[RegR2];
+  regs[RegPC]=regs[RegLR];
+  regs[RegSP]=regs[RegR0];
+
+  mem.setModeDual(false);
  }
 
 void CPUCore::executeMemEnable()
