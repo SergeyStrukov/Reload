@@ -1,11 +1,11 @@
 ------------------------------------
 
-Rsrc = R0 - R15                     16*(1+2+4+8) = 16*(16-1)    8 bit
+Rsrc = R0 - R15
        R0.32.0 - R15.32.1
        ...
 Rdst = Rsrc       
 
-suffixes = u s                      1 bit
+suffixes = u s
 
 Csrc = 12345 -12345 12345h 
 
@@ -33,7 +33,7 @@ Dst,Src = R0-R15,LR,SP,BP,OP,CTX,TBP,CLK,FLAGS
 
 ------------------------------------
 
-Addr = Src
+Addr = (Src)
 
        (Src+RCsrc)
 
@@ -49,11 +49,11 @@ Rdst = *Addr
 
 *Addr = Rsrc
 
-Dst = Addr
+Dst <- Addr
 
-Dst = *Addr
+Dst <- *Addr
 
-*Addr = Src
+*Addr <- Src
 
 lock *Addr
 
@@ -73,9 +73,9 @@ ret
 
 ------------------------------------
 
-Dst = RCsrc
+Dst <- RCsrc
 
-Rdst = Src
+Rdst <- Src
 
 ------------------------------------
 
