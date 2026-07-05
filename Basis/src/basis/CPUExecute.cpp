@@ -326,20 +326,20 @@ void CPUCore::executeLoad()
 
   switch( command.dst.width )
     {
-     case 0 : status=mem.readData(addr,temp64); break;
-     case 1 : status=mem.readData(addr,temp32); break;
-     case 2 : status=mem.readData(addr,temp16); break;
-     case 3 : status=mem.readData(addr,temp8); break;
+     case Reg64bit : status=mem.readData(addr,temp64); break;
+     case Reg32bit : status=mem.readData(addr,temp32); break;
+     case Reg16bit : status=mem.readData(addr,temp16); break;
+     case Reg8bit : status=mem.readData(addr,temp8); break;
     }
 
   if( status==StatusDone )  
     {
      switch( command.dst.width )
        {
-        case 0 : regs[command.dst.num]=temp64; break;
-        case 1 : set32reg(command.dst,temp32); break;
-        case 2 : set16reg(command.dst,temp16); break;
-        case 3 : set8reg(command.dst,temp8); break;
+        case Reg64bit : regs[command.dst.num]=temp64; break;
+        case Reg32bit : set32reg(command.dst,temp32); break;
+        case Reg16bit : set16reg(command.dst,temp16); break;
+        case Reg8bit : set8reg(command.dst,temp8); break;
        }
 
      updatePC();  
@@ -364,10 +364,10 @@ void CPUCore::executeStore()
 
   switch( command.dst.width )
     {
-     case 0 : status=mem.writeData(addr,regs[command.dst.num]); break;
-     case 1 : status=mem.writeData(addr,get32reg(command.dst)); break;
-     case 2 : status=mem.writeData(addr,get16reg(command.dst)); break;
-     case 3 : status=mem.writeData(addr,get8reg(command.dst)); break;
+     case Reg64bit : status=mem.writeData(addr,regs[command.dst.num]); break;
+     case Reg32bit : status=mem.writeData(addr,get32reg(command.dst)); break;
+     case Reg16bit : status=mem.writeData(addr,get16reg(command.dst)); break;
+     case Reg8bit : status=mem.writeData(addr,get8reg(command.dst)); break;
     }
 
   if( status==StatusDone )  
