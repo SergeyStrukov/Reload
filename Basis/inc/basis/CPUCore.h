@@ -119,7 +119,7 @@ class CPUCore : NoCopy
    uint64 get64(const RegArg &reg) const;
    uint64 get64(const ConstArg &cnst) const;
    uint64 get64(const ConstArg &cnst,bool cmd2) const;
-   uint64 get64(const ConstRegArg &reg) const;
+   uint64 get64(const ConstRegArg &arg) const;
 
    uint32 get32reg(const RegArg &reg) const;
    uint16 get16reg(const RegArg &reg) const;
@@ -133,11 +133,32 @@ class CPUCore : NoCopy
    void set16reg(const RegArg &reg,uint16 val);
    void set8reg(const RegArg &reg,uint8 val);
 
+   uint64 get64arg(const ConstRegArg &arg) const;
+   uint32 get32arg(const ConstRegArg &arg) const;
+   uint16 get16arg(const ConstRegArg &arg) const;
+   uint8 get8arg(const ConstRegArg &arg) const;
+
    void completeIO(Status status);
+
+   template <class F,class Dst,class Src>
+   void executeUn(Dst &dst,Src src);
+   template <class F,class Dst>
+   void executeUn(Dst &dst);
+   template <class F>
+   void executeUn();
 
    void executeCast();
    void executeNeg();
    void executeNot();
+
+   template <class F,class Dst,class Src1,class Src2>
+   void executeBin(Dst &dst,Src1 src1,Src2 src2);
+   template <class F,class Dst,class Src1>
+   void executeBin(Dst &dst,Src1 src1);
+   template <class F,class Dst>
+   void executeBin(Dst &dst);
+   template <class F>
+   void executeBin();
 
    void executeAdd();
    void executeSub();

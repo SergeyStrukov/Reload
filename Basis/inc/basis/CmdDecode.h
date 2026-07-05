@@ -226,6 +226,10 @@ struct ConstRegArg // >= 10 bit
    }; 
 
   bool decode(uint64 cmd,unsigned width); 
+
+  uint8 getSign() const { return isReg? reg.sign : cnst.sign ; }
+
+  uint8 getWidth() const { return isReg? reg.width : 64 ; }
  };
 
 /* struct CmdAddress */ 

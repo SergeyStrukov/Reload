@@ -12,6 +12,7 @@
 //----------------------------------------------------------------------------------------
 
 #include "basis/CPUCore.h"
+#include "basis/CPUOp.h"
 
 #include <CCore/inc/Exception.h>
 #include <CCore/inc/Print.h>
@@ -153,12 +154,12 @@ uint64 CPUCore::get64(const ConstArg &cnst,bool cmd2) const
     return cnst.val;
  }
 
-uint64 CPUCore::get64(const ConstRegArg &reg) const
+uint64 CPUCore::get64(const ConstRegArg &arg) const
  {
-  if( reg.isReg ) 
-    return get64(reg.reg);
+  if( arg.isReg ) 
+    return get64(arg.reg);
   else  
-    return get64(reg.cnst);
+    return get64(arg.cnst);
  }
 
 uint32 CPUCore::get32reg(const RegArg &reg) const
@@ -246,6 +247,38 @@ void CPUCore::set8reg(const RegArg &reg,uint8 val)
   SetPart8(regs[reg.num/8],reg.num%8,val);
  }
 
+uint64 CPUCore::get64arg(const ConstRegArg &arg) const
+ {
+  if( arg.isReg )
+    return regs[arg.reg.num];
+  else
+    return get64(arg.cnst);
+ }
+
+uint32 CPUCore::get32arg(const ConstRegArg &arg) const
+ {
+  if( arg.isReg )
+    return get32reg(arg.reg);
+  else
+    return 0; // impossible
+ }
+
+uint16 CPUCore::get16arg(const ConstRegArg &arg) const
+ {
+  if( arg.isReg )
+    return get16reg(arg.reg);
+  else
+    return 0; // impossible
+ }
+
+uint8 CPUCore::get8arg(const ConstRegArg &arg) const
+ {
+  if( arg.isReg )
+    return get8reg(arg.reg);
+  else
+    return 0; // impossible
+ }
+
 void CPUCore::completeIO(Status status)
  {
   if( status==StatusDone )  
@@ -269,9 +302,67 @@ void CPUCore::completeIO(Status status)
     }
  }
 
+template <class F,class Dst,class Src>
+void CPUCore::executeUn(Dst &dst,Src src)
+ {
+  F()(dst,src);
+ }
+
+template <class F,class Dst>
+void CPUCore::executeUn(Dst &dst)
+ {
+  if( command.src1.getSign() )
+    {
+     switch( command.src1.getWidth() )
+       {
+        case Reg64bit : { Op::SInt64 src1{get64arg(command.src1)}; executeUn<F>(dst,src1); } break;
+        case Reg32bit : { Op::SInt32 src1{get32arg(command.src1)}; executeUn<F>(dst,src1); } break;
+        case Reg16bit : { Op::SInt16 src1{get16arg(command.src1)}; executeUn<F>(dst,src1); } break;
+        case Reg8bit :  { Op::SInt8 src1{get8arg(command.src1)};  executeUn<F>(dst,src1); } break;
+       }
+    }
+  else
+    {
+     switch( command.src1.getWidth() )
+       {
+        case Reg64bit : { Op::UInt64 src1{get64arg(command.src1)}; executeUn<F>(dst,src1); } break;
+        case Reg32bit : { Op::UInt32 src1{get32arg(command.src1)}; executeUn<F>(dst,src1); } break;
+        case Reg16bit : { Op::UInt16 src1{get16arg(command.src1)}; executeUn<F>(dst,src1); } break;
+        case Reg8bit :  { Op::UInt8 src1{get8arg(command.src1)};  executeUn<F>(dst,src1); } break;
+       }
+    }
+ }
+
+template <class F>
+void CPUCore::executeUn()
+ {
+  if( command.dst.sign )
+    {
+     switch( command.dst.width )
+       {
+        case Reg64bit : { Op::SInt64 dst; executeUn<F>(dst); regs[command.dst.num]=dst.val; } break;
+        case Reg32bit : { Op::SInt32 dst; executeUn<F>(dst); set32reg(command.dst,dst.val); } break;
+        case Reg16bit : { Op::SInt16 dst; executeUn<F>(dst); set16reg(command.dst,dst.val); } break;
+        case Reg8bit :  { Op::SInt8 dst;  executeUn<F>(dst); set8reg(command.dst,dst.val); } break;
+       }
+    }
+  else
+    {
+     switch( command.dst.width )
+       {
+        case Reg64bit : { Op::UInt64 dst; executeUn<F>(dst); regs[command.dst.num]=dst.val; } break;
+        case Reg32bit : { Op::UInt32 dst; executeUn<F>(dst); set32reg(command.dst,dst.val); } break;
+        case Reg16bit : { Op::UInt16 dst; executeUn<F>(dst); set16reg(command.dst,dst.val); } break;
+        case Reg8bit :  { Op::UInt8 dst;  executeUn<F>(dst); set8reg(command.dst,dst.val); } break;
+       }
+    }
+ }
+
 void CPUCore::executeCast()
  {
-  // TODO
+  executeUn<Op::OpCast>();
+
+  updatePC();
  }
 
 void CPUCore::executeNeg()
@@ -284,9 +375,92 @@ void CPUCore::executeNot()
   // TODO
  }
 
+template <class F,class Dst,class Src1,class Src2>
+void CPUCore::executeBin(Dst &dst,Src1 src1,Src2 src2)
+ {
+  F()(dst,src1,src2);
+ }
+
+template <class F,class Dst,class Src1>
+void CPUCore::executeBin(Dst &dst,Src1 src1)
+ {
+  if( command.src2.getSign() )
+    {
+     switch( command.src2.getWidth() )
+       {
+        case Reg64bit : { Op::SInt64 src2{get64arg(command.src2)}; executeBin<F>(dst,src1,src2); } break;
+        case Reg32bit : { Op::SInt32 src2{get32arg(command.src2)}; executeBin<F>(dst,src1,src2); } break;
+        case Reg16bit : { Op::SInt16 src2{get16arg(command.src2)}; executeBin<F>(dst,src1,src2); } break;
+        case Reg8bit :  { Op::SInt8 src2{get8arg(command.src2)};  executeBin<F>(dst,src1,src2); } break;
+       }
+    }
+  else
+    {
+     switch( command.src2.getWidth() )
+       {
+        case Reg64bit : { Op::UInt64 src2{get64arg(command.src2)}; executeBin<F>(dst,src1,src2); } break;
+        case Reg32bit : { Op::UInt32 src2{get32arg(command.src2)}; executeBin<F>(dst,src1,src2); } break;
+        case Reg16bit : { Op::UInt16 src2{get16arg(command.src2)}; executeBin<F>(dst,src1,src2); } break;
+        case Reg8bit :  { Op::UInt8 src2{get8arg(command.src2)};  executeBin<F>(dst,src1,src2); } break;
+       }
+    }
+ }
+
+template <class F,class Dst>
+void CPUCore::executeBin(Dst &dst)
+ {
+  if( command.src1.getSign() )
+    {
+     switch( command.src1.getWidth() )
+       {
+        case Reg64bit : { Op::SInt64 src1{get64arg(command.src1)}; executeBin<F>(dst,src1); } break;
+        case Reg32bit : { Op::SInt32 src1{get32arg(command.src1)}; executeBin<F>(dst,src1); } break;
+        case Reg16bit : { Op::SInt16 src1{get16arg(command.src1)}; executeBin<F>(dst,src1); } break;
+        case Reg8bit :  { Op::SInt8 src1{get8arg(command.src1)};  executeBin<F>(dst,src1); } break;
+       }
+    }
+  else
+    {
+     switch( command.src1.getWidth() )
+       {
+        case Reg64bit : { Op::UInt64 src1{get64arg(command.src1)}; executeBin<F>(dst,src1); } break;
+        case Reg32bit : { Op::UInt32 src1{get32arg(command.src1)}; executeBin<F>(dst,src1); } break;
+        case Reg16bit : { Op::UInt16 src1{get16arg(command.src1)}; executeBin<F>(dst,src1); } break;
+        case Reg8bit :  { Op::UInt8 src1{get8arg(command.src1)};  executeBin<F>(dst,src1); } break;
+       }
+    }
+ }
+
+template <class F>
+void CPUCore::executeBin()
+ {
+  if( command.dst.sign )
+    {
+     switch( command.dst.width )
+       {
+        case Reg64bit : { Op::SInt64 dst; executeBin<F>(dst); regs[command.dst.num]=dst.val; } break;
+        case Reg32bit : { Op::SInt32 dst; executeBin<F>(dst); set32reg(command.dst,dst.val); } break;
+        case Reg16bit : { Op::SInt16 dst; executeBin<F>(dst); set16reg(command.dst,dst.val); } break;
+        case Reg8bit :  { Op::SInt8 dst;  executeBin<F>(dst); set8reg(command.dst,dst.val); } break;
+       }
+    }
+  else
+    {
+     switch( command.dst.width )
+       {
+        case Reg64bit : { Op::UInt64 dst; executeBin<F>(dst); regs[command.dst.num]=dst.val; } break;
+        case Reg32bit : { Op::UInt32 dst; executeBin<F>(dst); set32reg(command.dst,dst.val); } break;
+        case Reg16bit : { Op::UInt16 dst; executeBin<F>(dst); set16reg(command.dst,dst.val); } break;
+        case Reg8bit :  { Op::UInt8 dst;  executeBin<F>(dst); set8reg(command.dst,dst.val); } break;
+       }
+    }
+ }
+
 void CPUCore::executeAdd()
  {
-  // TODO
+  executeBin<Op::OpAdd>();
+
+  updatePC();
  }
 
 void CPUCore::executeSub()

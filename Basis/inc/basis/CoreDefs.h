@@ -14,8 +14,8 @@
 #ifndef Basis_inc_CoreDefs_h
 #define Basis_inc_CoreDefs_h
 
-#include "CCore/inc/Array.h"
-#include "CCore/inc/Print.h"
+#include <CCore/inc/Array.h>
+#include <CCore/inc/Print.h>
 
 namespace Basis {
 
