@@ -30,15 +30,9 @@ enum OpBit : uint8
 
 /* classes */    
 
-struct UInt64;
-struct UInt32;
-struct UInt16;
-struct UInt8;
+struct uint65;
 
-struct SInt64;
-struct SInt32;
-struct SInt16;
-struct SInt8;
+template <class Body,unsigned Width_,bool Sign_> struct Arg;
 
 struct OpCast;
 struct OpNeg;
@@ -50,68 +44,68 @@ struct OpMul;
 struct Div;
 struct Rem;
 
-/* struct UInt64 */
+/* struct uint65 */
 
-struct UInt64
+struct uint65
  {
   uint64 val;  
+  uint8 msb;  
  };
 
-/* struct UInt32 */
+/* struct Arg<Body,Width,Sign> */
 
-struct UInt32
+template <class Body,unsigned Width_,bool Sign_>
+struct Arg
  {
-  uint32 val;  
+  static constexpr unsigned Width = Width_ ;
+  static constexpr bool Sign = Sign_ ;
+
+  static constexpr unsigned ExtWidth = Sign? Width : (Width+1) ;
+
+  Body val;
+  
+  template <class Src>
+  static Arg Ext(Src src) { Arg ret; ret.ext(src); return ret; }
+
+  template <class Src>
+  void ext(Src src);
+
+  template <class Src>
+  uint8 cast(Src src);
+
+  Arg operator + (Arg obj) const;
  };
 
-/* struct UInt16 */
+using UInt64 = Arg<uint64,64,false> ; 
+using UInt32 = Arg<uint32,32,false> ; 
+using UInt16 = Arg<uint16,16,false> ; 
+using UInt8  = Arg<uint8,8,false> ; 
 
-struct UInt16
- {
-  uint16 val;  
- };
+using SInt64 = Arg<uint64,64,true> ; 
+using SInt32 = Arg<uint32,32,true> ; 
+using SInt16 = Arg<uint16,16,true> ; 
+using SInt8  = Arg<uint8,8,true> ; 
 
-/* struct UInt8 */
+using SInt65 = Arg<uint65,65,true> ; 
 
-struct UInt8
- {
-  uint8 val;  
- };
+template <unsigned W>
+using SIntArg = Meta::Select<( W<=8 ), SInt8 , Meta::Select<( W<=16 ), SInt16 , Meta::Select<( W<=32 ), SInt32 , Meta::Select<( W<=64 ), SInt64 , SInt65 > > > > ;
 
-/* struct SInt64 */
+template <class Src1,class Src2>
+using SMaxArg = SIntArg< Max(Src1::ExtWidth,Src2::ExtWidth) > ;
 
-struct SInt64
- {
-  uint64 val;  
- };
+template <class Src1,class Src2>
+using UMaxArg = Meta::Select<( Src1::Width>=Src2::Width ), Src1 , Src2 > ;
 
-/* struct SInt32 */
-
-struct SInt32
- {
-  uint32 val;  
- };
-
-/* struct SInt16 */
-
-struct SInt16
- {
-  uint16 val;  
- };
-
-/* struct SInt8 */
-
-struct SInt8
- {
-  uint8 val;  
- };
+template <class Src1,class Src2>
+using MaxArg = Meta::Select< Src1::Sign || Src2::Sign , SMaxArg<Src1,Src2> , UMaxArg<Src1,Src2> > ;
 
 /* struct OpCast */ 
 
 struct OpCast
  {
   template <class Dst,class Src>  
-  uint8 operator () (Dst &dst,Src src);  
+  uint8 operator () (Dst &dst,Src src) { return dst.cast(src); }
  };
 
 /* struct OpAdd */
@@ -119,7 +113,12 @@ struct OpCast
 struct OpAdd
  {
   template <class Dst,class Src1,class Src2>  
-  uint8 operator () (Dst &dst,Src1 src1,Src2 src2);  
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2)
+   {
+    using Type = MaxArg<Src1,Src2> ;
+
+    return dst.cast( Type::Ext(src1) + Type::Ext(src2) );
+   }
  };
 
 } // namespace Basis::Op    
