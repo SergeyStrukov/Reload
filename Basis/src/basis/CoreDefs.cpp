@@ -34,8 +34,8 @@ const char * GetTextDesc(Status status)
     "Status Error Absent",
     "Status Error Void",
     
-    "Status Error Cmd",
-    "Status Error ROReg",
+    "Status Error unknown command",
+    "Status Error read-only register",
     "Status Error SysExit in user mode",
    };
 

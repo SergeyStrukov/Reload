@@ -20,16 +20,16 @@ namespace Basis {
 
 /* class CPUCore */
 
-void CPUCore::finError(Status status)
- {
-  finError(status,regs[RegPC]);
- }
-
 void CPUCore::finError(Status status,uint64 va)
  {
   Printf(Exception,"Basis::CPUCore::finError(#;,#.h;)",status,va);
 
   // TODO
+ }
+
+void CPUCore::finError(Status status)
+ {
+  finError(status,regs[RegPC]);
  }
 
 void CPUCore::execute()

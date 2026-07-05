@@ -112,19 +112,19 @@ uint64 CPUCore::get64(const RegArg &reg) const
  {
   switch( reg.width )
     {
-     case 0 : // 64
+     case Reg64bit :
        return regs[reg.num];
      break;
 
-     case 1 : // 32
+     case Reg32bit :
        return Ext32to64(reg.sign,regs[reg.num/2],reg.num%2);
      break;
 
-     case 2 : // 16
+     case Reg16bit :
        return Ext16to64(reg.sign,regs[reg.num/4],reg.num%4);
      break;
 
-     case 3 : // 8
+     case Reg8bit :
        return Ext8to64(reg.sign,regs[reg.num/8],reg.num%8);
      break;
 
@@ -182,19 +182,19 @@ uint64 CPUCore::getAddr() const
 
   switch( command.address.type )
     {
-     case 1 :
+     case CmdAddressBaseReg :
       {
        addr+=get64(command.address.src); 
       }
      break;
 
-     case 2 :
+     case CmdAddressBaseRegConst :
       {
        addr+=get64(command.address.src.reg)*get64(command.address.cnst1); 
       }
      break;
 
-     case 3 : 
+     case CmdAddressBaseRegConstConst : 
       {
        addr+=get64(command.address.src.reg)*get64(command.address.cnst1)+get64(command.address.cnst2,command.address.cnst1.ext); 
       }
@@ -208,19 +208,19 @@ void CPUCore::set64(const RegArg &reg,uint64 val)
  {
   switch( reg.width )
     {
-     case 0 : // 64
+     case Reg64bit :
        regs[reg.num]=val;
      break;
 
-     case 1 : // 32
+     case Reg32bit :
        SetPart32(regs[reg.num/2],reg.num%2,uint32(val));
      break;
 
-     case 2 : // 16
+     case Reg16bit :
        SetPart16(regs[reg.num/4],reg.num%4,uint16(val));
      break;
 
-     case 3 : // 8
+     case Reg8bit :
        SetPart8(regs[reg.num/8],reg.num%8,uint8(val));
      break;
 

@@ -51,7 +51,7 @@ class CPUCoreBlock;
 
 struct FlagBits
  {
-  uint64 bits;
+  uint8 bits : 4 ;
 
   uint8 bitZ() const { return bits&1u; }
   uint8 bitC() const { return bits&2u; }
@@ -110,7 +110,7 @@ class CPUCore : NoCopy
 
    bool userMode() const { return modeS==0 && modeI==0 ; }
 
-   FlagBits condFlags() const { return {regs[RegFlags]>>(command.flag*4)}; }
+   FlagBits condFlags() const { return {uint8( regs[RegFlags]>>(command.flag*4) )}; }
 
    bool testCond() const;
 
@@ -186,8 +186,8 @@ class CPUCore : NoCopy
 
    void updatePC() { regs[RegPC] += cmdLen*sizeof (uint64) ; }
 
-   void finError(Status status);
    void finError(Status status,uint64 va);
+   void finError(Status status);
    void executeOp();
    void execute();
    void step1();
