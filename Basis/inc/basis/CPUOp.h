@@ -75,7 +75,17 @@ struct Rem;
 struct uint65
  {
   uint64 val;  
-  uint8 msb;  
+  uint8 msb; 
+  
+  uint65 & operator += (uint65 obj)
+   {
+    UIntFunc<uint64>::Add add(val,obj.val); 
+
+    val=add.result;
+    msb+=obj.msb+add.carry;    
+
+    return *this;
+   }
  };
 
 template <class UInt1>
@@ -117,7 +127,7 @@ struct Arg
   template <class Src>
   uint8 cast(Src src);
 
-  Arg operator + (Arg obj) const;
+  Arg operator + (Arg obj) const { Arg ret=*this; ret.val+=obj.val; return ret; }
  };
 
 using UInt64 = Arg<uint64,64,false> ; 
@@ -136,13 +146,7 @@ template <unsigned W>
 using SIntArg = Meta::Select<( W<=8 ), SInt8 , Meta::Select<( W<=16 ), SInt16 , Meta::Select<( W<=32 ), SInt32 , Meta::Select<( W<=64 ), SInt64 , SInt65 > > > > ;
 
 template <class Src1,class Src2>
-using SMaxArg = SIntArg< Max(Src1::ExtWidth,Src2::ExtWidth) > ;
-
-template <class Src1,class Src2>
-using UMaxArg = Meta::Select<( Src1::Width>=Src2::Width ), Src1 , Src2 > ;
-
-template <class Src1,class Src2>
-using MaxArg = Meta::Select< Src1::Sign || Src2::Sign , SMaxArg<Src1,Src2> , UMaxArg<Src1,Src2> > ;
+using MaxArg = SIntArg< Max(Src1::ExtWidth,Src2::ExtWidth)+1 > ;
 
 /* struct OpCast */ 
 
