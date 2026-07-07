@@ -763,7 +763,7 @@ void CPUCore::executeSysEntry()
  {
   if( !userMode() )
     {
-     block->fatal(FatalSysEntry,index,regs[RegPC]); 
+     finError(StatusErrorCmd);
      return;
     }
 
@@ -775,25 +775,22 @@ void CPUCore::executeSysEntry()
   regs[RegPC]=sysPC;
   regs[RegSP]=sysSP;
 
+  modeS=true;
   mem.setModeDual(true);
  }
 
 void CPUCore::executeSysExit()
  {
-  if( userMode() )
+  if( !modeS || modeI )
     {
-     finError(StatusErrorSysExit);
+     finError(StatusErrorCmd);
      return; 
-    }
-  else if( modeI )
-    {
-     block->fatal(FatalSysExit,index,regs[RegPC]); 
-     return;
     }
 
   regs[RegPC]=regs[RegLR];
   regs[RegSP]=regs[RegR0];
 
+  modeS=false;
   mem.setModeDual(false);
  }
 

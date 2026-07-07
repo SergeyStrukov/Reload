@@ -42,7 +42,6 @@ enum Status
   
   StatusErrorCmd,
   StatusErrorROReg,
-  StatusErrorSysExit,
  };
 
 const char * GetTextDesc(Status status); 
@@ -51,8 +50,7 @@ enum FatalCode
  {
   FatalCoreIndex = 0,
   FatalROReg,
-  FatalSysEntry,
-  FatalSysExit,
+  FatalCmd,
  };
 
 const char * GetTextDesc(FatalCode code); 

@@ -20,11 +20,19 @@ namespace Basis {
 
 /* class CPUCore */
 
-void CPUCore::finError(Status status,uint64 va)
+void CPUCore::finError(Status status,uint64 va) // TODO
  {
-  Printf(Exception,"Basis::CPUCore::finError(#;,#.h;)",status,va);
+  Printf(block->log,"Basis::CPUCore::finError(#;,#.h;) : core #; PC #.h;",status,va,index,regs[RegPC]);
 
-  // TODO
+  if( userMode() || status==StatusErrorAbsent )
+    {
+     // TODO 
+     block->fatal(FatalCmd,index,regs[RegPC]);
+    }
+  else
+    {
+     block->fatal(FatalCmd,index,regs[RegPC]);
+    }
  }
 
 void CPUCore::finError(Status status)

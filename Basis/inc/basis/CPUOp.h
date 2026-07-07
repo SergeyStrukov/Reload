@@ -28,6 +28,32 @@ enum OpBit : uint8
   BitO = 8u,  
  };
 
+/* functions */ 
+
+template <class UInt,class UInt1>
+void ExtUnsigned(UInt &dst,UInt1 src)
+ {
+  dst=src;
+ }
+
+template <class UInt,class UInt1>
+UInt MSBitUp(UInt1 src)
+ {
+  UInt dst=src;
+
+  dst&=UIntFunc<UInt1>::MSBit;
+
+  return dst<<1;
+ }
+
+template <class UInt,class UInt1>
+void ExtSigned(UInt &dst,UInt1 src)
+ {
+  dst=src;
+
+  dst-=MSBitUp<UInt>(src);
+ }
+
 /* classes */    
 
 struct uint65;
@@ -52,6 +78,21 @@ struct uint65
   uint8 msb;  
  };
 
+template <class UInt1>
+void ExtUnsigned(uint65 &dst,UInt1 src)
+ {
+  dst.val=src;
+  dst.msb=0;
+ }
+
+template <class UInt1>
+void ExtSigned(uint65 &dst,UInt1 src)
+ {
+  ExtSigned(dst.val,src);
+  dst.msb=0;
+  dst.msb-=(dst.val>>63);
+ }
+
 /* struct Arg<Body,Width,Sign> */
 
 template <class Body,unsigned Width_,bool Sign_>
@@ -67,8 +108,11 @@ struct Arg
   template <class Src>
   static Arg Ext(Src src) { Arg ret; ret.ext(src); return ret; }
 
-  template <class Src>
-  void ext(Src src);
+  template <class Src> requires ( Src::Sign )
+  void ext(Src src) { ExtSigned(val,src.val); }
+
+  template <class Src> requires ( !Src::Sign )
+  void ext(Src src) { ExtUnsigned(val,src.val); }
 
   template <class Src>
   uint8 cast(Src src);
