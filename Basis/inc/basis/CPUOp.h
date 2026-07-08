@@ -177,9 +177,9 @@ struct Arg
 
     Src temp;
 
-    temp.ext(*this);
+    uint8 o=temp.ext(*this);
 
-    return (temp.val!=src.val)? BitO : 0 ;
+    return (temp.val!=src.val)? uint8(BitO) : o ;
    }
 
   template <class Src> requires ( Src::Width==Width && Src::Sign==Sign )
