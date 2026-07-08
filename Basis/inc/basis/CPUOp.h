@@ -70,6 +70,12 @@ uint8 GetN(UInt src)
   return UIntFunc<UInt>::IsNegative(src)? BitZ : 0 ;
  }
 
+template <class UInt,class UInt1>
+void Cut(UInt &dst,UInt1 src) 
+ {
+  dst=(UInt)src;
+ }
+
 /* classes */    
 
 struct uint72;
@@ -92,6 +98,8 @@ struct uint72
  {
   uint64 val;  
   uint8 msb; 
+
+  bool operator == (uint72 obj) const { return val==obj.val && msb==obj.msb ; }
   
   uint72 & operator += (uint72 obj)
    {
@@ -129,7 +137,13 @@ inline uint8 GetZ(uint72 src)
 
 inline uint8 GetN(uint72 src)
  {
-  return UIntFunc<uint8>::IsNegative(src.msb)? BitZ : 0 ;
+  return UIntFunc<uint8>::IsNegative(src.msb)? BitN : 0 ;
+ }
+
+template <class UInt>
+void Cut(UInt &dst,uint72 src) 
+ {
+  dst=(UInt)src.val;
  }
 
 /* struct Arg<Body,Width,Sign> */
@@ -156,8 +170,33 @@ struct Arg
   template <class Src> requires ( !Src::Sign && Src::Width<Width )
   uint8 ext(Src src) { ExtUnsigned(val,src.val); return 0; }
 
-  template <class Src> requires ( Src::Width>=Width )
-  uint8 cut(Src src); // TODO
+  template <class Src> requires ( Src::Width>Width )
+  uint8 cut(Src src)
+   {
+    Cut(val,src.val);
+
+    Src temp;
+
+    temp.ext(*this);
+
+    return (temp.val!=src.val)? BitO : 0 ;
+   }
+
+  template <class Src> requires ( Src::Width==Width && Src::Sign==Sign )
+  uint8 cut(Src src)
+   {
+    val=src.val;
+
+    return 0;
+   }
+
+  template <class Src> requires ( Src::Width==Width && Src::Sign!=Sign )
+  uint8 cut(Src src)
+   {
+    val=src.val;
+
+    return GetN(val)? BitO : 0 ;
+   }
 
   uint8 getNZ() const requires( Sign )
    {
