@@ -71,9 +71,11 @@ uint8 GetN(UInt src)
  }
 
 template <class UInt,class UInt1>
-void Cut(UInt &dst,UInt1 src) 
+uint8 Cut(UInt &dst,UInt1 src) // TODO BitC
  {
   dst=(UInt)src;
+
+  return 0;
  }
 
 /* classes */    
@@ -141,9 +143,11 @@ inline uint8 GetN(uint72 src)
  }
 
 template <class UInt>
-void Cut(UInt &dst,uint72 src) 
+uint8 Cut(UInt &dst,uint72 src) // TODO Bit C
  {
   dst=(UInt)src.val;
+
+  return 0;
  }
 
 /* struct Arg<Body,Width,Sign> */
@@ -162,10 +166,10 @@ struct Arg
   static Arg Ext(Src src) { Arg ret; ret.ext(src); return ret; }
 
   template <class Src> requires ( Src::Sign && Sign && Src::Width<Width )
-  uint8 ext(Src src) { ExtSigned(val,src.val); return 0; }
+  uint8 ext(Src src) { auto neg=ExtSigned(val,src.val); return neg? BitC : 0 ; }
 
   template <class Src> requires ( Src::Sign && !Sign && Src::Width<Width )
-  uint8 ext(Src src) { auto neg=ExtSigned(val,src.val); return neg? BitO : 0 ; }
+  uint8 ext(Src src) { auto neg=ExtSigned(val,src.val); return neg? (BitO|BitC) : 0 ; }
 
   template <class Src> requires ( !Src::Sign && Src::Width<Width )
   uint8 ext(Src src) { ExtUnsigned(val,src.val); return 0; }
@@ -173,13 +177,23 @@ struct Arg
   template <class Src> requires ( Src::Width>Width )
   uint8 cut(Src src)
    {
-    Cut(val,src.val);
+    uint8 c=Cut(val,src.val);
 
     Src temp;
 
     uint8 o=temp.ext(*this);
 
-    return (temp.val!=src.val)? uint8(BitO) : o ;
+    return c | ( (temp.val!=src.val)? uint8(BitO) : o ) ;
+   }
+
+  uint8 bitC() const requires( Sign )
+   {
+    return GetN(val)? BitC : 0 ;
+   }
+
+  uint8 bitC() const requires( !Sign )
+   {
+    return 0;
    }
 
   template <class Src> requires ( Src::Width==Width && Src::Sign==Sign )
@@ -187,7 +201,7 @@ struct Arg
    {
     val=src.val;
 
-    return 0;
+    return src.bitC();
    }
 
   template <class Src> requires ( Src::Width==Width && Src::Sign!=Sign )
@@ -195,7 +209,7 @@ struct Arg
    {
     val=src.val;
 
-    return GetN(val)? BitO : 0 ;
+    return src.bitC() | ( GetN(val)? BitO : 0 ) ;
    }
 
   uint8 getNZ() const requires( Sign )
@@ -211,17 +225,17 @@ struct Arg
   template <class Src> requires ( Src::Width<Width )
   uint8 cast(Src src)
    {
-    uint8 o=ext(src);
+    uint8 oc=ext(src);
 
-    return src.getNZ()|o; // TODO C
+    return src.getNZ()|oc;
    }
 
   template <class Src> requires ( Src::Width>=Width )
   uint8 cast(Src src)
    {
-    uint8 o=cut(src);
+    uint8 oc=cut(src);
 
-    return src.getNZ()|o; // TODO C
+    return src.getNZ()|oc;
    }
 
   Arg operator + (Arg obj) const { Arg ret=*this; ret.val+=obj.val; return ret; }
@@ -244,6 +258,9 @@ using SIntArg = Meta::Select<( W<=8 ), SInt8 , Meta::Select<( W<=16 ), SInt16 , 
 
 template <class Src1,class Src2>
 using MaxArg = SIntArg< Max(Src1::ExtWidth,Src2::ExtWidth)+1 > ;
+
+template <class Src>
+using UpArg = SIntArg< Max(Src::ExtWidth)+1 > ;
 
 /* struct OpCast */ 
 
