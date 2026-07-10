@@ -71,11 +71,13 @@ uint8 GetN(UInt src)
  }
 
 template <class UInt,class UInt1>
-uint8 Cut(UInt &dst,UInt1 src) // TODO BitC
+uint8 Cut(UInt &dst,UInt1 src)
  {
   dst=(UInt)src;
 
-  return 0;
+  UInt1 bit=UInt1(1)<<UIntFunc<UInt>::Bits;
+
+  return (src&bit)? BitC : 0 ;
  }
 
 /* classes */    
@@ -143,11 +145,16 @@ inline uint8 GetN(uint72 src)
  }
 
 template <class UInt>
-uint8 Cut(UInt &dst,uint72 src) // TODO Bit C
+uint8 Cut(UInt &dst,uint72 src)
  {
-  dst=(UInt)src.val;
+  return Cut(dst,src.val);
+ }
 
-  return 0;
+inline uint8 Cut(uint64 &dst,uint72 src)
+ {
+  dst=src.val;
+
+  return (src.msb&1u)? BitC : 0 ;
  }
 
 /* struct Arg<Body,Width,Sign> */
