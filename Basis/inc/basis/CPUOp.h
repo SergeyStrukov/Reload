@@ -105,14 +105,18 @@ struct uint72
 
   bool operator == (uint72 obj) const { return val==obj.val && msb==obj.msb ; }
   
-  uint72 operator - () const // TODO
+  uint72 operator - () const
    {
-    return {};
+    uint72 ret{0,0};
+
+    ret-=(*this);
+
+    return ret;
    }
 
-  uint72 operator ~ () const // TODO
+  uint72 operator ~ () const
    {
-    return {};
+    return {~val,(uint8)~msb};
    }
 
   uint72 & operator += (uint72 obj)
