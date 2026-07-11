@@ -382,12 +382,12 @@ void CPUCore::executeCast()
 
 void CPUCore::executeNeg()
  {
-  // TODO
+  executeUn<Op::OpNeg>();
  }
 
 void CPUCore::executeNot()
  {
-  // TODO
+  executeUn<Op::OpNot>();
  }
 
 template <class F,class Dst,class Src1,class Src2>
@@ -480,7 +480,7 @@ void CPUCore::executeAdd()
 
 void CPUCore::executeSub()
  {
-  // TODO
+  executeBin<Op::OpSub>();
  }
 
 void CPUCore::executeMul()

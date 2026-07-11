@@ -105,12 +105,32 @@ struct uint72
 
   bool operator == (uint72 obj) const { return val==obj.val && msb==obj.msb ; }
   
+  uint72 operator - () const // TODO
+   {
+    return {};
+   }
+
+  uint72 operator ~ () const // TODO
+   {
+    return {};
+   }
+
   uint72 & operator += (uint72 obj)
    {
     UIntFunc<uint64>::Add add(val,obj.val); 
 
     val=add.result;
     msb+=obj.msb+add.carry;    
+
+    return *this;
+   }
+  
+  uint72 & operator -= (uint72 obj)
+   {
+    UIntFunc<uint64>::Sub sub(val,obj.val); 
+
+    val=sub.result;
+    msb-=obj.msb+sub.borrow;    
 
     return *this;
    }
@@ -245,7 +265,11 @@ struct Arg
     return src.getNZ()|oc;
    }
 
+  Arg operator - () const { Arg ret; ret.val=-val; return ret; }
+  Arg operator ~ () const { Arg ret; ret.val=~val; return ret; }
+
   Arg operator + (Arg obj) const { Arg ret=*this; ret.val+=obj.val; return ret; }
+  Arg operator - (Arg obj) const { Arg ret=*this; ret.val-=obj.val; return ret; }
  };
 
 using UInt64 = Arg<uint64,64,false> ; 
@@ -267,7 +291,7 @@ template <class Src1,class Src2>
 using MaxArg = SIntArg< Max(Src1::ExtWidth,Src2::ExtWidth)+1 > ;
 
 template <class Src>
-using UpArg = SIntArg< Max(Src::ExtWidth)+1 > ;
+using UpArg = SIntArg< Src::ExtWidth+1 > ;
 
 /* struct OpCast */ 
 
@@ -275,6 +299,32 @@ struct OpCast
  {
   template <class Dst,class Src>  
   uint8 operator () (Dst &dst,Src src) { return dst.cast(src); }
+ };
+
+/* struct OpNeg */
+
+struct OpNeg
+ {
+  template <class Dst,class Src>  
+  uint8 operator () (Dst &dst,Src src) 
+   { 
+    using Type = UpArg<Src> ;
+
+    return dst.cast( -Type::Ext(src) ); 
+   }
+ };
+
+/* struct OpNot */
+
+struct OpNot
+ {
+  template <class Dst,class Src>  
+  uint8 operator () (Dst &dst,Src src) 
+   { 
+    using Type = UpArg<Src> ;
+
+    return dst.cast( ~Type::Ext(src) ); 
+   }
  };
 
 /* struct OpAdd */
@@ -289,6 +339,23 @@ struct OpAdd
     return dst.cast( Type::Ext(src1) + Type::Ext(src2) );
    }
  };
+
+/* struct OpSub */ 
+
+struct OpSub
+ {
+  template <class Dst,class Src1,class Src2>  
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2)
+   {
+    using Type = MaxArg<Src1,Src2> ;
+
+    return dst.cast( Type::Ext(src1) - Type::Ext(src2) );
+   }
+ };
+
+//struct OpMul;
+//struct Div;
+//struct Rem;
 
 } // namespace Basis::Op    
 
