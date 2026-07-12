@@ -498,6 +498,26 @@ void CPUCore::executeRem()
   // TODO
  }
 
+void CPUCore::executeAnd()
+ {
+  executeBin<Op::OpAnd>();
+ }
+
+void CPUCore::executeOr()
+ {
+  executeBin<Op::OpOr>();
+ }
+
+void CPUCore::executeXor()
+ {
+  executeBin<Op::OpXor>();
+ }
+
+void CPUCore::executeAndNot()
+ {
+  executeBin<Op::OpAndNot>();
+ }
+
 void CPUCore::executeLoadAddr()
  {
   uint64 addr=getAddr();
@@ -868,6 +888,10 @@ void CPUCore::executeOp()
      case CmdMul : executeMul(); break;
      case CmdDiv : executeDiv(); break;
      case CmdRem : executeRem(); break;
+     case CmdAnd : executeAnd(); break;
+     case CmdOr : executeOr(); break;
+     case CmdXor : executeXor(); break;
+     case CmdAndNot : executeAndNot(); break;
 
      // mem op
 

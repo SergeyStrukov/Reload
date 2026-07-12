@@ -169,6 +169,10 @@ class CPUCore : NoCopy
    void executeMul();
    void executeDiv();
    void executeRem();
+   void executeAnd();
+   void executeOr();
+   void executeXor();
+   void executeAndNot();
 
    void executeLoadAddr();
    void executeLoad();
