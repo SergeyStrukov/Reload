@@ -67,14 +67,8 @@ bool CPUCore::testCond() const
      case CmdIfO : return condFlags().bitO();
      case CmdNotO : return !condFlags().bitO();
 
-     case CmdIfCnZ : return condFlags().isCnZ();
-     case CmdNotCnZ : return !condFlags().isCnZ();
-
-     case CmdIfNisO : return condFlags().isNisO();
-     case CmdNotNisO : return !condFlags().isNisO();
-
-     case CmdIfZNisO : return condFlags().isZNisO();
-     case CmdNotZNisO : return !condFlags().isZNisO();
+     case CmdIfNorZ : return condFlags().bitNZ();
+     case CmdNotNorZ : return !condFlags().bitNZ(); 
 
      default: 
       {

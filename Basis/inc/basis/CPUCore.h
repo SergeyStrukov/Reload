@@ -58,11 +58,7 @@ struct FlagBits
   uint8 bitN() const { return bits&4u; }
   uint8 bitO() const { return bits&8u; }
 
-  bool isCnZ() const { return (bits&3u)==2 ; }
-
-  bool isNisO() const { uint8 m=bits&12u; return m==0 || m==12u ; }
-
-  bool isZNisO() const { uint8 m=bits&13u; return m==1u || m==13u ; }
+  uint8 bitNZ() const { return bits&5u; }
  };
 
 /* class CPUCore */

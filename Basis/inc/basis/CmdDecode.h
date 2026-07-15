@@ -141,20 +141,14 @@ enum CmdCond // 4 bit
   CmdIfC,      // C != 0
   CmdNotC,     // C == 0
 
-  CmdIfN,      // N != 0
-  CmdNotN,     // N == 0
+  CmdIfN,      // N != 0               <
+  CmdNotN,     // N == 0               >=
 
   CmdIfO,      // O != 0
   CmdNotO,     // O == 0
 
-  CmdIfCnZ,    // C!=0 && Z==0
-  CmdNotCnZ,   // C==0 || Z==1
-
-  CmdIfNisO,   // N == O
-  CmdNotNisO,  // N != O
-
-  CmdIfZNisO,  // Z != 0 && N == O 
-  CmdNotZNisO, // Z == 0 || N != O
+  CmdIfNorZ,   // N != 0  or Z != 0     <=
+  CmdNotNorZ   // N == 0 and Z == 0     >
  }; 
 
 enum RegWidth
