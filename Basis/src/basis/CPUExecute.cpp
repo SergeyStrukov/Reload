@@ -865,6 +865,15 @@ void CPUCore::executeCoreStop()
 
 void CPUCore::executeOp()
  {
+  if( command.opcode==CmdSelect )
+    {
+     if( !testCond() ) command.src1=command.src2;
+
+     executeCast(); 
+
+     return; 
+    }
+
   if( !testCond() )
     {
      updatePC();

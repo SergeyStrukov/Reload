@@ -81,6 +81,7 @@ enum CmdOpcode // 8 bit
   CmdOr,
   CmdXor,
   CmdAndNot,
+  CmdSelect,
   CmdBinLim,
 
   // hole
