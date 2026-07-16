@@ -80,6 +80,14 @@ uint8 Cut(UInt &dst,UInt1 src)
   return (src&bit)? BitC : 0 ;
  }
 
+/* functions */ 
+
+template <UIntType UInt>
+UInt SwapBit(UInt val); // TODO
+
+template <UIntType UInt>
+UInt SwapByte(UInt val); // TODO
+
 /* classes */    
 
 struct uint72;
@@ -89,6 +97,8 @@ template <class Body,unsigned Width_,bool Sign_> struct Arg;
 struct OpCast;
 struct OpNeg;
 struct OpNot;
+struct OpSwapBit;
+struct OpSwapByte;
 
 struct OpAdd;
 struct OpSub;
@@ -306,6 +316,9 @@ struct Arg
   Arg operator & (Arg obj) const { Arg ret=*this; ret.val&=obj.val; return ret; }
   Arg operator | (Arg obj) const { Arg ret=*this; ret.val|=obj.val; return ret; }
   Arg operator ^ (Arg obj) const { Arg ret=*this; ret.val^=obj.val; return ret; }
+
+  Arg swapBit() const { Arg ret{SwapBit(val)}; return ret; }
+  Arg swapByte() const { Arg ret{SwapByte(val)}; return ret; }
  };
 
 using UInt64 = Arg<uint64,64,false> ; 
@@ -360,6 +373,32 @@ struct OpNot
     using Type = UpArg<Src> ;
 
     return dst.cast( ~Type::Ext(src) ); 
+   }
+ };
+
+/* struct OpSwapBit */
+
+struct OpSwapBit
+ {
+  template <class Dst,class Src>  
+  uint8 operator () (Dst &dst,Src src)
+   { 
+    dst.cast( src.swapBit() );
+
+    return 0; 
+   }
+ };
+
+/* struct OpSwapByte */
+
+struct OpSwapByte
+ {
+  template <class Dst,class Src>  
+  uint8 operator () (Dst &dst,Src src)
+   { 
+    dst.cast( src.swapByte() );
+
+    return 0; 
    }
  };
 

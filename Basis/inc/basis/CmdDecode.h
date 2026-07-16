@@ -66,7 +66,9 @@ enum CmdOpcode // 8 bit
   CmdUnBase = 2,
   CmdCast = CmdUnBase, // dst src1
   CmdNeg,
-  CmdNot,  
+  CmdNot, 
+  CmdSwapBit,
+  CmdSwapByte,
   CmdUnLim,
 
   // hole
