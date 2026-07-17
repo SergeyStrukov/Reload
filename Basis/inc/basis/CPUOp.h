@@ -30,13 +30,13 @@ enum OpBit : uint8
 
 /* functions */ 
 
-template <class UInt,class UInt1>
+template <UIntType UInt,UIntType UInt1>
 void ExtUnsigned(UInt &dst,UInt1 src)
  {
   dst=src;
  }
 
-template <class UInt,class UInt1>
+template <UIntType UInt,UIntType UInt1>
 UInt MSBit(UInt1 src)
  {
   UInt dst=src;
@@ -46,7 +46,7 @@ UInt MSBit(UInt1 src)
   return dst;
  }
 
-template <class UInt,class UInt1>
+template <UIntType UInt,UIntType UInt1>
 auto ExtSigned(UInt &dst,UInt1 src)
  {
   dst=src;
@@ -58,19 +58,19 @@ auto ExtSigned(UInt &dst,UInt1 src)
   return bit;
  }
 
-template <class UInt>
+template <UIntType UInt>
 uint8 GetZ(UInt src)
  {
   return src? 0 : BitZ ;
  }
 
-template <class UInt>
+template <UIntType UInt>
 uint8 GetN(UInt src)
  {
   return UIntFunc<UInt>::IsNegative(src)? BitZ : 0 ;
  }
 
-template <class UInt,class UInt1>
+template <UIntType UInt,UIntType UInt1>
 uint8 Cut(UInt &dst,UInt1 src)
  {
   dst=(UInt)src;
@@ -83,10 +83,35 @@ uint8 Cut(UInt &dst,UInt1 src)
 /* functions */ 
 
 template <UIntType UInt>
-UInt SwapBit(UInt val); // TODO
+UInt SwapBit(UInt val)
+ {
+  UInt ret=0;
+
+  for(UInt bit=1,out=UIntFunc<UInt>::MSBit; out ;bit<<=1,out>>=1) if( val&bit ) ret|=out;
+
+  return ret;
+ }
 
 template <UIntType UInt>
-UInt SwapByte(UInt val); // TODO
+UInt SwapByte(UInt val)
+ {
+  UInt ret=0;
+  unsigned shift=UIntFunc<UInt>::Bits-8;
+
+  for(; val ;val>>=8,shift-=8) ret|=((val&0xFFu)<<shift);
+
+  return ret;
+ }
+
+template <UIntType UInt>
+uint8 BitCount(UInt val)
+ {
+  uint8 ret=0;
+
+  for(; val ;val>>=1) if( val&1u ) ret++;
+
+  return ret;
+ }
 
 /* classes */    
 
@@ -99,6 +124,9 @@ struct OpNeg;
 struct OpNot;
 struct OpSwapBit;
 struct OpSwapByte;
+struct OpScanMSBit;
+struct OpScanLSBit;
+struct OpScanBitCount;
 
 struct OpAdd;
 struct OpSub;
@@ -178,14 +206,14 @@ struct uint72
    }
  };
 
-template <class UInt1>
+template <UIntType UInt1>
 void ExtUnsigned(uint72 &dst,UInt1 src)
  {
   dst.val=src;
   dst.msb=0;
  }
 
-template <class UInt1>
+template <UIntType UInt1>
 auto ExtSigned(uint72 &dst,UInt1 src)
  {
   auto bit=ExtSigned(dst.val,src);
@@ -206,7 +234,7 @@ inline uint8 GetN(uint72 src)
   return UIntFunc<uint8>::IsNegative(src.msb)? BitN : 0 ;
  }
 
-template <class UInt>
+template <UIntType UInt>
 uint8 Cut(UInt &dst,uint72 src)
  {
   return Cut(dst,src.val);
@@ -317,8 +345,12 @@ struct Arg
   Arg operator | (Arg obj) const { Arg ret=*this; ret.val|=obj.val; return ret; }
   Arg operator ^ (Arg obj) const { Arg ret=*this; ret.val^=obj.val; return ret; }
 
-  Arg swapBit() const { Arg ret{SwapBit(val)}; return ret; }
-  Arg swapByte() const { Arg ret{SwapByte(val)}; return ret; }
+  Arg swapBit() const { Arg ret{ SwapBit(val) }; return ret; }
+  Arg swapByte() const { Arg ret{ SwapByte(val) }; return ret; }
+
+  Arg<uint8,8,false> scanMSBit() const { Arg<uint8,8,false> ret{ (uint8)UIntFunc<Body>::CountZeroMSB(val) }; return ret; }
+  Arg<uint8,8,false> scanLSBit() const { Arg<uint8,8,false> ret{ (uint8)UIntFunc<Body>::CountZeroLSB(val) }; return ret; }
+  Arg<uint8,8,false> scanBitCount() const { Arg<uint8,8,false> ret{ BitCount(val) }; return ret; }
  };
 
 using UInt64 = Arg<uint64,64,false> ; 
@@ -383,9 +415,7 @@ struct OpSwapBit
   template <class Dst,class Src>  
   uint8 operator () (Dst &dst,Src src)
    { 
-    dst.cast( src.swapBit() );
-
-    return 0; 
+    return dst.cast( src.swapBit() ); 
    }
  };
 
@@ -396,9 +426,40 @@ struct OpSwapByte
   template <class Dst,class Src>  
   uint8 operator () (Dst &dst,Src src)
    { 
-    dst.cast( src.swapByte() );
+    return dst.cast( src.swapByte() ); 
+   }
+ };
 
-    return 0; 
+/* struct OpScanMSBit */
+
+struct OpScanMSBit
+ {
+  template <class Dst,class Src>  
+  uint8 operator () (Dst &dst,Src src)
+   { 
+    return dst.cast( src.scanMSBit() );
+   }
+ };
+
+/* struct OpScanLSBit */
+
+struct OpScanLSBit
+ {
+  template <class Dst,class Src>  
+  uint8 operator () (Dst &dst,Src src)
+   { 
+    return dst.cast( src.scanLSBit() );
+   }
+ };
+
+/* struct OpScanBitCount */ 
+
+struct OpScanBitCount
+ {
+  template <class Dst,class Src>  
+  uint8 operator () (Dst &dst,Src src)
+   { 
+    return dst.cast( src.scanBitCount() );
    }
  };
 

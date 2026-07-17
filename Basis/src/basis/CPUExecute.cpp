@@ -394,6 +394,21 @@ void CPUCore::executeSwapByte()
   executeUn<Op::OpSwapByte>();
  }
 
+void CPUCore::executeScanMSBit()
+ {
+  executeUn<Op::OpScanMSBit>();
+ }
+
+void CPUCore::executeScanLSBit()
+ {
+  executeUn<Op::OpScanLSBit>();
+ }
+
+void CPUCore::executeScanBitCount()
+ {
+  executeUn<Op::OpScanBitCount>();
+ }
+
 template <class F,class Dst,class Src1,class Src2>
 void CPUCore::executeBin(Dst &dst,Src1 src1,Src2 src2)
  {
@@ -895,6 +910,9 @@ void CPUCore::executeOp()
      case CmdNot : executeNot(); break;
      case CmdSwapBit : executeSwapBit(); break;
      case CmdSwapByte : executeSwapByte(); break;
+     case CmdScanMSBit : executeScanMSBit(); break; 
+     case CmdScanLSBit : executeScanLSBit(); break;
+     case CmdScanBitCount : executeScanBitCount(); break;
 
      // bin op
 

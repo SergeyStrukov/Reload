@@ -69,6 +69,9 @@ enum CmdOpcode // 8 bit
   CmdNot, 
   CmdSwapBit,
   CmdSwapByte,
+  CmdScanMSBit,
+  CmdScanLSBit,
+  CmdScanBitCount,
   CmdUnLim,
 
   // hole

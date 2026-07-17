@@ -152,6 +152,9 @@ class CPUCore : NoCopy
    void executeNot();
    void executeSwapBit();
    void executeSwapByte();
+   void executeScanMSBit();
+   void executeScanLSBit();
+   void executeScanBitCount();
 
    template <class F,class Dst,class Src1,class Src2>
    void executeBin(Dst &dst,Src1 src1,Src2 src2);
