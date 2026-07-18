@@ -152,6 +152,8 @@ struct uint72
   uint64 val;  
   uint8 msb; 
 
+  bool operator ! () const { return !(val|msb); }
+
   bool operator == (uint72 obj) const { return val==obj.val && msb==obj.msb ; }
   
   uint72 operator - () const
@@ -166,6 +168,16 @@ struct uint72
   uint72 operator ~ () const
    {
     return {~val,(uint8)~msb};
+   }
+
+  uint72 & operator += (uint64 obj)
+   {
+    UIntFunc<uint64>::Add add(val,obj); 
+
+    val=add.result;
+    msb+=add.carry;    
+
+    return *this;
    }
 
   uint72 & operator += (uint72 obj)
@@ -187,6 +199,16 @@ struct uint72
 
     return *this;
    }
+
+  uint72 & operator /= (uint72 obj) // TODO
+   {
+    return *this;
+   } 
+
+  uint72 & operator %= (uint72 obj) // TODO
+   {
+    return *this;
+   } 
 
   uint72 & operator &= (uint72 obj)
    {
@@ -316,6 +338,8 @@ struct Arg
     return src.bitC() | ( GetN(val)? BitO : 0 ) ;
    }
 
+  bool operator ! () const { return !val; }
+
   uint8 getNZ() const requires( Sign )
    {
     return GetZ(val)|GetN(val);
@@ -348,6 +372,9 @@ struct Arg
   Arg operator + (Arg obj) const { Arg ret=*this; ret.val+=obj.val; return ret; }
   Arg operator - (Arg obj) const { Arg ret=*this; ret.val-=obj.val; return ret; }
 
+  Arg operator / (Arg obj) const { Arg ret=*this; ret.val/=obj.val; return ret; }
+  Arg operator % (Arg obj) const { Arg ret=*this; ret.val%=obj.val; return ret; }
+
   Arg operator & (Arg obj) const { Arg ret=*this; ret.val&=obj.val; return ret; }
   Arg operator | (Arg obj) const { Arg ret=*this; ret.val|=obj.val; return ret; }
   Arg operator ^ (Arg obj) const { Arg ret=*this; ret.val^=obj.val; return ret; }
@@ -358,6 +385,9 @@ struct Arg
   Arg<uint8,8,false> scanMSBit() const { Arg<uint8,8,false> ret{ (uint8)UIntFunc<Body>::CountZeroMSB(val) }; return ret; }
   Arg<uint8,8,false> scanLSBit() const { Arg<uint8,8,false> ret{ (uint8)UIntFunc<Body>::CountZeroLSB(val) }; return ret; }
   Arg<uint8,8,false> scanBitCount() const { Arg<uint8,8,false> ret{ BitCount(val) }; return ret; }
+
+  Arg addCarry(Arg obj,bool bitC) const { if( bitC ) obj.val+=1u; return (*this)+obj; }
+  Arg subCarry(Arg obj,bool bitC) const { if( bitC ) obj.val+=1u; return (*this)-obj; }
  };
 
 using UInt64 = Arg<uint64,64,false> ; 
@@ -506,18 +536,36 @@ struct OpMul // TODO
 
 /* struct OpDiv */
 
-struct OpDiv // TODO
+struct OpDiv
  {
   template <class Dst,class Src1,class Src2>  
-  uint8 operator () (Dst &dst,Src1 src1,Src2 src2);
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2)
+   {
+    using Type = MaxArg<Src1,Src2> ;
+
+    Type div=Type::Ext(src2);
+
+    if( !div ) return dst.cast( Type::Ext(Src1{0}) )|BitO;
+
+    return dst.cast( Type::Ext(src1) / div );
+   }
  };
 
 /* struct OpRem */
 
-struct OpRem // TODO
+struct OpRem
  {
   template <class Dst,class Src1,class Src2>  
-  uint8 operator () (Dst &dst,Src1 src1,Src2 src2);
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2)
+   {
+    using Type = MaxArg<Src1,Src2> ;
+
+    Type div=Type::Ext(src2);
+
+    if( !div ) return dst.cast( Type::Ext(src1) )|BitO;
+
+    return dst.cast( Type::Ext(src1) % div );
+   }
  };
 
 /* struct OpAnd */
@@ -582,18 +630,28 @@ struct OpMac // TODO
 
 /* struct OpAddCarry */ 
 
-struct OpAddCarry // TODO
+struct OpAddCarry
  {
   template <class Dst,class Src1,class Src2>  
-  uint8 operator () (Dst &dst,Src1 src1,Src2 src2,uint8 flags);
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2,uint8 flags)
+   {
+    using Type = MaxArg<Src1,Src2> ;
+
+    return dst.cast( Type::Ext(src1).addCarry(Type::Ext(src2),flags&BitC) );
+   }
  };
 
 /* struct OpSubCarry */
 
-struct OpSubCarry // TODO
+struct OpSubCarry
  {
   template <class Dst,class Src1,class Src2>  
-  uint8 operator () (Dst &dst,Src1 src1,Src2 src2,uint8 flags);
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2,uint8 flags)
+   {
+    using Type = MaxArg<Src1,Src2> ;
+
+    return dst.cast( Type::Ext(src1).subCarry(Type::Ext(src2),flags&BitC) );
+   }
  };
 
 /* struct OpShiftLeft */
