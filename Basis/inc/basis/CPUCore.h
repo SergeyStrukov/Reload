@@ -156,14 +156,14 @@ class CPUCore : NoCopy
    void executeScanLSBit();
    void executeScanBitCount();
 
-   template <class F,class Dst,class Src1,class Src2>
-   void executeBin(Dst &dst,Src1 src1,Src2 src2);
-   template <class F,class Dst,class Src1>
-   void executeBin(Dst &dst,Src1 src1);
-   template <class F,class Dst>
-   void executeBin(Dst &dst);
-   template <class F>
-   void executeBin();
+   template <class F,class Dst,class Src1,class Src2,class ... SS>
+   void executeBin3(Dst &dst,Src1 src1,Src2 src2,SS ... ss);
+   template <class F,class Dst,class Src1,class ... SS>
+   void executeBin2(Dst &dst,Src1 src1,SS ... ss);
+   template <class F,class Dst,class ... SS>
+   void executeBin1(Dst &dst,SS ... ss);
+   template <class F,class ... SS>
+   void executeBin(SS ... ss);
 
    void executeAdd();
    void executeSub();
@@ -174,6 +174,13 @@ class CPUCore : NoCopy
    void executeOr();
    void executeXor();
    void executeAndNot();
+   void executeMac();
+   void executeAddCarry();
+   void executeSubCarry();
+   void executeShiftLeft();
+   void executeShiftRight();
+   void executeRotLeft();
+   void executeRotRight();
 
    void executeLoadAddr();
    void executeLoad();

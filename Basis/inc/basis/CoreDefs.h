@@ -120,11 +120,13 @@ inline void SetPart16(uint64 &reg,uint8 part,uint16 val) { SetPart<16>(reg,part,
 
 inline void SetPart8(uint64 &reg,uint8 part,uint8 val) { SetPart<8>(reg,part,val); }
 
-inline uint32 GetPart32(uint64 reg,uint8 part) { return uint32(reg>>part*32u); }
+inline uint32 GetPart32(uint64 reg,uint8 part) { return uint32( reg>>part*32u ); }
 
-inline uint16 GetPart16(uint64 reg,uint8 part) { return uint16(reg>>part*16u); }
+inline uint16 GetPart16(uint64 reg,uint8 part) { return uint16( reg>>part*16u ); }
 
-inline uint8 GetPart8(uint64 reg,uint8 part) { return uint8(reg>>part*8u); }
+inline uint8 GetPart8(uint64 reg,uint8 part) { return uint8( reg>>part*8u ); }
+
+inline uint8 GetPart4(uint64 reg,uint8 part) { return uint8( (reg>>part*4u)&15u ); }
 
 /* classes */
 

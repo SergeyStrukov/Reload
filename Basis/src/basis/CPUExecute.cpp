@@ -409,85 +409,85 @@ void CPUCore::executeScanBitCount()
   executeUn<Op::OpScanBitCount>();
  }
 
-template <class F,class Dst,class Src1,class Src2>
-void CPUCore::executeBin(Dst &dst,Src1 src1,Src2 src2)
+template <class F,class Dst,class Src1,class Src2,class ... SS>
+void CPUCore::executeBin3(Dst &dst,Src1 src1,Src2 src2,SS ... ss)
  {
-  setFlags(F()(dst,src1,src2));
+  setFlags(F()(dst,src1,src2,ss...));
 
   updatePC();
  }
 
-template <class F,class Dst,class Src1>
-void CPUCore::executeBin(Dst &dst,Src1 src1)
+template <class F,class Dst,class Src1,class ... SS>
+void CPUCore::executeBin2(Dst &dst,Src1 src1,SS ... ss)
  {
   if( command.src2.getSign() )
     {
      switch( command.src2.getWidth() )
        {
-        case Reg64bit : { Op::SInt64 src2{get64arg(command.src2)}; executeBin<F>(dst,src1,src2); } break;
-        case Reg32bit : { Op::SInt32 src2{get32arg(command.src2)}; executeBin<F>(dst,src1,src2); } break;
-        case Reg16bit : { Op::SInt16 src2{get16arg(command.src2)}; executeBin<F>(dst,src1,src2); } break;
-        case Reg8bit :  { Op::SInt8 src2{get8arg(command.src2)};  executeBin<F>(dst,src1,src2); } break;
+        case Reg64bit : { Op::SInt64 src2{get64arg(command.src2)}; executeBin3<F>(dst,src1,src2,ss...); } break;
+        case Reg32bit : { Op::SInt32 src2{get32arg(command.src2)}; executeBin3<F>(dst,src1,src2,ss...); } break;
+        case Reg16bit : { Op::SInt16 src2{get16arg(command.src2)}; executeBin3<F>(dst,src1,src2,ss...); } break;
+        case Reg8bit :  { Op::SInt8 src2{get8arg(command.src2)};  executeBin3<F>(dst,src1,src2,ss...); } break;
        }
     }
   else
     {
      switch( command.src2.getWidth() )
        {
-        case Reg64bit : { Op::UInt64 src2{get64arg(command.src2)}; executeBin<F>(dst,src1,src2); } break;
-        case Reg32bit : { Op::UInt32 src2{get32arg(command.src2)}; executeBin<F>(dst,src1,src2); } break;
-        case Reg16bit : { Op::UInt16 src2{get16arg(command.src2)}; executeBin<F>(dst,src1,src2); } break;
-        case Reg8bit :  { Op::UInt8 src2{get8arg(command.src2)};  executeBin<F>(dst,src1,src2); } break;
+        case Reg64bit : { Op::UInt64 src2{get64arg(command.src2)}; executeBin3<F>(dst,src1,src2,ss...); } break;
+        case Reg32bit : { Op::UInt32 src2{get32arg(command.src2)}; executeBin3<F>(dst,src1,src2,ss...); } break;
+        case Reg16bit : { Op::UInt16 src2{get16arg(command.src2)}; executeBin3<F>(dst,src1,src2,ss...); } break;
+        case Reg8bit :  { Op::UInt8 src2{get8arg(command.src2)};  executeBin3<F>(dst,src1,src2,ss...); } break;
        }
     }
  }
 
-template <class F,class Dst>
-void CPUCore::executeBin(Dst &dst)
+template <class F,class Dst,class ... SS>
+void CPUCore::executeBin1(Dst &dst,SS ... ss)
  {
   if( command.src1.getSign() )
     {
      switch( command.src1.getWidth() )
        {
-        case Reg64bit : { Op::SInt64 src1{get64arg(command.src1)}; executeBin<F>(dst,src1); } break;
-        case Reg32bit : { Op::SInt32 src1{get32arg(command.src1)}; executeBin<F>(dst,src1); } break;
-        case Reg16bit : { Op::SInt16 src1{get16arg(command.src1)}; executeBin<F>(dst,src1); } break;
-        case Reg8bit :  { Op::SInt8 src1{get8arg(command.src1)};  executeBin<F>(dst,src1); } break;
+        case Reg64bit : { Op::SInt64 src1{get64arg(command.src1)}; executeBin2<F>(dst,src1,ss...); } break;
+        case Reg32bit : { Op::SInt32 src1{get32arg(command.src1)}; executeBin2<F>(dst,src1,ss...); } break;
+        case Reg16bit : { Op::SInt16 src1{get16arg(command.src1)}; executeBin2<F>(dst,src1,ss...); } break;
+        case Reg8bit :  { Op::SInt8 src1{get8arg(command.src1)};  executeBin2<F>(dst,src1,ss...); } break;
        }
     }
   else
     {
      switch( command.src1.getWidth() )
        {
-        case Reg64bit : { Op::UInt64 src1{get64arg(command.src1)}; executeBin<F>(dst,src1); } break;
-        case Reg32bit : { Op::UInt32 src1{get32arg(command.src1)}; executeBin<F>(dst,src1); } break;
-        case Reg16bit : { Op::UInt16 src1{get16arg(command.src1)}; executeBin<F>(dst,src1); } break;
-        case Reg8bit :  { Op::UInt8 src1{get8arg(command.src1)};  executeBin<F>(dst,src1); } break;
+        case Reg64bit : { Op::UInt64 src1{get64arg(command.src1)}; executeBin2<F>(dst,src1,ss...); } break;
+        case Reg32bit : { Op::UInt32 src1{get32arg(command.src1)}; executeBin2<F>(dst,src1,ss...); } break;
+        case Reg16bit : { Op::UInt16 src1{get16arg(command.src1)}; executeBin2<F>(dst,src1,ss...); } break;
+        case Reg8bit :  { Op::UInt8 src1{get8arg(command.src1)};  executeBin2<F>(dst,src1,ss...); } break;
        }
     }
  }
 
-template <class F>
-void CPUCore::executeBin()
+template <class F,class ... SS>
+void CPUCore::executeBin(SS ... ss)
  {
   if( command.dst.sign )
     {
      switch( command.dst.width )
        {
-        case Reg64bit : { Op::SInt64 dst; executeBin<F>(dst); set64reg(command.dst,dst.val); } break;
-        case Reg32bit : { Op::SInt32 dst; executeBin<F>(dst); set32reg(command.dst,dst.val); } break;
-        case Reg16bit : { Op::SInt16 dst; executeBin<F>(dst); set16reg(command.dst,dst.val); } break;
-        case Reg8bit :  { Op::SInt8 dst;  executeBin<F>(dst); set8reg(command.dst,dst.val); } break;
+        case Reg64bit : { Op::SInt64 dst; executeBin1<F>(dst,ss...); set64reg(command.dst,dst.val); } break;
+        case Reg32bit : { Op::SInt32 dst; executeBin1<F>(dst,ss...); set32reg(command.dst,dst.val); } break;
+        case Reg16bit : { Op::SInt16 dst; executeBin1<F>(dst,ss...); set16reg(command.dst,dst.val); } break;
+        case Reg8bit :  { Op::SInt8 dst;  executeBin1<F>(dst,ss...); set8reg(command.dst,dst.val); } break;
        }
     }
   else
     {
      switch( command.dst.width )
        {
-        case Reg64bit : { Op::UInt64 dst; executeBin<F>(dst); set64reg(command.dst,dst.val); } break;
-        case Reg32bit : { Op::UInt32 dst; executeBin<F>(dst); set32reg(command.dst,dst.val); } break;
-        case Reg16bit : { Op::UInt16 dst; executeBin<F>(dst); set16reg(command.dst,dst.val); } break;
-        case Reg8bit :  { Op::UInt8 dst;  executeBin<F>(dst); set8reg(command.dst,dst.val); } break;
+        case Reg64bit : { Op::UInt64 dst; executeBin1<F>(dst,ss...); set64reg(command.dst,dst.val); } break;
+        case Reg32bit : { Op::UInt32 dst; executeBin1<F>(dst,ss...); set32reg(command.dst,dst.val); } break;
+        case Reg16bit : { Op::UInt16 dst; executeBin1<F>(dst,ss...); set16reg(command.dst,dst.val); } break;
+        case Reg8bit :  { Op::UInt8 dst;  executeBin1<F>(dst,ss...); set8reg(command.dst,dst.val); } break;
        }
     }
  }
@@ -504,17 +504,17 @@ void CPUCore::executeSub()
 
 void CPUCore::executeMul()
  {
-  // TODO
+  executeBin<Op::OpMul>();
  }
 
 void CPUCore::executeDiv()
  {
-  // TODO
+  executeBin<Op::OpDiv>();
  }
 
 void CPUCore::executeRem()
  {
-  // TODO
+  executeBin<Op::OpRem>();
  }
 
 void CPUCore::executeAnd()
@@ -535,6 +535,49 @@ void CPUCore::executeXor()
 void CPUCore::executeAndNot()
  {
   executeBin<Op::OpAndNot>();
+ }
+
+void CPUCore::executeMac()
+ {
+  executeBin<Op::OpMac>();
+ }
+
+void CPUCore::executeAddCarry()
+ {
+  unsigned part=command.flagOut;
+
+  uint8 flags=GetPart4(regs[RegFlags],part);
+
+  executeBin<Op::OpAddCarry>(flags);
+ }
+
+void CPUCore::executeSubCarry()
+ {
+  unsigned part=command.flagOut;
+
+  uint8 flags=GetPart4(regs[RegFlags],part);
+
+  executeBin<Op::OpSubCarry>(flags);
+ }
+
+void CPUCore::executeShiftLeft()
+ {
+  executeBin<Op::OpShiftLeft>();
+ }
+
+void CPUCore::executeShiftRight()
+ {
+  executeBin<Op::OpShiftRight>();
+ }
+
+void CPUCore::executeRotLeft()
+ {
+  executeBin<Op::OpRotLeft>();
+ }
+
+void CPUCore::executeRotRight()
+ {
+  executeBin<Op::OpRotRight>();
  }
 
 void CPUCore::executeLoadAddr()
@@ -925,6 +968,13 @@ void CPUCore::executeOp()
      case CmdOr : executeOr(); break;
      case CmdXor : executeXor(); break;
      case CmdAndNot : executeAndNot(); break;
+     case CmdMac : executeMac(); break;
+     case CmdAddCarry : executeAddCarry(); break;
+     case CmdSubCarry : executeSubCarry(); break;
+     case CmdShiftLeft : executeShiftLeft(); break;
+     case CmdShiftRight : executeShiftRight(); break;
+     case CmdRotLeft : executeRotLeft(); break;
+     case CmdRotRight : executeRotRight(); break;
 
      // mem op
 

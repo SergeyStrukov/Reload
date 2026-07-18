@@ -137,6 +137,13 @@ struct OpAnd;
 struct OpOr;
 struct OpXor;
 struct OpAndNot;
+struct OpMac;
+struct OpAddCarry;
+struct OpSubCarry;
+struct OpShiftLeft;
+struct OpShiftRight;
+struct OpRotLeft;
+struct OpRotRight;
 
 /* struct uint72 */
 
@@ -489,9 +496,29 @@ struct OpSub
    }
  };
 
-//struct OpMul;
-//struct OpDiv;
-//struct OpRem;
+/* struct OpMul */
+
+struct OpMul // TODO
+ {
+  template <class Dst,class Src1,class Src2>  
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2);
+ };
+
+/* struct OpDiv */
+
+struct OpDiv // TODO
+ {
+  template <class Dst,class Src1,class Src2>  
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2);
+ };
+
+/* struct OpRem */
+
+struct OpRem // TODO
+ {
+  template <class Dst,class Src1,class Src2>  
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2);
+ };
 
 /* struct OpAnd */
 
@@ -543,6 +570,62 @@ struct OpAndNot
 
     return dst.cast( Type::Ext(src1) & ~Type::Ext(src2) );
    }
+ };
+
+/* struct OpMac */
+
+struct OpMac // TODO
+ {
+  template <class Dst,class Src1,class Src2>  
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2);
+ };
+
+/* struct OpAddCarry */ 
+
+struct OpAddCarry // TODO
+ {
+  template <class Dst,class Src1,class Src2>  
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2,uint8 flags);
+ };
+
+/* struct OpSubCarry */
+
+struct OpSubCarry // TODO
+ {
+  template <class Dst,class Src1,class Src2>  
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2,uint8 flags);
+ };
+
+/* struct OpShiftLeft */
+
+struct OpShiftLeft // TODO
+ {
+  template <class Dst,class Src1,class Src2>  
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2);
+ };
+
+/* struct OpShiftRight */
+
+struct OpShiftRight // TODO
+ {
+  template <class Dst,class Src1,class Src2>  
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2);
+ };
+
+/* struct OpRotLeft */ 
+
+struct OpRotLeft // TODO
+ {
+  template <class Dst,class Src1,class Src2>  
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2);
+ };
+
+/* struct OpRotRight */
+
+struct OpRotRight // TODO
+ {
+  template <class Dst,class Src1,class Src2>  
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2);
  };
 
 } // namespace Basis::Op    
