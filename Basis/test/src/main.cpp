@@ -1,7 +1,7 @@
 /* main.cpp */
 //----------------------------------------------------------------------------------------
 //
-//  Target: Basis Sim 1.00
+//  Target: Basis Test 1.00
 //
 //  License: Boost Software License - Version 1.0 - August 17th, 2003
 //
@@ -11,19 +11,36 @@
 //
 //----------------------------------------------------------------------------------------
 
-#include "basis/CoreDefs.h"
+#include "test.h"
 
 /* main() */
 
-using namespace Basis;
+namespace Test {
 
-int main(int argc,const char *const* argv)
+void test1();
+
+} // namespace Test
+
+using namespace Test;
+
+int main()
  {
-  HEntrySplit split(0xFFFF'FFFF'FFFF'FFFFu);
+  ReportException report;
 
-  Printf(Con,"#.h; #.h; #.h; #.h; #.h; #.h; #.h;\n",split.base,split.len,split.R,split.W,split.X,split.P,split.H);
+  try
+    {
+     test1();
 
-  return 0;   
+     report.guard();
+
+     return 0;   
+    }
+  catch(CatchType)
+    {
+     return 1;   
+    }
+
+  return 1;   
  }
 
 
