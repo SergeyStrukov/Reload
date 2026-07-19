@@ -53,12 +53,12 @@ struct FlagBits
  {
   uint8 bits : 4 ;
 
-  uint8 bitZ() const { return bits&1u; }
-  uint8 bitC() const { return bits&2u; }
-  uint8 bitN() const { return bits&4u; }
-  uint8 bitO() const { return bits&8u; }
+  uint8 bitZ() const { return bits&BitZ; }
+  uint8 bitC() const { return bits&BitC; }
+  uint8 bitN() const { return bits&BitN; }
+  uint8 bitO() const { return bits&BitO; }
 
-  uint8 bitNZ() const { return bits&5u; }
+  uint8 bitNZ() const { return bits&(BitZ|BitN); }
  };
 
 /* class CPUCore */

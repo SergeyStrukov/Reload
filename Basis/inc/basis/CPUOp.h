@@ -14,108 +14,11 @@
 #ifndef Basis_inc_CPUOp_h
 #define Basis_inc_CPUOp_h
 
-#include "basis/CoreDefs.h"
+#include "basis/ExtInt.h"
 
 namespace Basis::Op {
 
-/* consts */    
-
-enum OpBit : uint8
- {
-  BitZ = 1u,  
-  BitC = 2u,  
-  BitN = 4u,  
-  BitO = 8u,  
- };
-
-/* functions */ 
-
-template <UIntType UInt,UIntType UInt1>
-void ExtUnsigned(UInt &dst,UInt1 src)
- {
-  dst=src;
- }
-
-template <UIntType UInt,UIntType UInt1>
-UInt MSBit(UInt1 src)
- {
-  UInt dst=src;
-
-  dst&=UIntFunc<UInt1>::MSBit;
-
-  return dst;
- }
-
-template <UIntType UInt,UIntType UInt1>
-auto ExtSigned(UInt &dst,UInt1 src)
- {
-  dst=src;
-
-  auto bit=MSBit<UInt>(src);
-
-  dst-=(bit<<1);
-
-  return bit;
- }
-
-template <UIntType UInt>
-uint8 GetZ(UInt src)
- {
-  return src? 0 : BitZ ;
- }
-
-template <UIntType UInt>
-uint8 GetN(UInt src)
- {
-  return UIntFunc<UInt>::IsNegative(src)? BitZ : 0 ;
- }
-
-template <UIntType UInt,UIntType UInt1>
-uint8 Cut(UInt &dst,UInt1 src)
- {
-  dst=(UInt)src;
-
-  UInt1 bit=UInt1(1)<<UIntFunc<UInt>::Bits;
-
-  return (src&bit)? BitC : 0 ;
- }
-
-/* functions */ 
-
-template <UIntType UInt>
-UInt SwapBit(UInt val)
- {
-  UInt ret=0;
-
-  for(UInt bit=1,out=UIntFunc<UInt>::MSBit; out ;bit<<=1,out>>=1) if( val&bit ) ret|=out;
-
-  return ret;
- }
-
-template <UIntType UInt>
-UInt SwapByte(UInt val)
- {
-  UInt ret=0;
-  unsigned shift=UIntFunc<UInt>::Bits-8;
-
-  for(; val ;val>>=8,shift-=8) ret|=((val&0xFFu)<<shift);
-
-  return ret;
- }
-
-template <UIntType UInt>
-uint8 BitCount(UInt val)
- {
-  uint8 ret=0;
-
-  for(; val ;val>>=1) if( val&1u ) ret++;
-
-  return ret;
- }
-
 /* classes */    
-
-struct uint72;
 
 template <class Body,unsigned Width_,bool Sign_> struct Arg;
 
@@ -145,137 +48,6 @@ struct OpShiftRight;
 struct OpRotLeft;
 struct OpRotRight;
 
-/* struct uint72 */
-
-struct uint72
- {
-  uint64 val;  
-  uint8 msb; 
-
-  bool operator ! () const { return !(val|msb); }
-
-  bool operator == (uint72 obj) const { return val==obj.val && msb==obj.msb ; }
-  
-  uint72 operator - () const
-   {
-    uint72 ret{0,0};
-
-    ret-=(*this);
-
-    return ret;
-   }
-
-  uint72 operator ~ () const
-   {
-    return {~val,(uint8)~msb};
-   }
-
-  uint72 & operator += (uint64 obj)
-   {
-    UIntFunc<uint64>::Add add(val,obj); 
-
-    val=add.result;
-    msb+=add.carry;    
-
-    return *this;
-   }
-
-  uint72 & operator += (uint72 obj)
-   {
-    UIntFunc<uint64>::Add add(val,obj.val); 
-
-    val=add.result;
-    msb+=obj.msb+add.carry;    
-
-    return *this;
-   }
-  
-  uint72 & operator -= (uint72 obj)
-   {
-    UIntFunc<uint64>::Sub sub(val,obj.val); 
-
-    val=sub.result;
-    msb-=obj.msb+sub.borrow;    
-
-    return *this;
-   }
-
-  uint72 & operator /= (uint72 obj) // TODO
-   {
-    return *this;
-   } 
-
-  uint72 & operator %= (uint72 obj) // TODO
-   {
-    return *this;
-   } 
-
-  uint72 & operator &= (uint72 obj)
-   {
-    val&=obj.val;
-    msb&=obj.msb;
-
-    return *this;
-   }
-
-  uint72 & operator |= (uint72 obj)
-   {
-    val|=obj.val;
-    msb|=obj.msb;
-
-    return *this;
-   }
-
-  uint72 & operator ^= (uint72 obj)
-   {
-    val^=obj.val;
-    msb^=obj.msb;
-
-    return *this;
-   }
- };
-
-template <UIntType UInt1>
-void ExtUnsigned(uint72 &dst,UInt1 src)
- {
-  dst.val=src;
-  dst.msb=0;
- }
-
-template <UIntType UInt1>
-auto ExtSigned(uint72 &dst,UInt1 src)
- {
-  auto bit=ExtSigned(dst.val,src);
-
-  dst.msb=0;
-  dst.msb-=(dst.val>>63);
-
-  return bit;
- }
-
-inline uint8 GetZ(uint72 src)
- {
-  return (src.val|src.msb)? 0 : BitZ ;
- }
-
-inline uint8 GetN(uint72 src)
- {
-  return UIntFunc<uint8>::IsNegative(src.msb)? BitN : 0 ;
- }
-
-template <UIntType UInt>
-uint8 Cut(UInt &dst,uint72 src)
- {
-  return Cut(dst,src.val);
- }
-
-inline uint8 Cut(uint64 &dst,uint72 src)
- {
-  dst=src.val;
-
-  return (src.msb&1u)? BitC : 0 ;
- }
-
 /* struct Arg<Body,Width,Sign> */
 
 template <class Body,unsigned Width_,bool Sign_>
@@ -286,7 +58,35 @@ struct Arg
 
   static constexpr unsigned ExtWidth = Sign? Width : (Width+1) ;
 
+  // body
+
   Body val;
+
+  // prop
+
+  bool operator ! () const { return !val; }
+
+  uint8 getNZ() const requires( Sign )
+   {
+    return GetZ(val)|GetN(val);
+   }
+
+  uint8 getNZ() const requires( !Sign )
+   {
+    return GetZ(val);
+   }
+
+  uint8 bitC() const requires( Sign )
+   {
+    return GetN(val)? BitC : 0 ;
+   }
+
+  uint8 bitC() const requires( !Sign )
+   {
+    return 0;
+   }
+
+  // ext
   
   template <class Src>
   static Arg Ext(Src src) { Arg ret; ret.ext(src); return ret; }
@@ -300,6 +100,8 @@ struct Arg
   template <class Src> requires ( !Src::Sign && Src::Width<Width )
   uint8 ext(Src src) { ExtUnsigned(val,src.val); return 0; }
 
+  // cut
+
   template <class Src> requires ( Src::Width>Width )
   uint8 cut(Src src)
    {
@@ -307,19 +109,9 @@ struct Arg
 
     Src temp;
 
-    uint8 o=temp.ext(*this);
+    uint8 o=temp.ext(*this)&BitO;
 
     return c | ( (temp.val!=src.val)? uint8(BitO) : o ) ;
-   }
-
-  uint8 bitC() const requires( Sign )
-   {
-    return GetN(val)? BitC : 0 ;
-   }
-
-  uint8 bitC() const requires( !Sign )
-   {
-    return 0;
    }
 
   template <class Src> requires ( Src::Width==Width && Src::Sign==Sign )
@@ -338,17 +130,7 @@ struct Arg
     return src.bitC() | ( GetN(val)? BitO : 0 ) ;
    }
 
-  bool operator ! () const { return !val; }
-
-  uint8 getNZ() const requires( Sign )
-   {
-    return GetZ(val)|GetN(val);
-   }
-
-  uint8 getNZ() const requires( !Sign )
-   {
-    return GetZ(val);
-   }
+  // cast
 
   template <class Src> requires ( Src::Width<Width )
   uint8 cast(Src src)
@@ -366,6 +148,8 @@ struct Arg
     return src.getNZ()|oc;
    }
 
+  // operators
+
   Arg operator - () const { Arg ret; ret.val=-val; return ret; }
   Arg operator ~ () const { Arg ret; ret.val=~val; return ret; }
 
@@ -379,16 +163,20 @@ struct Arg
   Arg operator | (Arg obj) const { Arg ret=*this; ret.val|=obj.val; return ret; }
   Arg operator ^ (Arg obj) const { Arg ret=*this; ret.val^=obj.val; return ret; }
 
-  Arg swapBit() const { Arg ret{ SwapBit(val) }; return ret; }
-  Arg swapByte() const { Arg ret{ SwapByte(val) }; return ret; }
+  Arg swapBit() const { return Arg{ SwapBit(val) }; }
+  Arg swapByte() const { return Arg{ SwapByte(val) }; }
 
-  Arg<uint8,8,false> scanMSBit() const { Arg<uint8,8,false> ret{ (uint8)UIntFunc<Body>::CountZeroMSB(val) }; return ret; }
-  Arg<uint8,8,false> scanLSBit() const { Arg<uint8,8,false> ret{ (uint8)UIntFunc<Body>::CountZeroLSB(val) }; return ret; }
-  Arg<uint8,8,false> scanBitCount() const { Arg<uint8,8,false> ret{ BitCount(val) }; return ret; }
+  using ScanType = Arg<uint8,8,false> ;
+
+  ScanType scanMSBit() const { return ScanType{ (uint8)UIntFunc<Body>::CountZeroMSB(val) }; }
+  ScanType scanLSBit() const { return ScanType{ (uint8)UIntFunc<Body>::CountZeroLSB(val) }; }
+  ScanType scanBitCount() const { return ScanType{ BitCount(val) }; }
 
   Arg addCarry(Arg obj,bool bitC) const { if( bitC ) obj.val+=1u; return (*this)+obj; }
   Arg subCarry(Arg obj,bool bitC) const { if( bitC ) obj.val+=1u; return (*this)-obj; }
  };
+
+/* arg types */
 
 using UInt64 = Arg<uint64,64,false> ; 
 using UInt32 = Arg<uint32,32,false> ; 
@@ -400,7 +188,7 @@ using SInt32 = Arg<uint32,32,true> ;
 using SInt16 = Arg<uint16,16,true> ; 
 using SInt8  = Arg<uint8,8,true> ; 
 
-using SInt72 = Arg<uint72,65,true> ; 
+using SInt72 = Arg<uint72,72,true> ; 
 
 template <unsigned W>
 using SIntArg = Meta::Select<( W<=8 ), SInt8 , Meta::Select<( W<=16 ), SInt16 , Meta::Select<( W<=32 ), SInt32 , Meta::Select<( W<=64 ), SInt64 , SInt72 > > > > ;

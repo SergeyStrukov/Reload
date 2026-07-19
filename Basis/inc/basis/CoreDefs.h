@@ -25,6 +25,14 @@ using namespace CCore;
 
 /* consts */
 
+enum OpBit : uint8
+ {
+  BitZ = 1u,  
+  BitC = 2u,  
+  BitN = 4u,  
+  BitO = 8u,  
+ };
+
 enum Status
  {
   StatusDone = 0,  
