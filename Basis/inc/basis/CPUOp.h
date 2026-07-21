@@ -78,7 +78,7 @@ struct Arg
 
   uint8 bitC() const requires( Sign )
    {
-    return GetN(val)? BitC : 0 ;
+    return IsNeg(val)? BitC : 0 ;
    }
 
   uint8 bitC() const requires( !Sign )
@@ -127,7 +127,7 @@ struct Arg
    {
     val=src.val;
 
-    return src.bitC() | ( GetN(val)? BitO : 0 ) ;
+    return src.bitC() | ( IsNeg(val)? BitO : 0 ) ;
    }
 
   // cast
@@ -156,8 +156,8 @@ struct Arg
   Arg operator + (Arg obj) const { Arg ret=*this; ret.val+=obj.val; return ret; }
   Arg operator - (Arg obj) const { Arg ret=*this; ret.val-=obj.val; return ret; }
 
-  Arg operator / (Arg obj) const { Arg ret=*this; ret.val/=obj.val; return ret; }
-  Arg operator % (Arg obj) const { Arg ret=*this; ret.val%=obj.val; return ret; }
+  Arg operator / (Arg obj) const requires (Sign) { return Arg{ SignedDiv(val,obj.val) }; }
+  Arg operator % (Arg obj) const requires (Sign) { return Arg{ SignedRem(val,obj.val) }; }
 
   Arg operator & (Arg obj) const { Arg ret=*this; ret.val&=obj.val; return ret; }
   Arg operator | (Arg obj) const { Arg ret=*this; ret.val|=obj.val; return ret; }

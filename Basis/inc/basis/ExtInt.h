@@ -77,13 +77,17 @@ struct uint72
     return *this;
    }
 
-  uint72 & operator /= (uint72 obj) // TODO
+  uint72 & operator /= (uint72 obj) // 64 bit operation, msb and obj.msb == 0
    {
+    val/=obj.val;
+
     return *this;
    } 
 
-  uint72 & operator %= (uint72 obj) // TODO
+  uint72 & operator %= (uint72 obj) // 64 bit operation, msb and obj.msb == 0
    {
+    val%=obj.val;
+
     return *this;
    } 
 
@@ -114,19 +118,28 @@ struct uint72
 
 /* functions */ 
 
+template <UIntType UInt>
+bool IsNeg(UInt src)
+ {
+  return UIntFunc<UInt>::IsNegative(src);
+ }
+
+inline bool IsNeg(uint72 src)
+ {
+  return IsNeg(src.msb);
+ }
+
 template <class UInt>
 uint8 GetZ(UInt src)
  {
-  return (!src)? (uint8)BitZ : 0 ;
+  return (!src)? BitZ : 0 ;
  }
 
-template <UIntType UInt>
+template <class UInt>
 uint8 GetN(UInt src)
  {
-  return UIntFunc<UInt>::IsNegative(src)? BitN : 0 ;
+  return IsNeg(src)? BitN : 0 ;
  }
-
-inline uint8 GetN(uint72 src) { return GetN(src.msb); }
 
 template <UIntType UInt,UIntType UInt1>
 UInt MSBit(UInt1 src)
@@ -230,6 +243,68 @@ uint8 BitCount(UInt val)
   for(; val ;val>>=1) if( val&1u ) ret++;
 
   return ret;
+ }
+
+/* functions */ 
+
+template <class UInt>
+UInt SignedDiv(UInt a,UInt b)
+ {
+  if( IsNeg(a) )
+    {
+     a=-a;
+
+     if( IsNeg(b) )
+       {
+        b=-b;
+        a/=b;
+
+        return a;
+       }
+     else 
+       {
+        a/=b;
+
+        return -a;
+       }
+    }
+  else
+    {
+     if( IsNeg(b) )
+       {
+        b=-b;
+        a/=b;
+
+        return -a;
+       }
+     else 
+       {
+        a/=b;
+
+        return a;
+       }
+    }
+ }
+
+template <class UInt>
+UInt SignedRem(UInt a,UInt b)
+ {
+  if( IsNeg(b) ) b=-b;
+
+  if( IsNeg(a) )
+    {
+     a=-a;
+
+     a%=b;
+
+     return -a;
+    }
+  else
+    {
+     a%=b;
+
+     return a;
+    }
  }
 
 } // namespace Basis::Op    
