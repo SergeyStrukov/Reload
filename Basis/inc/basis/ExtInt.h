@@ -22,6 +22,8 @@ namespace Basis::Op {
 
 struct uint72;
 
+struct uint128;
+
 /* struct uint72 */
 
 struct uint72
@@ -116,6 +118,37 @@ struct uint72
    }
  };
 
+/* struct uint128 */ 
+
+struct uint128
+ {
+  uint64 hi;
+  uint64 lo;
+
+  bool operator ! () const { return !(hi|lo); }
+
+  bool operator == (uint128 obj) const { return hi==obj.hi && lo==obj.lo ; }
+
+  uint128 operator - () const
+   {
+    uint128 ret{0,0};
+
+    ret-=(*this);
+
+    return ret;
+   }
+
+  uint128 & operator -= (uint128 obj)
+   {
+    UIntFunc<uint64>::Sub sub(lo,obj.lo); 
+
+    lo=sub.result;
+    hi-=obj.hi+sub.borrow;    
+
+    return *this;
+   }
+ };
+
 /* functions */ 
 
 template <UIntType UInt>
@@ -127,6 +160,11 @@ bool IsNeg(UInt src)
 inline bool IsNeg(uint72 src)
  {
   return IsNeg(src.msb);
+ }
+
+inline bool IsNeg(uint128 src)
+ {
+  return IsNeg(src.hi);
  }
 
 template <class UInt>
@@ -166,6 +204,13 @@ void ExtUnsigned(uint72 &dst,UInt1 src)
   dst.msb=0;
  }
 
+template <UIntType UInt1>
+void ExtUnsigned(uint128 &dst,UInt1 src)
+ {
+  dst.lo=src;
+  dst.hi=0;
+ }
+
 template <UIntType UInt,UIntType UInt1>
 auto ExtSigned(UInt &dst,UInt1 src)
  {
@@ -185,6 +230,17 @@ auto ExtSigned(uint72 &dst,UInt1 src)
 
   dst.msb=0;
   dst.msb-=(dst.val>>63);
+
+  return bit;
+ }
+
+template <UIntType UInt1>
+auto ExtSigned(uint128 &dst,UInt1 src)
+ {
+  auto bit=ExtSigned(dst.lo,src);
+
+  dst.hi=0;
+  dst.hi-=(dst.lo>>63);
 
   return bit;
  }
@@ -210,6 +266,19 @@ inline uint8 Cut(uint64 &dst,uint72 src)
   dst=src.val;
 
   return (src.msb&1u)? BitC : 0 ;
+ }
+
+template <class UInt>
+uint8 Cut(UInt &dst,uint128 src)
+ {
+  return Cut(dst,src.lo);
+ }
+
+inline uint8 Cut(uint64 &dst,uint128 src)
+ {
+  dst=src.lo;
+
+  return (src.hi&1u)? BitC : 0 ;
  }
 
 /* functions */ 
@@ -246,6 +315,61 @@ uint8 BitCount(UInt val)
  }
 
 /* functions */ 
+
+inline uint32 UnsignedMul(uint16 a,uint16 b)
+ {
+  return (uint32)a*b;
+ }
+
+inline uint64 UnsignedMul(uint32 a,uint32 b)
+ {
+  return (uint64)a*b;
+ }
+
+inline uint128 UnsignedMul(uint64 a,uint64 b)
+ {
+  UIntFunc<uint64>::Mul mul(a,b);
+
+  return uint128{mul.hi,mul.lo};
+ }
+
+inline uint128 UnsignedMul(uint72 a,uint72 b)
+ {
+  return UnsignedMul(a.val,b.val);
+ }
+
+template <class UInt>
+auto SignedMul(UInt a,UInt b)
+ {
+  if( IsNeg(a) )
+    {
+     a=-a;
+
+     if( IsNeg(b) )
+       {
+        b=-b;
+
+        return UnsignedMul(a,b);
+       }
+     else 
+       {
+        return -UnsignedMul(a,b);
+       }
+    }
+  else
+    {
+     if( IsNeg(b) )
+       {
+        b=-b;
+
+        return -UnsignedMul(a,b);
+       }
+     else 
+       {
+        return UnsignedMul(a,b);
+       }
+    }
+ }
 
 template <class UInt>
 UInt SignedDiv(UInt a,UInt b)

@@ -18,7 +18,9 @@
 
 namespace Basis::Op {
 
-/* classes */    
+/* classes */
+
+template <class Body> struct Arg2SelectCtor;
 
 template <class Body,unsigned Width_,bool Sign_> struct Arg;
 
@@ -48,6 +50,28 @@ struct OpShiftRight;
 struct OpRotLeft;
 struct OpRotRight;
 
+/* struct Arg2SelectCtor<Body> */
+
+template <> struct Arg2SelectCtor<uint8> { using SRet = Arg<uint16,16,true> ; using URet = Arg<uint16,16,false> ; };
+
+template <> struct Arg2SelectCtor<uint16> { using SRet = Arg<uint32,32,true> ; using URet = Arg<uint32,32,false> ; };
+
+template <> struct Arg2SelectCtor<uint32> { using SRet = Arg<uint64,64,true> ; using URet = Arg<uint64,64,false> ; };
+
+template <> struct Arg2SelectCtor<uint64> { using SRet = Arg<uint128,128,true> ; using URet = Arg<uint128,128,false> ; };
+
+template <> struct Arg2SelectCtor<uint72> { using SRet = Arg<uint128,128,true> ; using URet = Arg<uint128,128,false> ; };
+
+template <> struct Arg2SelectCtor<uint128> { using SRet = Arg<uint128,128,true> ; using URet = Arg<uint128,128,false> ; };
+
+/* type Arg2Select<Body> */
+
+template <class Body>
+using Arg2Select = typename Arg2SelectCtor<Body>::SRet ;
+
+template <class Body>
+using UArg2Select = typename Arg2SelectCtor<Body>::URet ;
+
 /* struct Arg<Body,Width,Sign> */
 
 template <class Body,unsigned Width_,bool Sign_>
@@ -66,22 +90,22 @@ struct Arg
 
   bool operator ! () const { return !val; }
 
-  uint8 getNZ() const requires( Sign )
+  uint8 getNZ() const requires (Sign)
    {
     return GetZ(val)|GetN(val);
    }
 
-  uint8 getNZ() const requires( !Sign )
+  uint8 getNZ() const requires (!Sign)
    {
     return GetZ(val);
    }
 
-  uint8 bitC() const requires( Sign )
+  uint8 bitC() const requires (Sign)
    {
     return IsNeg(val)? BitC : 0 ;
    }
 
-  uint8 bitC() const requires( !Sign )
+  uint8 bitC() const requires (!Sign)
    {
     return 0;
    }
@@ -155,6 +179,12 @@ struct Arg
 
   Arg operator + (Arg obj) const { Arg ret=*this; ret.val+=obj.val; return ret; }
   Arg operator - (Arg obj) const { Arg ret=*this; ret.val-=obj.val; return ret; }
+
+  using Arg2 = Arg2Select<Body> ;
+  using UArg2 = UArg2Select<Body> ;
+
+  Arg2 operator * (Arg obj) const requires (Sign) { return Arg2{ SignedMul(val,obj.val) }; }
+  UArg2 operator * (Arg obj) const requires (!Sign) { return UArg2{ UnsignedMul(val,obj.val) }; }
 
   Arg operator / (Arg obj) const requires (Sign) { return Arg{ SignedDiv(val,obj.val) }; }
   Arg operator % (Arg obj) const requires (Sign) { return Arg{ SignedRem(val,obj.val) }; }
@@ -316,10 +346,21 @@ struct OpSub
 
 /* struct OpMul */
 
-struct OpMul // TODO
+struct OpMul
  {
   template <class Dst,class Src1,class Src2>  
-  uint8 operator () (Dst &dst,Src1 src1,Src2 src2);
+  uint8 operator () (Dst &dst,Src1 src1,Src2 src2)
+   {
+    using Type = MaxArg<Src1,Src2> ;
+
+    return dst.cast( Type::Ext(src1) * Type::Ext(src2) );
+   }
+
+  template <class Dst>  
+  uint8 operator () (Dst &dst,UInt64 src1,UInt64 src2)
+   {
+    return dst.cast( src1*src2 );
+   }
  };
 
 /* struct OpDiv */
